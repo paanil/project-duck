@@ -1,7 +1,7 @@
 
 #include <SDL2/SDL.h>
 
-#include "bacteroids/BacteroidsGame.h"
+#include "duck/Game.h"
 
 #ifdef ROB_DEBUG
 #include "resource/Builder/MasterBuilder.h"
@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     builder.Build("data_source", "data");
 #endif
 
-    bact::Bacteroids game;
+    duck::Game game;
     game.Run();
 
     return 0;
