@@ -68,6 +68,7 @@
 		</Linker>
 		<Unit filename="TODO.txt" />
 		<Unit filename="src/duck/Game.h" />
+		<Unit filename="src/duck/GameState.h" />
 		<Unit filename="src/rob/Assert.cpp" />
 		<Unit filename="src/rob/Assert.h" />
 		<Unit filename="src/rob/Log.cpp" />

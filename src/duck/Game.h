@@ -3,6 +3,7 @@
 #define H_DUCK_GAME_H
 
 #include "rob/application/Game.h"
+#include "GameState.h"
 
 namespace duck
 {
@@ -10,7 +11,9 @@ namespace duck
     class Game : public rob::Game
     {
     public:
-
+        bool Initialize() override { return true; }
+    protected:
+        void HandleStateChange(int state) override { }
     };
 
 } // duck
