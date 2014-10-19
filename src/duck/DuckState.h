@@ -15,6 +15,8 @@ namespace duck
     using rob::Time_t;
     using rob::GameTime;
 
+    class DebugDraw;
+
     class DuckState : public rob::GameState
     {
     public:
@@ -22,6 +24,7 @@ namespace duck
         ~DuckState();
 
         bool Initialize() override;
+        void CreateWorld();
 
         void OnResize(int w, int h) override;
 
@@ -40,13 +43,13 @@ namespace duck
     private:
         rob::View m_view;
         b2World *m_world;
+        DebugDraw *m_debugDraw;
 
         rob::Pool<GameObject> m_objectPool;
         GameObject **m_objects;
         size_t m_objectCount;
 
         GameObject *m_obj;
-        GameObject *m_floor;
     };
 
 } // duck

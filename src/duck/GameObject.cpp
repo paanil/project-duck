@@ -44,14 +44,19 @@ namespace duck
         const b2Fixture *fixture = m_body->GetFixtureList();
         const b2Shape *shape = fixture->GetShape();
 
+        const mat4f model = FromB2Transform(m_body->GetTransform());
+        renderer->SetModel(model);
+
         switch (shape->GetType())
         {
         case b2Shape::e_polygon:
-            renderer->DrawFilledRectangle(pos.x - dim.x, pos.y - dim.y, pos.x + dim.x, pos.y + dim.y);
+//            renderer->DrawFilledRectangle(pos.x - dim.x, pos.y - dim.y, pos.x + dim.x, pos.y + dim.y);
+            renderer->DrawFilledRectangle(-dim.x, -dim.y, dim.x, dim.y);
             break;
 
         case b2Shape::e_circle:
-            renderer->DrawFilledCircle(pos.x, pos.y, dim.x);
+//            renderer->DrawFilledCircle(pos.x, pos.y, dim.x);
+            renderer->DrawFilledCircle(0.0f, 0.0f, dim.x);
             break;
 
         default:

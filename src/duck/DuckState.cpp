@@ -1,6 +1,7 @@
 
 #include "DuckState.h"
 #include "GameState.h"
+#include "B2DebugDraw.h"
 
 #include "rob/renderer/Renderer.h"
 #include "rob/math/Projection.h"
@@ -20,18 +21,20 @@ namespace duck
     static const size_t MAX_OBJECTS = 1000;
 
     DuckState::DuckState()
-        : m_world(nullptr)
+        : m_view()
+        , m_world(nullptr)
+        , m_debugDraw(nullptr)
         , m_objectPool()
         , m_objects(nullptr)
         , m_objectCount(0)
         , m_obj(nullptr)
-        , m_floor(nullptr)
     { }
 
     DuckState::~DuckState()
     {
         DestroyAllObjects();
         GetAllocator().del_object(m_world);
+        GetAllocator().del_object(m_debugDraw);
     }
 
     bool DuckState::Initialize()
@@ -39,21 +42,27 @@ namespace duck
         m_objectPool.SetMemory(GetAllocator().AllocateArray<GameObject>(MAX_OBJECTS), GetArraySize<GameObject>(MAX_OBJECTS));
         m_objects = GetAllocator().AllocateArray<GameObject*>(MAX_OBJECTS);
 
+        m_debugDraw = GetAllocator().new_object<DebugDraw>(&GetRenderer());
+        int32 flags = 0;
+        flags += b2Draw::e_shapeBit;
+        flags += b2Draw::e_jointBit;
+        flags += b2Draw::e_aabbBit;
+        flags += b2Draw::e_centerOfMassBit;
+        m_debugDraw->SetFlags(flags);
+
+
         m_world = GetAllocator().new_object<b2World>(b2Vec2(0.0, -9.81f));
-
-        b2BodyDef bodyDef;
-        bodyDef.type = b2_dynamicBody;
-        bodyDef.position.Set(0.0f, 0.0f);
-        b2Body *body = m_world->CreateBody(&bodyDef);
-
-        b2CircleShape circleShape;
-        circleShape.m_radius = 1.0f;
-        b2Fixture *circle = body->CreateFixture(&circleShape, 1.0f);
-        circle->SetRestitution(0.6f);
+        m_world->SetDebugDraw(m_debugDraw);
 
         m_obj = CreateBird(vec2f::Zero);
-        m_floor = CreateStaticBox(vec2f(0.0f, PLAY_AREA_BOTTOM), 0.0f, PLAY_AREA_W, 1.0f);
+        CreateWorld();
         return true;
+    }
+
+    void DuckState::CreateWorld()
+    {
+        CreateStaticBox(vec2f(-12.0f, PLAY_AREA_BOTTOM), 0.0f, 11.0f, 1.0f);
+        CreateStaticBox(vec2f(12.0f, 0.0f), -30.0f * DEG2RAD_f, 6.0f, 0.5f);
     }
 
     void DuckState::OnResize(int w, int h)
@@ -151,25 +160,26 @@ namespace duck
     {
         Renderer &renderer = GetRenderer();
         renderer.SetView(m_view);
+        renderer.SetModel(mat4f::Identity);
 
-        for (size_t i = 0; i < m_objectCount; i++)
-        {
-            m_objects[i]->Render(&renderer);
-        }
+        renderer.SetColor(Color(0.25,0.2,0.2));
+        renderer.BindColorShader();
+        renderer.DrawFilledRectangle(PLAY_AREA_LEFT, PLAY_AREA_BOTTOM, PLAY_AREA_RIGHT, PLAY_AREA_TOP);
+
+//        for (size_t i = 0; i < m_objectCount; i++)
+//        {
+//            m_objects[i]->Render(&renderer);
+//        }
+
+        renderer.SetModel(mat4f::Identity);
+        renderer.BindColorShader();
+        m_world->DrawDebugData();
     }
 
     void DuckState::OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods)
     {
         if (key == Keyboard::Key::Space)
             ChangeState(STATE_Game);
-        if (key == Keyboard::Key::R)
-        {
-            if (m_floor)
-            {
-                DestroyObject(m_floor);
-                m_floor = nullptr;
-            }
-        }
     }
 
 } // duck

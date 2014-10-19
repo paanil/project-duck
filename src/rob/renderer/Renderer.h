@@ -22,6 +22,7 @@ namespace rob
     struct GlobalUniforms
     {
         UniformHandle projection;
+        UniformHandle model;
         UniformHandle position;
         UniformHandle time_ms;
         UniformHandle texture0;
@@ -63,6 +64,7 @@ namespace rob
         View GetView() const;
 
         void SetProjection(const mat4f &projection);
+        void SetModel(const mat4f &model);
         void SetTime(uint64_t timeMicroseconds);
 
         void BindShader(ShaderProgramHandle shader);

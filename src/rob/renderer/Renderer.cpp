@@ -81,6 +81,7 @@ namespace rob
         m_graphics->DestroyFragmentShader(fs);
 
         m_graphics->AddProgramUniform(p, m_globals.projection);
+        m_graphics->AddProgramUniform(p, m_globals.model);
         m_graphics->AddProgramUniform(p, m_globals.position);
         m_graphics->AddProgramUniform(p, m_globals.time_ms);
         m_graphics->AddProgramUniform(p, m_globals.texture0);
@@ -103,10 +104,12 @@ namespace rob
         , m_fontScale(1.0f)
     {
         m_globals.projection    = m_graphics->CreateGlobalUniform("u_projection", UniformType::Mat4);
+        m_globals.model         = m_graphics->CreateGlobalUniform("u_model", UniformType::Mat4);
         m_globals.position      = m_graphics->CreateGlobalUniform("u_position", UniformType::Vec4);
-        m_globals.time_ms      = m_graphics->CreateGlobalUniform("u_time_ms", UniformType::Int);
+        m_globals.time_ms       = m_graphics->CreateGlobalUniform("u_time_ms", UniformType::Int);
         m_globals.texture0      = m_graphics->CreateGlobalUniform("u_texture0", UniformType::Int);
         m_graphics->SetUniform(m_globals.projection, mat4f::Identity);
+        m_graphics->SetUniform(m_globals.model, mat4f::Identity);
         m_graphics->SetUniform(m_globals.time_ms, 0);
         m_graphics->SetUniform(m_globals.texture0, 0);
 
@@ -132,6 +135,7 @@ namespace rob
         if (m_fontProgram != InvalidHandle)
             m_graphics->DestroyShaderProgram(m_fontProgram);
         m_graphics->DecRefUniform(m_globals.projection);
+        m_graphics->DecRefUniform(m_globals.model);
         m_graphics->DecRefUniform(m_globals.position);
         m_graphics->DecRefUniform(m_globals.time_ms);
         m_graphics->DecRefUniform(m_globals.texture0);
@@ -145,6 +149,9 @@ namespace rob
 
     void Renderer::SetProjection(const mat4f &projection)
     { m_graphics->SetUniform(m_globals.projection, projection); }
+
+    void Renderer::SetModel(const mat4f &model)
+    { m_graphics->SetUniform(m_globals.model, model); }
 
     void Renderer::SetView(const View &view)
     {
@@ -191,12 +198,14 @@ namespace rob
 
     void Renderer::DrawLine(float x0, float y0, float x1, float y1)
     {
-        const float dx = x1 - x0;
-        const float dy = y1 - y0;
+//        const float dx = x1 - x0;
+//        const float dy = y1 - y0;
         const size_t vertexCount = 2;
         ColorVertex* vertices = m_vb_alloc.AllocateArray<ColorVertex>(vertexCount);
-        vertices[0] = { 0.0f, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
-        vertices[1] = { dx, dy, m_color.r, m_color.g, m_color.b, m_color.a };
+//        vertices[0] = { 0.0f, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
+//        vertices[1] = { dx, dy, m_color.r, m_color.g, m_color.b, m_color.a };
+        vertices[0] = { x0, y0, m_color.r, m_color.g, m_color.b, m_color.a };
+        vertices[1] = { x1, y1, m_color.r, m_color.g, m_color.b, m_color.a };
 
         m_graphics->SetUniform(m_globals.position, vec4f(x0, y0, 0.0f, 1.0f));
 
@@ -212,14 +221,18 @@ namespace rob
 
     void Renderer::DrawRectangle(float x0, float y0, float x1, float y1)
     {
-        const float w = x1 - x0;
-        const float h = y1 - y0;
+//        const float w = x1 - x0;
+//        const float h = y1 - y0;
         const size_t vertexCount = 4;
         ColorVertex* vertices = m_vb_alloc.AllocateArray<ColorVertex>(vertexCount);
-        vertices[0] = { 0.0f, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
-        vertices[1] = { w, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
-        vertices[2] = { w, h, m_color.r, m_color.g, m_color.b, m_color.a };
-        vertices[3] = { 0.0f, h, m_color.r, m_color.g, m_color.b, m_color.a };
+//        vertices[0] = { 0.0f, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
+//        vertices[1] = { w, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
+//        vertices[2] = { w, h, m_color.r, m_color.g, m_color.b, m_color.a };
+//        vertices[3] = { 0.0f, h, m_color.r, m_color.g, m_color.b, m_color.a };
+        vertices[0] = { x0, y0, m_color.r, m_color.g, m_color.b, m_color.a };
+        vertices[1] = { x1, y0, m_color.r, m_color.g, m_color.b, m_color.a };
+        vertices[2] = { x1, y1, m_color.r, m_color.g, m_color.b, m_color.a };
+        vertices[3] = { x0, y1, m_color.r, m_color.g, m_color.b, m_color.a };
 
         m_graphics->SetUniform(m_globals.position, vec4f(x0, y0, 0.0f, 1.0f));
 
@@ -235,14 +248,18 @@ namespace rob
 
     void Renderer::DrawFilledRectangle(float x0, float y0, float x1, float y1)
     {
-        const float w = x1 - x0;
-        const float h = y1 - y0;
+//        const float w = x1 - x0;
+//        const float h = y1 - y0;
         const size_t vertexCount = 4;
         ColorVertex* vertices = m_vb_alloc.AllocateArray<ColorVertex>(vertexCount);
-        vertices[0] = { 0.0f, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
-        vertices[1] = { w, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
-        vertices[2] = { 0.0f, h, m_color.r, m_color.g, m_color.b, m_color.a };
-        vertices[3] = { w, h, m_color.r, m_color.g, m_color.b, m_color.a };
+//        vertices[0] = { 0.0f, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
+//        vertices[1] = { w, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
+//        vertices[2] = { 0.0f, h, m_color.r, m_color.g, m_color.b, m_color.a };
+//        vertices[3] = { w, h, m_color.r, m_color.g, m_color.b, m_color.a };
+        vertices[0] = { x0, y0, m_color.r, m_color.g, m_color.b, m_color.a };
+        vertices[1] = { x1, y0, m_color.r, m_color.g, m_color.b, m_color.a };
+        vertices[2] = { x0, y1, m_color.r, m_color.g, m_color.b, m_color.a };
+        vertices[3] = { x1, y1, m_color.r, m_color.g, m_color.b, m_color.a };
 
         m_graphics->SetUniform(m_globals.position, vec4f(x0, y0, 0.0f, 1.0f));
 
@@ -280,10 +297,10 @@ namespace rob
             const size_t i1 = i0 + quarter;
             const size_t i2 = i1 + quarter;
             const size_t i3 = i2 + quarter;
-            vertices[i0] = { -cs, -sn, m_color.r, m_color.g, m_color.b, m_color.a };
-            vertices[i1] = { +sn, -cs, m_color.r, m_color.g, m_color.b, m_color.a };
-            vertices[i2] = { +cs, +sn, m_color.r, m_color.g, m_color.b, m_color.a };
-            vertices[i3] = { -sn, +cs, m_color.r, m_color.g, m_color.b, m_color.a };
+            vertices[i0] = { x-cs, y-sn, m_color.r, m_color.g, m_color.b, m_color.a };
+            vertices[i1] = { x+sn, y-cs, m_color.r, m_color.g, m_color.b, m_color.a };
+            vertices[i2] = { x+cs, y+sn, m_color.r, m_color.g, m_color.b, m_color.a };
+            vertices[i3] = { x-sn, y+cs, m_color.r, m_color.g, m_color.b, m_color.a };
         };
 
         m_graphics->SetUniform(m_globals.position, vec4f(x, y, 0.0f, 1.0f));
@@ -308,7 +325,7 @@ namespace rob
 
         float angle = 0.0f;
         const float deltaAngle = 2.0f * PI_f / segments;
-        vertices[0] = { 0.0f, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
+        vertices[0] = { x+0.0f, y+0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
         for (size_t i = 0; i < quarter; i++, angle += deltaAngle)
         {
             float sn, cs;
@@ -320,10 +337,10 @@ namespace rob
             const size_t i1 = i0 + quarter;
             const size_t i2 = i1 + quarter;
             const size_t i3 = i2 + quarter;
-            vertices[i0] = { -cs, -sn, m_color.r, m_color.g, m_color.b, m_color.a };
-            vertices[i1] = { +sn, -cs, m_color.r, m_color.g, m_color.b, m_color.a };
-            vertices[i2] = { +cs, +sn, m_color.r, m_color.g, m_color.b, m_color.a };
-            vertices[i3] = { -sn, +cs, m_color.r, m_color.g, m_color.b, m_color.a };
+            vertices[i0] = { x-cs, y-sn, m_color.r, m_color.g, m_color.b, m_color.a };
+            vertices[i1] = { x+sn, y-cs, m_color.r, m_color.g, m_color.b, m_color.a };
+            vertices[i2] = { x+cs, y+sn, m_color.r, m_color.g, m_color.b, m_color.a };
+            vertices[i3] = { x-sn, y+cs, m_color.r, m_color.g, m_color.b, m_color.a };
         };
         vertices[2 + segments - 1] = vertices[1];
 
@@ -349,7 +366,7 @@ namespace rob
 
         float angle = 0.0f;
         const float deltaAngle = 2.0f * PI_f / segments;
-        vertices[0] = { 0.0f, 0.0f, center.r, center.g, center.b, center.a };
+        vertices[0] = { x+0.0f, y+0.0f, center.r, center.g, center.b, center.a };
         for (size_t i = 0; i < quarter; i++, angle += deltaAngle)
         {
             float sn, cs;
@@ -361,10 +378,10 @@ namespace rob
             const size_t i1 = i0 + quarter;
             const size_t i2 = i1 + quarter;
             const size_t i3 = i2 + quarter;
-            vertices[i0] = { -cs, -sn, m_color.r, m_color.g, m_color.b, m_color.a };
-            vertices[i1] = { +sn, -cs, m_color.r, m_color.g, m_color.b, m_color.a };
-            vertices[i2] = { +cs, +sn, m_color.r, m_color.g, m_color.b, m_color.a };
-            vertices[i3] = { -sn, +cs, m_color.r, m_color.g, m_color.b, m_color.a };
+            vertices[i0] = { x-cs, y-sn, m_color.r, m_color.g, m_color.b, m_color.a };
+            vertices[i1] = { x+sn, y-cs, m_color.r, m_color.g, m_color.b, m_color.a };
+            vertices[i2] = { x+cs, y+sn, m_color.r, m_color.g, m_color.b, m_color.a };
+            vertices[i3] = { x-sn, y+cs, m_color.r, m_color.g, m_color.b, m_color.a };
         };
         vertices[2 + segments - 1] = vertices[1];
 
