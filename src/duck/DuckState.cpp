@@ -17,22 +17,30 @@ namespace duck
     static const float PLAY_AREA_BOTTOM = -PLAY_AREA_H / 2.0f;
     static const float PLAY_AREA_TOP    = -PLAY_AREA_BOTTOM;
 
+    static const size_t MAX_OBJECTS = 1000;
+
     DuckState::DuckState()
         : m_world(nullptr)
+        , m_objectPool()
+        , m_objects(nullptr)
+        , m_objectCount(0)
         , m_obj(nullptr)
         , m_floor(nullptr)
     { }
 
     DuckState::~DuckState()
     {
-        GetAllocator().del_object(m_obj);
-        GetAllocator().del_object(m_floor);
+        DestroyAllObjects();
         GetAllocator().del_object(m_world);
     }
 
     bool DuckState::Initialize()
     {
+        m_objectPool.SetMemory(GetAllocator().AllocateArray<GameObject>(MAX_OBJECTS), GetArraySize<GameObject>(MAX_OBJECTS));
+        m_objects = GetAllocator().AllocateArray<GameObject*>(MAX_OBJECTS);
+
         m_world = GetAllocator().new_object<b2World>(b2Vec2(0.0, -9.81f));
+
         b2BodyDef bodyDef;
         bodyDef.type = b2_dynamicBody;
         bodyDef.position.Set(0.0f, 0.0f);
@@ -43,21 +51,8 @@ namespace duck
         b2Fixture *circle = body->CreateFixture(&circleShape, 1.0f);
         circle->SetRestitution(0.6f);
 
-        m_obj = GetAllocator().new_object<GameObject>();
-        m_obj->SetBody(body);
-
-        b2BodyDef floorDef;
-        floorDef.type = b2_staticBody;
-        floorDef.position.Set(0.0f, PLAY_AREA_BOTTOM);
-        b2Body *floor = m_world->CreateBody(&floorDef);
-
-        b2PolygonShape floorShape;
-        floorShape.SetAsBox(PLAY_AREA_W, 1.0f);
-        floor->CreateFixture(&floorShape, 1.0f);
-
-        m_floor = GetAllocator().new_object<GameObject>();
-        m_floor->SetBody(floor);
-
+        m_obj = CreateBird(vec2f::Zero);
+        m_floor = CreateStaticBox(vec2f(0.0f, PLAY_AREA_BOTTOM), 0.0f, PLAY_AREA_W, 1.0f);
         return true;
     }
 
@@ -76,6 +71,72 @@ namespace duck
                                                        PLAY_AREA_TOP, -1.0f, 1.0f);
     }
 
+    GameObject* DuckState::CreateStaticBox(const vec2f &position, float angle, float w, float h)
+    {
+        GameObject *object = m_objectPool.Obtain();
+
+        b2BodyDef def;
+        def.type = b2_staticBody;
+        def.position = ToB2(position);
+        def.angle = angle;
+        b2Body *body = m_world->CreateBody(&def);
+
+        b2PolygonShape shape;
+        shape.SetAsBox(w, h);
+        body->CreateFixture(&shape, 1.0f);
+
+        object->SetBody(body);
+        m_objects[m_objectCount++] = object;
+        return object;
+    }
+
+    GameObject* DuckState::CreateBird(const vec2f &position)
+    {
+        GameObject *object = m_objectPool.Obtain();
+
+        b2BodyDef def;
+        def.type = b2_dynamicBody;
+        def.position = ToB2(position);
+        b2Body *body = m_world->CreateBody(&def);
+
+        b2CircleShape shape;
+        shape.m_radius = 1.0f;
+        body->CreateFixture(&shape, 1.0f);
+
+        object->SetBody(body);
+        m_objects[m_objectCount++] = object;
+        return object;
+    }
+
+    void DuckState::DestroyObject(GameObject *object)
+    {
+        for (size_t i = 0; i < m_objectCount; i++)
+        {
+            if (m_objects[i] == object)
+            {
+                m_objects[i] = (i < MAX_OBJECTS - 1) ?
+                    m_objects[m_objectCount - 1] : nullptr;
+                m_objectCount--;
+
+                m_world->DestroyBody(object->GetBody());
+                m_objectPool.Return(object);
+                return;
+            }
+        }
+        ROB_ASSERT(0);
+    }
+
+    void DuckState::DestroyAllObjects()
+    {
+        for (size_t i = 0; i < m_objectCount; i++)
+        {
+            m_world->DestroyBody(m_objects[i]->GetBody());
+            m_objectPool.Return(m_objects[i]);
+            m_objects[i] = nullptr;
+        }
+        m_objectCount = 0;
+    }
+
     void DuckState::RealtimeUpdate(const Time_t deltaMicroseconds)
     {
 
@@ -90,14 +151,25 @@ namespace duck
     {
         Renderer &renderer = GetRenderer();
         renderer.SetView(m_view);
-        m_obj->Render(&renderer);
-        m_floor->Render(&renderer);
+
+        for (size_t i = 0; i < m_objectCount; i++)
+        {
+            m_objects[i]->Render(&renderer);
+        }
     }
 
     void DuckState::OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods)
     {
         if (key == Keyboard::Key::Space)
             ChangeState(STATE_Game);
+        if (key == Keyboard::Key::R)
+        {
+            if (m_floor)
+            {
+                DestroyObject(m_floor);
+                m_floor = nullptr;
+            }
+        }
     }
 
 } // duck

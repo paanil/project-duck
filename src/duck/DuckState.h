@@ -5,7 +5,8 @@
 #include "rob/application/GameState.h"
 #include "rob/application/GameTime.h"
 #include "rob/renderer/Renderer.h"
-#include "Physics.h"
+#include "rob/memory/Pool.h"
+
 #include "GameObject.h"
 
 namespace duck
@@ -24,6 +25,12 @@ namespace duck
 
         void OnResize(int w, int h) override;
 
+        GameObject* CreateStaticBox(const vec2f &position, float angle, float w, float h);
+        GameObject* CreateBird(const vec2f &position);
+
+        void DestroyObject(GameObject *object);
+        void DestroyAllObjects();
+
         void RealtimeUpdate(const Time_t deltaMicroseconds) override;
         void Update(const GameTime &gameTime) override;
         void Render() override;
@@ -33,6 +40,10 @@ namespace duck
     private:
         rob::View m_view;
         b2World *m_world;
+
+        rob::Pool<GameObject> m_objectPool;
+        GameObject **m_objects;
+        size_t m_objectCount;
 
         GameObject *m_obj;
         GameObject *m_floor;
