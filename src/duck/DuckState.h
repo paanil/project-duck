@@ -44,12 +44,12 @@ namespace duck
         rob::View m_view;
         b2World *m_world;
         DebugDraw *m_debugDraw;
+        bool m_drawBox2D;
 
         rob::Pool<GameObject> m_objectPool;
         GameObject **m_objects;
         size_t m_objectCount;
 
-        GameObject *m_obj;
     };
 
 } // duck

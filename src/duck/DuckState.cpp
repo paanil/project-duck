@@ -24,10 +24,10 @@ namespace duck
         : m_view()
         , m_world(nullptr)
         , m_debugDraw(nullptr)
+        , m_drawBox2D(false)
         , m_objectPool()
         , m_objects(nullptr)
         , m_objectCount(0)
-        , m_obj(nullptr)
     { }
 
     DuckState::~DuckState()
@@ -50,11 +50,10 @@ namespace duck
         flags += b2Draw::e_centerOfMassBit;
         m_debugDraw->SetFlags(flags);
 
-
         m_world = GetAllocator().new_object<b2World>(b2Vec2(0.0, -9.81f));
         m_world->SetDebugDraw(m_debugDraw);
 
-        m_obj = CreateBird(vec2f::Zero);
+        CreateBird(vec2f::Zero);
         CreateWorld();
         return true;
     }
@@ -166,18 +165,23 @@ namespace duck
         renderer.BindColorShader();
         renderer.DrawFilledRectangle(PLAY_AREA_LEFT, PLAY_AREA_BOTTOM, PLAY_AREA_RIGHT, PLAY_AREA_TOP);
 
-//        for (size_t i = 0; i < m_objectCount; i++)
-//        {
-//            m_objects[i]->Render(&renderer);
-//        }
+        for (size_t i = 0; i < m_objectCount; i++)
+        {
+            m_objects[i]->Render(&renderer);
+        }
 
-        renderer.SetModel(mat4f::Identity);
-        renderer.BindColorShader();
-        m_world->DrawDebugData();
+        if (m_drawBox2D)
+        {
+            renderer.SetModel(mat4f::Identity);
+            renderer.BindColorShader();
+            m_world->DrawDebugData();
+        }
     }
 
     void DuckState::OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods)
     {
+        if (key == Keyboard::Key::Tab)
+            m_drawBox2D = !m_drawBox2D;
         if (key == Keyboard::Key::Space)
             ChangeState(STATE_Game);
     }
