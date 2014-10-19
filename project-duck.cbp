@@ -159,6 +159,8 @@
 		<Unit filename="3rdparty/box2d/Box2D/Box2D/Rope/b2Rope.cpp" />
 		<Unit filename="3rdparty/box2d/Box2D/Box2D/Rope/b2Rope.h" />
 		<Unit filename="TODO.txt" />
+		<Unit filename="src/duck/B2DebugDraw.cpp" />
+		<Unit filename="src/duck/B2DebugDraw.h" />
 		<Unit filename="src/duck/DuckState.cpp" />
 		<Unit filename="src/duck/DuckState.h" />
 		<Unit filename="src/duck/Game.cpp" />
