@@ -218,8 +218,8 @@ namespace rob
         ColorVertex* vertices = m_vb_alloc.AllocateArray<ColorVertex>(vertexCount);
         vertices[0] = { 0.0f, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
         vertices[1] = { w, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
-        vertices[2] = { 0.0f, h, m_color.r, m_color.g, m_color.b, m_color.a };
-        vertices[3] = { w, h, m_color.r, m_color.g, m_color.b, m_color.a };
+        vertices[2] = { w, h, m_color.r, m_color.g, m_color.b, m_color.a };
+        vertices[3] = { 0.0f, h, m_color.r, m_color.g, m_color.b, m_color.a };
 
         m_graphics->SetUniform(m_globals.position, vec4f(x0, y0, 0.0f, 1.0f));
 
@@ -259,7 +259,7 @@ namespace rob
     static const size_t CIRCLE_SEGMENTS = 48;
     static const float SEG_RADIUS_SCALE = 1.0f;
 
-    void Renderer::DrawCirlce(float x, float y, float radius)
+    void Renderer::DrawCircle(float x, float y, float radius)
     {
         const size_t segs = CIRCLE_SEGMENTS * (radius / SEG_RADIUS_SCALE);
         const size_t segments = Min((segs + 3) & ~0x3, CIRCLE_SEGMENTS);
@@ -298,7 +298,7 @@ namespace rob
         m_vb_alloc.Reset();
     }
 
-    void Renderer::DrawFilledCirlce(float x, float y, float radius)
+    void Renderer::DrawFilledCircle(float x, float y, float radius)
     {
         const size_t segs = CIRCLE_SEGMENTS * (radius / SEG_RADIUS_SCALE);
         const size_t segments = Min((segs + 3) & ~0x3, CIRCLE_SEGMENTS);
@@ -339,7 +339,7 @@ namespace rob
         m_vb_alloc.Reset();
     }
 
-    void Renderer::DrawFilledCirlce(float x, float y, float radius, const Color &center)
+    void Renderer::DrawFilledCircle(float x, float y, float radius, const Color &center)
     {
         const size_t segs = CIRCLE_SEGMENTS * (radius / SEG_RADIUS_SCALE);
         const size_t segments = Min((segs + 3) & ~0x3, CIRCLE_SEGMENTS);

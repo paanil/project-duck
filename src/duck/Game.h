@@ -11,9 +11,9 @@ namespace duck
     class Game : public rob::Game
     {
     public:
-        bool Initialize() override { return true; }
+        bool Initialize() override;
     protected:
-        void HandleStateChange(int state) override { }
+        void HandleStateChange(int state) override;
     };
 
 } // duck
