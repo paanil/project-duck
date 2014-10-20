@@ -74,15 +74,17 @@ namespace duck
     void DuckState::CreateWorld()
     {
         // Convoyer belt
-        CreateStaticBox(vec2f(-12.0f, PLAY_AREA_BOTTOM), 0.0f, 11.0f, 1.0f);
+//        CreateStaticBox(vec2f(-12.0f, PLAY_AREA_BOTTOM), 0.0f, 11.0f, 1.0f);
+        for (int i = 0; i < 48; i++)
+        {
+            CreateWheel(vec2f(-12.0f + -12.0f + float(i) * 0.5f, PLAY_AREA_BOTTOM));
+        }
+
         // "Output slide"
         CreateStaticBox(vec2f(12.0f, 0.0f), -30.0f * DEG2RAD_f, 5.0f, 0.25f);
 
         // Water container
         CreateWaterContainer(vec2f(0.0f, -2.0f), 2.0f, 0.15f);
-//        CreateStaticBox(vec2f(0.0f, -2.0f), 0.0f, 2.0f, 0.25f);
-//        CreateStaticBox(vec2f(-2.6f, -1.4f), -45.0f * DEG2RAD_f, 1.0f, 0.25f);
-//        CreateStaticBox(vec2f(2.6f, -1.4f), 45.0f * DEG2RAD_f, 1.0f, 0.25f);
     }
 
     void DuckState::OnResize(int w, int h)
@@ -100,9 +102,43 @@ namespace duck
                                                        PLAY_AREA_TOP, -1.0f, 1.0f);
     }
 
+    GameObject* DuckState::CreateObject()
+    {
+        ROB_ASSERT(m_objectCount < MAX_OBJECTS);
+
+        GameObject *object = m_objectPool.Obtain();
+        m_objects[m_objectCount++] = object;
+        return object;
+    }
+
+    GameObject* DuckState::CreateWheel(const vec2f &position)
+    {
+        GameObject *wheel = CreateObject();
+
+        b2BodyDef bodyDef;
+        bodyDef.type = b2_dynamicBody;
+        bodyDef.position = ToB2(position);
+        b2Body *body = m_world->CreateBody(&bodyDef);
+
+        b2CircleShape shape;
+        shape.m_radius = 0.25f;
+        body->CreateFixture(&shape, 10.0f);
+
+        b2RevoluteJointDef revDef;
+        revDef.Initialize(body, m_worldBody, body->GetWorldCenter());
+        revDef.enableMotor = true;
+        revDef.motorSpeed = 30.0f;
+        revDef.maxMotorTorque = 1000.0f;
+        m_world->CreateJoint(&revDef);
+
+        wheel->SetBody(body);
+        return wheel;
+    }
+
+
     GameObject* DuckState::CreateWaterContainer(const vec2f &position, float w, float h)
     {
-        GameObject *object = m_objectPool.Obtain();
+        GameObject *object = CreateObject();
 
         b2BodyDef def;
         def.type = b2_staticBody;
@@ -135,7 +171,6 @@ namespace duck
         object->SetTexture(texture);
         object->SetLayer(1);
 
-        m_objects[m_objectCount++] = object;
         return object;
     }
 
@@ -160,19 +195,50 @@ namespace duck
 
     GameObject* DuckState::CreateBird(const vec2f &position)
     {
-        GameObject *object = m_objectPool.Obtain();
-
-        b2BodyDef def;
-        def.type = b2_dynamicBody;
-        def.position = ToB2(position);
-        b2Body *body = m_world->CreateBody(&def);
-
+        b2BodyDef bodyDef;
         b2CircleShape shape;
+
+        GameObject *object = CreateObject();
+        bodyDef.type = b2_dynamicBody;
+        bodyDef.position = ToB2(position);
+        b2Body *body = m_world->CreateBody(&bodyDef);
+
         shape.m_radius = 1.0f;
         body->CreateFixture(&shape, 10.0f);
 
         object->SetBody(body);
-        m_objects[m_objectCount++] = object;
+        TextureHandle texture = GetCache().GetTexture("bird_body.tex");
+        object->SetTexture(texture);
+
+        GameObject *head = CreateObject();
+        bodyDef.position = ToB2(position + vec2f(0.5f, 0.5f));
+        b2Body *headBody = m_world->CreateBody(&bodyDef);
+
+        shape.m_radius = 0.75f;
+        headBody->CreateFixture(&shape, 5.0f);
+
+        head->SetBody(headBody);
+        texture = GetCache().GetTexture("bird_head.tex");
+        head->SetTexture(texture);
+
+
+        b2RopeJointDef neckDef;
+        neckDef.bodyA = body;
+        neckDef.bodyB = headBody;
+        neckDef.localAnchorA.Set(0.5f, 0.3f);
+        neckDef.localAnchorB.Set(-0.1f, -0.2f);
+        neckDef.maxLength = 1.5f;
+        neckDef.collideConnected = true;
+        m_world->CreateJoint(&neckDef);
+
+        neckDef.bodyA = body;
+        neckDef.bodyB = headBody;
+        neckDef.localAnchorA.Set(0.3f, 0.5f);
+        neckDef.localAnchorB.Set(-0.3f, -0.3f);
+        neckDef.maxLength = 1.5f;
+        neckDef.collideConnected = true;
+        m_world->CreateJoint(&neckDef);
+
         return object;
     }
 
@@ -206,9 +272,7 @@ namespace duck
     }
 
     void DuckState::RealtimeUpdate(const Time_t deltaMicroseconds)
-    {
-
-    }
+    { }
 
     void DuckState::Update(const GameTime &gameTime)
     {

@@ -28,7 +28,9 @@ namespace duck
 
         void OnResize(int w, int h) override;
 
+        GameObject* CreateObject();
         GameObject* CreateStaticBox(const vec2f &position, float angle, float w, float h);
+        GameObject* CreateWheel(const vec2f &position);
         GameObject* CreateWaterContainer(const vec2f &position, float w, float h);
         GameObject* CreateBird(const vec2f &position);
 
