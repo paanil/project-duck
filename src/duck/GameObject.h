@@ -5,6 +5,7 @@
 #include "Physics.h"
 
 #include "rob/application/GameTime.h"
+#include "rob/graphics/GraphicsTypes.h"
 
 namespace rob
 {
@@ -30,11 +31,19 @@ namespace duck
         void SetBody(b2Body *body) { m_body = body; }
         b2Body* GetBody() { return m_body; }
 
+        void SetTexture(rob::TextureHandle texture);
+        rob::TextureHandle GetTexture() const;
+
+        void SetLayer(int layer);
+        int GetLayer() const;
+
         void Update(const GameTime &gameTime);
         void Render(rob::Renderer *renderer);
 
     private:
         b2Body *m_body;
+        rob::TextureHandle m_texture;
+        int m_renderLayer;
     };
 
 } // duck

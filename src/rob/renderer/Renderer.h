@@ -69,6 +69,7 @@ namespace rob
 
         void BindShader(ShaderProgramHandle shader);
         void BindColorShader();
+        void BindTextureShader();
         void BindFontShader();
 
         void SetColor(const Color &color);
@@ -76,6 +77,7 @@ namespace rob
         void DrawLine(float x0, float y0, float x1, float y1);
         void DrawRectangle(float x0, float y0, float x1, float y1);
         void DrawFilledRectangle(float x0, float y0, float x1, float y1);
+        void DrawTexturedRectangle(float x0, float y0, float x1, float y1);
         void DrawCircle(float x, float y, float radius);
         void DrawFilledCircle(float x, float y, float radius);
         void DrawFilledCircle(float x, float y, float radius, const Color &center);
@@ -111,6 +113,7 @@ namespace rob
 
         VertexBufferHandle      m_vertexBuffer;
         ShaderProgramHandle     m_colorProgram;
+        ShaderProgramHandle     m_textureProgram;
         ShaderProgramHandle     m_fontProgram;
 
         Color m_color;

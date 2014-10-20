@@ -1,5 +1,6 @@
 
 #include "Projection.h"
+#include "Vector4.h"
 #include "Constants.h"
 #include <cmath>
 
@@ -70,6 +71,22 @@ namespace rob
             0.0f,     0.0f,     2.0f / d, tz,
             0.0f,     0.0f,     0.0f,     1.0f
         );
+    }
+
+    vec4f Unproject_Orthogonal_lh(const mat4f &projection, const vec4f &p)
+    {
+        vec4f u;
+        const float wOver2 = 1.0f / projection.m00;
+        const float hOver2 = 1.0f / projection.m11;
+        const float dOver2 = 1.0f / projection.m22;
+        const float tx = projection.m03;
+        const float ty = projection.m13;
+        const float tz = projection.m23;
+        u.x = p.x * wOver2 - tx * wOver2;
+        u.y = p.y * hOver2 - ty * hOver2;
+        u.z = p.z * dOver2 - tz * dOver2;
+        u.w = 1.0f;
+        return u;
     }
 
 

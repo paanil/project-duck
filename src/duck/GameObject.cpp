@@ -1,12 +1,17 @@
 
 #include "GameObject.h"
 #include "rob/renderer/Renderer.h"
+#include "rob/graphics/Graphics.h"
 
 namespace duck
 {
 
+    using namespace rob;
+
     GameObject::GameObject()
         : m_body(nullptr)
+        , m_texture(InvalidHandle)
+        , m_renderLayer(0)
     { }
 
     void GameObject::SetPosition(const vec2f &pos)
@@ -21,25 +26,50 @@ namespace duck
         const b2Shape *shape = fixture->GetShape();
 
         b2AABB aabb;
-        b2Transform transform;
-        transform.SetIdentity();
-        shape->ComputeAABB(&aabb, transform, 0);
+        b2Transform tr;
+        tr.SetIdentity();
+
+        shape->ComputeAABB(&aabb, tr, 0);
+        while (fixture)
+        {
+            const b2Shape *shape = fixture->GetShape();
+            for (int i = 0; i < shape->GetChildCount(); i++)
+            {
+                const b2Vec2 r(shape->m_radius, shape->m_radius);
+                b2AABB shapeAabb;
+                shape->ComputeAABB(&shapeAabb, tr, i);
+                shapeAabb.lowerBound = shapeAabb.lowerBound + r;
+                shapeAabb.upperBound = shapeAabb.upperBound - r;
+                aabb.Combine(shapeAabb);
+            }
+            fixture = fixture->GetNext();
+        }
 
         return FromB2(aabb.GetExtents());
     }
+
+    void GameObject::SetTexture(TextureHandle texture)
+    { m_texture = texture; }
+
+    TextureHandle GameObject::GetTexture() const
+    { return m_texture; }
+
+    void GameObject::SetLayer(int layer)
+    { m_renderLayer = layer; }
+
+    int GameObject::GetLayer() const
+    { return m_renderLayer; }
 
     void GameObject::Update(const GameTime &gameTime)
     {
 
     }
 
-    void GameObject::Render(rob::Renderer *renderer)
+    void GameObject::Render(Renderer *renderer)
     {
-        const vec2f pos = GetPosition();
         const vec2f dim = GetDimensions();
 
         renderer->SetColor(rob::Color::White);
-        renderer->BindColorShader();
 
         const b2Fixture *fixture = m_body->GetFixtureList();
         const b2Shape *shape = fixture->GetShape();
@@ -47,20 +77,29 @@ namespace duck
         const mat4f model = FromB2Transform(m_body->GetTransform());
         renderer->SetModel(model);
 
-        switch (shape->GetType())
+        if (m_texture == InvalidHandle)
         {
-        case b2Shape::e_polygon:
-//            renderer->DrawFilledRectangle(pos.x - dim.x, pos.y - dim.y, pos.x + dim.x, pos.y + dim.y);
-            renderer->DrawFilledRectangle(-dim.x, -dim.y, dim.x, dim.y);
-            break;
+            renderer->BindColorShader();
+            switch (shape->GetType())
+            {
+            case b2Shape::e_polygon:
+                renderer->DrawFilledRectangle(-dim.x, -dim.y, dim.x, dim.y);
+                break;
 
-        case b2Shape::e_circle:
-//            renderer->DrawFilledCircle(pos.x, pos.y, dim.x);
-            renderer->DrawFilledCircle(0.0f, 0.0f, dim.x);
-            break;
+            case b2Shape::e_circle:
+                renderer->DrawFilledCircle(0.0f, 0.0f, dim.x);
+                break;
 
-        default:
-            break;
+            default:
+                break;
+            }
+        }
+        else
+        {
+            renderer->GetGraphics()->SetUniform(renderer->GetGlobals().texture0, 1);
+            renderer->GetGraphics()->BindTexture(1, m_texture);
+            renderer->BindTextureShader();
+            renderer->DrawTexturedRectangle(-dim.x, -dim.y, dim.x, dim.y);
         }
     }
 

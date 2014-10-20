@@ -20,6 +20,8 @@ namespace rob
 
     extern const char * const g_colorVertexShader;
     extern const char * const g_colorFragmentShader;
+    extern const char * const g_textureVertexShader;
+    extern const char * const g_textureFragmentShader;
     extern const char * const g_fontVertexShader;
     extern const char * const g_fontFragmentShader;
 
@@ -30,6 +32,12 @@ namespace rob
     };
 
     struct FontVertex
+    {
+        float x, y, u, v;
+        float r, g, b, a;
+    };
+
+    struct TextureVertex
     {
         float x, y, u, v;
         float r, g, b, a;
@@ -98,6 +106,7 @@ namespace rob
         , m_globals()
         , m_vertexBuffer(InvalidHandle)
         , m_colorProgram(InvalidHandle)
+        , m_textureProgram(InvalidHandle)
         , m_fontProgram(InvalidHandle)
         , m_color(Color::White)
         , m_font()
@@ -114,6 +123,7 @@ namespace rob
         m_graphics->SetUniform(m_globals.texture0, 0);
 
         m_colorProgram = CompileShaderProgram(g_colorVertexShader, g_colorFragmentShader);
+        m_textureProgram = CompileShaderProgram(g_textureVertexShader, g_textureFragmentShader);
         m_fontProgram = CompileShaderProgram(g_fontVertexShader, g_fontFragmentShader);
 
 //        m_font = cache->GetFont("lucida_24.fnt");
@@ -132,6 +142,8 @@ namespace rob
         m_graphics->DestroyVertexBuffer(m_vertexBuffer);
         if (m_colorProgram != InvalidHandle)
             m_graphics->DestroyShaderProgram(m_colorProgram);
+        if (m_textureProgram != InvalidHandle)
+            m_graphics->DestroyShaderProgram(m_textureProgram);
         if (m_fontProgram != InvalidHandle)
             m_graphics->DestroyShaderProgram(m_fontProgram);
         m_graphics->DecRefUniform(m_globals.projection);
@@ -190,6 +202,9 @@ namespace rob
     void Renderer::BindColorShader()
     { BindShader(m_colorProgram); }
 
+    void Renderer::BindTextureShader()
+    { BindShader(m_textureProgram); }
+
     void Renderer::BindFontShader()
     { BindShader(m_fontProgram); }
 
@@ -198,12 +213,8 @@ namespace rob
 
     void Renderer::DrawLine(float x0, float y0, float x1, float y1)
     {
-//        const float dx = x1 - x0;
-//        const float dy = y1 - y0;
         const size_t vertexCount = 2;
         ColorVertex* vertices = m_vb_alloc.AllocateArray<ColorVertex>(vertexCount);
-//        vertices[0] = { 0.0f, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
-//        vertices[1] = { dx, dy, m_color.r, m_color.g, m_color.b, m_color.a };
         vertices[0] = { x0, y0, m_color.r, m_color.g, m_color.b, m_color.a };
         vertices[1] = { x1, y1, m_color.r, m_color.g, m_color.b, m_color.a };
 
@@ -221,14 +232,8 @@ namespace rob
 
     void Renderer::DrawRectangle(float x0, float y0, float x1, float y1)
     {
-//        const float w = x1 - x0;
-//        const float h = y1 - y0;
         const size_t vertexCount = 4;
         ColorVertex* vertices = m_vb_alloc.AllocateArray<ColorVertex>(vertexCount);
-//        vertices[0] = { 0.0f, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
-//        vertices[1] = { w, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
-//        vertices[2] = { w, h, m_color.r, m_color.g, m_color.b, m_color.a };
-//        vertices[3] = { 0.0f, h, m_color.r, m_color.g, m_color.b, m_color.a };
         vertices[0] = { x0, y0, m_color.r, m_color.g, m_color.b, m_color.a };
         vertices[1] = { x1, y0, m_color.r, m_color.g, m_color.b, m_color.a };
         vertices[2] = { x1, y1, m_color.r, m_color.g, m_color.b, m_color.a };
@@ -248,14 +253,8 @@ namespace rob
 
     void Renderer::DrawFilledRectangle(float x0, float y0, float x1, float y1)
     {
-//        const float w = x1 - x0;
-//        const float h = y1 - y0;
         const size_t vertexCount = 4;
         ColorVertex* vertices = m_vb_alloc.AllocateArray<ColorVertex>(vertexCount);
-//        vertices[0] = { 0.0f, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
-//        vertices[1] = { w, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
-//        vertices[2] = { 0.0f, h, m_color.r, m_color.g, m_color.b, m_color.a };
-//        vertices[3] = { w, h, m_color.r, m_color.g, m_color.b, m_color.a };
         vertices[0] = { x0, y0, m_color.r, m_color.g, m_color.b, m_color.a };
         vertices[1] = { x1, y0, m_color.r, m_color.g, m_color.b, m_color.a };
         vertices[2] = { x0, y1, m_color.r, m_color.g, m_color.b, m_color.a };
@@ -268,6 +267,27 @@ namespace rob
         buffer->Write(0, vertexCount * sizeof(ColorVertex), vertices);
         m_graphics->SetAttrib(0, 2, sizeof(ColorVertex), 0);
         m_graphics->SetAttrib(1, 4, sizeof(ColorVertex), sizeof(float) * 2);
+        m_graphics->DrawTriangleStripArrays(0, vertexCount);
+
+        m_vb_alloc.Reset();
+    }
+
+    void Renderer::DrawTexturedRectangle(float x0, float y0, float x1, float y1)
+    {
+        const size_t vertexCount = 4;
+        TextureVertex* vertices = m_vb_alloc.AllocateArray<TextureVertex>(vertexCount);
+        vertices[0] = { x0, y0, 0.0f, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
+        vertices[1] = { x1, y0, 1.0f, 0.0f, m_color.r, m_color.g, m_color.b, m_color.a };
+        vertices[2] = { x0, y1, 0.0f, 1.0f, m_color.r, m_color.g, m_color.b, m_color.a };
+        vertices[3] = { x1, y1, 1.0f, 1.0f, m_color.r, m_color.g, m_color.b, m_color.a };
+
+        m_graphics->SetUniform(m_globals.position, vec4f(x0, y0, 0.0f, 1.0f));
+
+        m_graphics->BindVertexBuffer(m_vertexBuffer);
+        VertexBuffer *buffer = m_graphics->GetVertexBuffer(m_vertexBuffer);
+        buffer->Write(0, vertexCount * sizeof(TextureVertex), vertices);
+        m_graphics->SetAttrib(0, 4, sizeof(TextureVertex), 0);
+        m_graphics->SetAttrib(1, 4, sizeof(TextureVertex), sizeof(float) * 4);
         m_graphics->DrawTriangleStripArrays(0, vertexCount);
 
         m_vb_alloc.Reset();
@@ -438,6 +458,7 @@ namespace rob
         if (!m_font.IsReady()) return;
 
         m_graphics->SetUniform(m_globals.position, vec4f(x, y, 0.0f, 1.0f));
+        m_graphics->SetUniform(m_globals.texture0, 0);
         m_graphics->BindVertexBuffer(m_vertexBuffer);
         m_graphics->SetAttrib(0, 4, sizeof(FontVertex), 0);
         m_graphics->SetAttrib(1, 4, sizeof(FontVertex), sizeof(float) * 4);
@@ -524,6 +545,7 @@ namespace rob
         if (!m_font.IsReady()) return;
 
         m_graphics->SetUniform(m_globals.position, vec4f(x, y, 0.0f, 1.0f));
+        m_graphics->SetUniform(m_globals.texture0, 0);
         m_graphics->BindVertexBuffer(m_vertexBuffer);
         m_graphics->SetAttrib(0, 4, sizeof(FontVertex), 0);
         m_graphics->SetAttrib(1, 4, sizeof(FontVertex), sizeof(float) * 4);

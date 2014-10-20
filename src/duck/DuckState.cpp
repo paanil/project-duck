@@ -4,6 +4,7 @@
 #include "B2DebugDraw.h"
 
 #include "rob/renderer/Renderer.h"
+#include "rob/resource/MasterCache.h"
 #include "rob/math/Projection.h"
 
 namespace duck
@@ -25,6 +26,8 @@ namespace duck
         , m_world(nullptr)
         , m_debugDraw(nullptr)
         , m_drawBox2D(false)
+        , m_worldBody(nullptr)
+        , m_mouseJoint(nullptr)
         , m_objectPool()
         , m_objects(nullptr)
         , m_objectCount(0)
@@ -53,15 +56,33 @@ namespace duck
         m_world = GetAllocator().new_object<b2World>(b2Vec2(0.0, -9.81f));
         m_world->SetDebugDraw(m_debugDraw);
 
-        CreateBird(vec2f::Zero);
+        b2BodyDef def;
+        def.type = b2_staticBody;
+        m_worldBody = m_world->CreateBody(&def);
+
         CreateWorld();
+        CreateBird(vec2f::Zero);
+        CreateBird(vec2f(-2.0f, 0.0f));
+        CreateBird(vec2f(-1.0f, 0.0f));
+        CreateBird(vec2f(1.0f, 0.0f));
+        CreateBird(vec2f(-2.5f, 2.0f));
+        CreateBird(vec2f(-4.5f, 4.0f));
+        CreateBird(vec2f(8.5f, 6.0f));
         return true;
     }
 
     void DuckState::CreateWorld()
     {
+        // Convoyer belt
         CreateStaticBox(vec2f(-12.0f, PLAY_AREA_BOTTOM), 0.0f, 11.0f, 1.0f);
-        CreateStaticBox(vec2f(12.0f, 0.0f), -30.0f * DEG2RAD_f, 6.0f, 0.5f);
+        // "Output slide"
+        CreateStaticBox(vec2f(12.0f, 0.0f), -30.0f * DEG2RAD_f, 5.0f, 0.25f);
+
+        // Water container
+        CreateWaterContainer(vec2f(0.0f, -2.0f), 2.0f, 0.15f);
+//        CreateStaticBox(vec2f(0.0f, -2.0f), 0.0f, 2.0f, 0.25f);
+//        CreateStaticBox(vec2f(-2.6f, -1.4f), -45.0f * DEG2RAD_f, 1.0f, 0.25f);
+//        CreateStaticBox(vec2f(2.6f, -1.4f), 45.0f * DEG2RAD_f, 1.0f, 0.25f);
     }
 
     void DuckState::OnResize(int w, int h)
@@ -77,6 +98,45 @@ namespace duck
                                                        PLAY_AREA_RIGHT,
                                                        PLAY_AREA_BOTTOM,
                                                        PLAY_AREA_TOP, -1.0f, 1.0f);
+    }
+
+    GameObject* DuckState::CreateWaterContainer(const vec2f &position, float w, float h)
+    {
+        GameObject *object = m_objectPool.Obtain();
+
+        b2BodyDef def;
+        def.type = b2_staticBody;
+        def.position = ToB2(position);
+        b2Body *body = m_world->CreateBody(&def);
+
+        b2PolygonShape shapeBottom;
+        shapeBottom.SetAsBox(w, h, b2Vec2(0.0f, -1.0f), 0.0f);
+        body->CreateFixture(&shapeBottom, 1.0f);
+
+        const float sideW = w * 0.65f * 0.5f;
+        const float sideX1 = w * 1.4f;
+        const float sideX2 = w * 1.1f;
+        const float sideY1 = 0.70f;
+        const float sideY2 = -0.4f;
+        b2PolygonShape shapeLeft;
+        shapeLeft.SetAsBox(sideW, h, b2Vec2(-sideX1, sideY1), -78.0f * DEG2RAD_f);
+        body->CreateFixture(&shapeLeft, 1.0f);
+        shapeLeft.SetAsBox(sideW, h, b2Vec2(-sideX2, sideY2), -50.0f * DEG2RAD_f);
+        body->CreateFixture(&shapeLeft, 1.0f);
+
+        b2PolygonShape shapeRight;
+        shapeRight.SetAsBox(sideW, h, b2Vec2(sideX1, sideY1), 78.0f * DEG2RAD_f);
+        body->CreateFixture(&shapeRight, 1.0f);
+        shapeRight.SetAsBox(sideW, h, b2Vec2(sideX2, sideY2), 50.0f * DEG2RAD_f);
+        body->CreateFixture(&shapeRight, 1.0f);
+
+        object->SetBody(body);
+        TextureHandle texture = GetCache().GetTexture("container.tex");
+        object->SetTexture(texture);
+        object->SetLayer(1);
+
+        m_objects[m_objectCount++] = object;
+        return object;
     }
 
     GameObject* DuckState::CreateStaticBox(const vec2f &position, float angle, float w, float h)
@@ -109,7 +169,7 @@ namespace duck
 
         b2CircleShape shape;
         shape.m_radius = 1.0f;
-        body->CreateFixture(&shape, 1.0f);
+        body->CreateFixture(&shape, 10.0f);
 
         object->SetBody(body);
         m_objects[m_objectCount++] = object;
@@ -165,9 +225,17 @@ namespace duck
         renderer.BindColorShader();
         renderer.DrawFilledRectangle(PLAY_AREA_LEFT, PLAY_AREA_BOTTOM, PLAY_AREA_RIGHT, PLAY_AREA_TOP);
 
-        for (size_t i = 0; i < m_objectCount; i++)
+        int maxLayer = 0;
+        for (int layer = 0; layer < maxLayer + 1; layer++)
         {
-            m_objects[i]->Render(&renderer);
+            for (size_t i = 0; i < m_objectCount; i++)
+            {
+                const int l = m_objects[i]->GetLayer();
+                if (l == layer)
+                    m_objects[i]->Render(&renderer);
+                if (l > maxLayer)
+                    maxLayer = l;
+            }
         }
 
         if (m_drawBox2D)
@@ -176,6 +244,14 @@ namespace duck
             renderer.BindColorShader();
             m_world->DrawDebugData();
         }
+
+        renderer.SetView(GetDefaultView());
+        renderer.BindFontShader();
+        renderer.SetColor(Color::White);
+
+        char text[40];
+        StringPrintF(text, "mouse=%f, %f", m_mouseWorld.x, m_mouseWorld.y);
+        renderer.DrawText(0.0f, 0.0f, text);
     }
 
     void DuckState::OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods)
@@ -184,6 +260,101 @@ namespace duck
             m_drawBox2D = !m_drawBox2D;
         if (key == Keyboard::Key::Space)
             ChangeState(STATE_Game);
+    }
+
+
+    class QueryCallback : public b2QueryCallback
+    {
+    public:
+        QueryCallback(const b2Vec2& point)
+        {
+            m_point = point;
+            m_fixture = NULL;
+        }
+
+        bool ReportFixture(b2Fixture* fixture)
+        {
+            b2Body* body = fixture->GetBody();
+            if (body->GetType() == b2_dynamicBody)
+            {
+                bool inside = fixture->TestPoint(m_point);
+                if (inside)
+                {
+                        m_fixture = fixture;
+
+                        // We are done, terminate the query.
+                        return false;
+                }
+            }
+
+            // Continue the query.
+            return true;
+        }
+
+        b2Vec2 m_point;
+        b2Fixture* m_fixture;
+    };
+
+    vec2f ScreenToWorld(const View view, int x, int y)
+    {
+        const vec4f vp = vec4f(view.m_viewport.w, view.m_viewport.h, 1.0f, 1.0f) * 0.5f;
+        const vec4f sp = vec4f(x - view.m_viewport.w * 0.5f, view.m_viewport.h * 0.5f - y, 0.0f, 1.0f) - vec4f(view.m_viewport.x, view.m_viewport.y, 0.0f, 0.0f);
+        const vec4f wp = Unproject_Orthogonal_lh(view.m_projection, sp / vp);
+        return vec2f(wp.x, wp.y);
+    }
+
+    void DuckState::OnMouseDown(MouseButton button, int x, int y)
+    {
+        m_mouseWorld = ScreenToWorld(m_view, x, y);
+
+        if (m_mouseJoint != nullptr)
+            return;
+
+        // Make a small box.
+        b2AABB aabb;
+        b2Vec2 d;
+        b2Vec2 p = ToB2(m_mouseWorld);
+        d.Set(0.001f, 0.001f);
+        aabb.lowerBound = p - d;
+        aabb.upperBound = p + d;
+
+        // Query the world for overlapping shapes.
+        QueryCallback callback(p);
+        m_world->QueryAABB(&callback, aabb);
+
+        if (callback.m_fixture)
+        {
+            b2Body* body = callback.m_fixture->GetBody();
+            b2MouseJointDef md;
+            md.bodyA = m_worldBody;
+            md.bodyB = body;
+            md.target = p;
+            md.maxForce = 1000.0f * body->GetMass();
+            md.dampingRatio = 0.98f;
+            m_mouseJoint = (b2MouseJoint*)m_world->CreateJoint(&md);
+            body->SetAwake(true);
+        }
+    }
+
+    void DuckState::OnMouseUp(MouseButton button, int x, int y)
+    {
+        if (m_mouseJoint)
+        {
+            b2Body *body = m_mouseJoint->GetBodyB();
+            body->ApplyForceToCenter(-1000.0f * body->GetLinearVelocity(), false);
+            m_world->DestroyJoint(m_mouseJoint);
+            m_mouseJoint = nullptr;
+        }
+    }
+
+    void DuckState::OnMouseMove(int x, int y)
+    {
+        m_mouseWorld = ScreenToWorld(m_view, x, y);
+        if (m_mouseJoint)
+        {
+            const b2Vec2 target(m_mouseWorld.x, m_mouseWorld.y);
+            m_mouseJoint->SetTarget(target);
+        }
     }
 
 } // duck

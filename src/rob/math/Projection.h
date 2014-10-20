@@ -39,6 +39,8 @@ namespace rob
                                    float bottom, float top,
                                    float near, float far);
 
+    vec4f Unproject_Orthogonal_lh(const mat4f &projection, const vec4f &p);
+
     /// Creates a right-handed orthogonal projection matrix.
     /// [left, right] maps to [-1, 1]
     /// [bottom, top] maps to [-1, 1]
