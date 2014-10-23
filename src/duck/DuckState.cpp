@@ -58,6 +58,7 @@ namespace duck
 
         b2BodyDef def;
         def.type = b2_staticBody;
+        def.position.Set(0.0f, PLAY_AREA_BOTTOM - 2.0f);
         m_worldBody = m_world->CreateBody(&def);
 
         CreateWorld();
