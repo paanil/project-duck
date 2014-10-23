@@ -19,6 +19,20 @@ namespace duck
     static const float PLAY_AREA_BOTTOM = -PLAY_AREA_H / 2.0f;
     static const float PLAY_AREA_TOP    = -PLAY_AREA_BOTTOM;
 
+    struct Rect
+    {
+        float left, right;
+        float bottom, top;
+        bool IsInside(const vec2f &p) const
+        {
+            return (p.x >= left && p.x < right) &&
+                (p.y >= bottom && p.y < top);
+        }
+    } g_playArea = {
+        PLAY_AREA_LEFT, PLAY_AREA_RIGHT,
+        PLAY_AREA_BOTTOM, PLAY_AREA_TOP
+    };
+
     static const size_t MAX_OBJECTS = 1000;
 
     DuckState::DuckState()
@@ -481,8 +495,8 @@ namespace duck
     {
         if (m_mouseJoint)
         {
-            b2Body *body = m_mouseJoint->GetBodyB();
-            body->ApplyForceToCenter(-1000.0f * body->GetLinearVelocity(), false);
+//            b2Body *body = m_mouseJoint->GetBodyB();
+//            body->ApplyForceToCenter(-1000.0f * body->GetLinearVelocity(), false);
             m_world->DestroyJoint(m_mouseJoint);
             m_mouseJoint = nullptr;
         }
@@ -493,8 +507,16 @@ namespace duck
         m_mouseWorld = ScreenToWorld(m_view, x, y);
         if (m_mouseJoint)
         {
-            const b2Vec2 target(m_mouseWorld.x, m_mouseWorld.y);
-            m_mouseJoint->SetTarget(target);
+            if (g_playArea.IsInside(m_mouseWorld))
+            {
+                const b2Vec2 target(m_mouseWorld.x, m_mouseWorld.y);
+                m_mouseJoint->SetTarget(target);
+            }
+            else
+            {
+                m_world->DestroyJoint(m_mouseJoint);
+                m_mouseJoint = nullptr;
+            }
         }
     }
 
