@@ -65,10 +65,11 @@ namespace duck
         CreateBird(vec2f::Zero);
         CreateBird(vec2f(-2.0f, 0.0f));
         CreateBird(vec2f(-1.0f, 0.0f));
-        CreateBird(vec2f(1.0f, 0.0f));
+        GameObject *bird = CreateBird(vec2f(1.0f, 0.0f));
         CreateBird(vec2f(-2.5f, 2.0f));
         CreateBird(vec2f(-4.5f, 4.0f));
         CreateBird(vec2f(8.5f, 6.0f));
+        DestroyObject(bird);
         return true;
     }
 
@@ -90,11 +91,12 @@ namespace duck
         CreateStaticBox(vec2f(-8.0f, 4.0f), 0.0f, 2.0f, 0.5f);
     }
 
-    GameObject* DuckState::CreateObject()
+    GameObject* DuckState::CreateObject(GameObject *prevLink /*= nullptr*/)
     {
         ROB_ASSERT(m_objectCount < MAX_OBJECTS);
 
         GameObject *object = m_objectPool.Obtain();
+        if (prevLink) prevLink->SetNext(object);
         m_objects[m_objectCount++] = object;
         return object;
     }
@@ -122,7 +124,6 @@ namespace duck
         wheel->SetBody(body);
         return wheel;
     }
-
 
     GameObject* DuckState::CreateWaterContainer(const vec2f &position, float w, float h)
     {
@@ -198,7 +199,7 @@ namespace duck
         TextureHandle texture = GetCache().GetTexture("bird_body.tex");
         object->SetTexture(texture);
 
-        GameObject *head = CreateObject();
+        GameObject *head = CreateObject(object);
         bodyDef.position = ToB2(position + vec2f(0.5f, 0.5f));
         b2Body *headBody = m_world->CreateBody(&bodyDef);
 
@@ -215,53 +216,55 @@ namespace duck
         TextureHandle neckTex = GetCache().GetTexture("bird_neck.tex");
         const float neckJlen = 0.25f;
 
-        b2RevoluteJointDef neckJ;
-        neckJ.collideConnected = false;
+        b2RevoluteJointDef neckJoint;
+        neckJoint.collideConnected = false;
 
-        GameObject *neck0 = CreateObject();
+        GameObject *neck0 = CreateObject(head);
         bodyDef.position = ToB2(position + vec2f(0.85f, 0.85f));
         b2Body *neck0body = m_world->CreateBody(&bodyDef);
         neck0body->CreateFixture(&neckShape, 5.0f);
         neck0->SetBody(neck0body);
         neck0->SetTexture(neckTex);
 
-        neckJ.bodyA = body;
-        neckJ.bodyB = neck0body;
-        neckJ.localAnchorA.Set(0.5f, 0.5f);
-        neckJ.localAnchorB.Set(-neckJlen, 0.0f);
-        m_world->CreateJoint(&neckJ);
+        neckJoint.bodyA = body;
+        neckJoint.bodyB = neck0body;
+        neckJoint.localAnchorA.Set(0.5f, 0.5f);
+        neckJoint.localAnchorB.Set(-neckJlen, 0.0f);
+        m_world->CreateJoint(&neckJoint);
 
-        GameObject *neck1 = CreateObject();
+        GameObject *neck1 = CreateObject(neck0);
         bodyDef.position = ToB2(position + vec2f(1.0f, 1.0f));
         b2Body *neck1body = m_world->CreateBody(&bodyDef);
         neck1body->CreateFixture(&neckShape, 5.0f);
         neck1->SetBody(neck1body);
         neck1->SetTexture(neckTex);
 
-        neckJ.bodyA = neck0body;
-        neckJ.bodyB = neck1body;
-        neckJ.localAnchorA.Set(neckJlen, 0.0f);
-        neckJ.localAnchorB.Set(-neckJlen, 0.0f);
-        m_world->CreateJoint(&neckJ);
+        neckJoint.bodyA = neck0body;
+        neckJoint.bodyB = neck1body;
+        neckJoint.localAnchorA.Set(neckJlen, 0.0f);
+        neckJoint.localAnchorB.Set(-neckJlen, 0.0f);
+        m_world->CreateJoint(&neckJoint);
 
-        GameObject *neck2 = CreateObject();
+        GameObject *neck2 = CreateObject(neck1);
         bodyDef.position = ToB2(position + vec2f(1.15f, 1.15f));
         b2Body *neck2body = m_world->CreateBody(&bodyDef);
         neck2body->CreateFixture(&neckShape, 5.0f);
         neck2->SetBody(neck2body);
         neck2->SetTexture(neckTex);
 
-        neckJ.bodyA = neck1body;
-        neckJ.bodyB = neck2body;
-        neckJ.localAnchorA.Set(neckJlen, 0.0f);
-        neckJ.localAnchorB.Set(-neckJlen, 0.0f);
-        m_world->CreateJoint(&neckJ);
+        neck2->SetNext(object);
 
-        neckJ.bodyA = neck2body;
-        neckJ.bodyB = headBody;
-        neckJ.localAnchorA.Set(neckJlen, 0.0f);
-        neckJ.localAnchorB.Set(-0.4f, -0.4f);
-        m_world->CreateJoint(&neckJ);
+        neckJoint.bodyA = neck1body;
+        neckJoint.bodyB = neck2body;
+        neckJoint.localAnchorA.Set(neckJlen, 0.0f);
+        neckJoint.localAnchorB.Set(-neckJlen, 0.0f);
+        m_world->CreateJoint(&neckJoint);
+
+        neckJoint.bodyA = neck2body;
+        neckJoint.bodyB = headBody;
+        neckJoint.localAnchorA.Set(neckJlen, 0.0f);
+        neckJoint.localAnchorB.Set(-0.4f, -0.4f);
+        m_world->CreateJoint(&neckJoint);
 
         // Ropes
         b2RopeJointDef neckDef;
@@ -285,6 +288,20 @@ namespace duck
     }
 
     void DuckState::DestroyObject(GameObject *object)
+    {
+        GameObject *next = object->GetNext();
+        DestroySingleObject(object);
+        if (next) DestroyObjectList(next, object);
+    }
+
+    void DuckState::DestroyObjectList(GameObject *object, GameObject *last)
+    {
+        GameObject *next = object->GetNext();
+        DestroySingleObject(object);
+        if (next && next != last) DestroyObjectList(next, last);
+    }
+
+    void DuckState::DestroySingleObject(GameObject *object)
     {
         for (size_t i = 0; i < m_objectCount; i++)
         {

@@ -40,10 +40,15 @@ namespace duck
         void Update(const GameTime &gameTime);
         void Render(rob::Renderer *renderer);
 
+        void SetNext(GameObject *object);
+        GameObject *GetNext();
+
     private:
         b2Body *m_body;
         rob::TextureHandle m_texture;
         int m_renderLayer;
+
+        GameObject *m_next;
     };
 
 } // duck

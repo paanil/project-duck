@@ -26,13 +26,15 @@ namespace duck
         bool Initialize() override;
         void CreateWorld();
 
-        GameObject* CreateObject();
+        GameObject* CreateObject(GameObject *prevLink = nullptr);
         GameObject* CreateStaticBox(const vec2f &position, float angle, float w, float h);
         GameObject* CreateWheel(const vec2f &position);
         GameObject* CreateWaterContainer(const vec2f &position, float w, float h);
         GameObject* CreateBird(const vec2f &position);
 
         void DestroyObject(GameObject *object);
+        void DestroyObjectList(GameObject *object, GameObject *last);
+        void DestroySingleObject(GameObject *object);
         void DestroyAllObjects();
 
         void OnResize(int w, int h) override;

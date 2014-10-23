@@ -12,6 +12,7 @@ namespace duck
         : m_body(nullptr)
         , m_texture(InvalidHandle)
         , m_renderLayer(0)
+        , m_next(nullptr)
     { }
 
     void GameObject::SetPosition(const vec2f &pos)
@@ -102,5 +103,11 @@ namespace duck
             renderer->DrawTexturedRectangle(-dim.x, -dim.y, dim.x, dim.y);
         }
     }
+
+    void GameObject::SetNext(GameObject *object)
+    { m_next = object; }
+
+    GameObject* GameObject::GetNext()
+    { return m_next; }
 
 } // duck
