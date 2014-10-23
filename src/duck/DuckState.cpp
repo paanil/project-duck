@@ -433,11 +433,14 @@ namespace duck
         b2Fixture* m_fixture;
     };
 
-    vec2f ScreenToWorld(const View view, int x, int y)
+    vec2f ScreenToWorld(const View &view, int x, int y)
     {
-        const vec4f vp = vec4f(view.m_viewport.w, view.m_viewport.h, 1.0f, 1.0f) * 0.5f;
-        const vec4f sp = vec4f(x - view.m_viewport.w * 0.5f, view.m_viewport.h * 0.5f - y, 0.0f, 1.0f) - vec4f(view.m_viewport.x, view.m_viewport.y, 0.0f, 0.0f);
-        const vec4f wp = Unproject_Orthogonal_lh(view.m_projection, sp / vp);
+        const Viewport &viewport = view.m_viewport;
+        const vec4f vp = vec4f(viewport.w, -viewport.h, 1.0f, 1.0f);
+        const vec4f vp_pos = vec4f(x - viewport.x, y - viewport.y, 0.0f, 1.0f);
+
+        const vec4f ndc = (vp_pos * 2.0f - vec4f(viewport.w, viewport.h, 0.0f, 0.0f)) / vp;
+        const vec4f wp = Unproject_Orthogonal_lh(view.m_projection, ndc);
         return vec2f(wp.x, wp.y);
     }
 
