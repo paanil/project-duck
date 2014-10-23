@@ -208,13 +208,62 @@ namespace duck
         texture = GetCache().GetTexture("bird_head.tex");
         head->SetTexture(texture);
 
+        GameObject *neck0 = CreateObject();
+        bodyDef.position = ToB2(position + vec2f(0.85f, 0.85f));
+        b2Body *neck0body = m_world->CreateBody(&bodyDef);
+        neck0->SetBody(neck0body);
 
+        b2PolygonShape neckShape;
+        neckShape.SetAsBox(0.4f, 0.25f);
+        neck0body->CreateFixture(&neckShape, 5.0f);
+
+        const float neckJlen = 0.25f;
+
+        b2RevoluteJointDef neckJ;
+        neckJ.collideConnected = false;
+        neckJ.bodyA = body;
+        neckJ.bodyB = neck0body;
+        neckJ.localAnchorA.Set(0.5f, 0.5f);
+        neckJ.localAnchorB.Set(-neckJlen, 0.0f);
+        m_world->CreateJoint(&neckJ);
+
+        GameObject *neck1 = CreateObject();
+        bodyDef.position = ToB2(position + vec2f(1.0f, 1.0f));
+        b2Body *neck1body = m_world->CreateBody(&bodyDef);
+        neck1->SetBody(neck1body);
+        neck1body->CreateFixture(&neckShape, 5.0f);
+
+        neckJ.bodyA = neck0body;
+        neckJ.bodyB = neck1body;
+        neckJ.localAnchorA.Set(neckJlen, 0.0f);
+        neckJ.localAnchorB.Set(-neckJlen, 0.0f);
+        m_world->CreateJoint(&neckJ);
+
+        GameObject *neck2 = CreateObject();
+        bodyDef.position = ToB2(position + vec2f(1.15f, 1.15f));
+        b2Body *neck2body = m_world->CreateBody(&bodyDef);
+        neck2->SetBody(neck2body);
+        neck2body->CreateFixture(&neckShape, 5.0f);
+
+        neckJ.bodyA = neck1body;
+        neckJ.bodyB = neck2body;
+        neckJ.localAnchorA.Set(neckJlen, 0.0f);
+        neckJ.localAnchorB.Set(-neckJlen, 0.0f);
+        m_world->CreateJoint(&neckJ);
+
+        neckJ.bodyA = neck2body;
+        neckJ.bodyB = headBody;
+        neckJ.localAnchorA.Set(neckJlen, 0.0f);
+        neckJ.localAnchorB.Set(-0.4f, -0.4f);
+        m_world->CreateJoint(&neckJ);
+
+        // Ropes
         b2RopeJointDef neckDef;
         neckDef.bodyA = body;
         neckDef.bodyB = headBody;
         neckDef.localAnchorA.Set(0.5f, 0.3f);
         neckDef.localAnchorB.Set(-0.1f, -0.2f);
-        neckDef.maxLength = 1.5f;
+        neckDef.maxLength = 2.5f;
         neckDef.collideConnected = true;
         m_world->CreateJoint(&neckDef);
 
@@ -222,7 +271,7 @@ namespace duck
         neckDef.bodyB = headBody;
         neckDef.localAnchorA.Set(0.3f, 0.5f);
         neckDef.localAnchorB.Set(-0.3f, -0.3f);
-        neckDef.maxLength = 1.5f;
+        neckDef.maxLength = 2.5f;
         neckDef.collideConnected = true;
         m_world->CreateJoint(&neckDef);
 
