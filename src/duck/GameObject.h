@@ -6,6 +6,7 @@
 
 #include "rob/application/GameTime.h"
 #include "rob/graphics/GraphicsTypes.h"
+#include "rob/renderer/Color.h"
 
 namespace rob
 {
@@ -17,6 +18,7 @@ namespace duck
 
     using rob::vec2f;
     using rob::GameTime;
+    using rob::Color;
 
     class GameObject
     {
@@ -31,6 +33,9 @@ namespace duck
         void SetBody(b2Body *body) { m_body = body; }
         b2Body* GetBody() { return m_body; }
 
+        void SetColor(const Color &color);
+        Color GetColor() const;
+
         void SetTexture(rob::TextureHandle texture);
         rob::TextureHandle GetTexture() const;
 
@@ -40,10 +45,16 @@ namespace duck
         void Update(const GameTime &gameTime);
         void Render(rob::Renderer *renderer);
 
+        void SetNext(GameObject *object);
+        GameObject *GetNext();
+
     private:
         b2Body *m_body;
+        Color m_color;
         rob::TextureHandle m_texture;
         int m_renderLayer;
+
+        GameObject *m_next;
     };
 
 } // duck
