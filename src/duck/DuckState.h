@@ -26,8 +26,6 @@ namespace duck
         bool Initialize() override;
         void CreateWorld();
 
-        void OnResize(int w, int h) override;
-
         GameObject* CreateObject();
         GameObject* CreateStaticBox(const vec2f &position, float angle, float w, float h);
         GameObject* CreateWheel(const vec2f &position);
@@ -36,6 +34,8 @@ namespace duck
 
         void DestroyObject(GameObject *object);
         void DestroyAllObjects();
+
+        void OnResize(int w, int h) override;
 
         void RealtimeUpdate(const Time_t deltaMicroseconds) override;
         void Update(const GameTime &gameTime) override;

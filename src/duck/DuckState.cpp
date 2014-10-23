@@ -85,21 +85,8 @@ namespace duck
 
         // Water container
         CreateWaterContainer(vec2f(0.0f, -2.0f), 2.0f, 0.15f);
-    }
-
-    void DuckState::OnResize(int w, int h)
-    {
-        const float x_scl = w / PLAY_AREA_W;
-        const float y_scl = h / PLAY_AREA_H;
-        const float scale = (x_scl < y_scl) ? x_scl : y_scl;
-
-        const int vpW = scale * PLAY_AREA_W;
-        const int vpH = scale * PLAY_AREA_H;
-        m_view.SetViewport((w - vpW) / 2, (h - vpH) / 2, vpW, vpH);
-        m_view.m_projection = Projection_Orthogonal_lh(PLAY_AREA_LEFT,
-                                                       PLAY_AREA_RIGHT,
-                                                       PLAY_AREA_BOTTOM,
-                                                       PLAY_AREA_TOP, -1.0f, 1.0f);
+        // Drying platform
+        CreateStaticBox(vec2f(-8.0f, 4.0f), 0.0f, 2.0f, 0.5f);
     }
 
     GameObject* DuckState::CreateObject()
@@ -269,6 +256,21 @@ namespace duck
             m_objects[i] = nullptr;
         }
         m_objectCount = 0;
+    }
+
+    void DuckState::OnResize(int w, int h)
+    {
+        const float x_scl = w / PLAY_AREA_W;
+        const float y_scl = h / PLAY_AREA_H;
+        const float scale = (x_scl < y_scl) ? x_scl : y_scl;
+
+        const int vpW = scale * PLAY_AREA_W;
+        const int vpH = scale * PLAY_AREA_H;
+        m_view.SetViewport((w - vpW) / 2, (h - vpH) / 2, vpW, vpH);
+        m_view.m_projection = Projection_Orthogonal_lh(PLAY_AREA_LEFT,
+                                                       PLAY_AREA_RIGHT,
+                                                       PLAY_AREA_BOTTOM,
+                                                       PLAY_AREA_TOP, -1.0f, 1.0f);
     }
 
     void DuckState::RealtimeUpdate(const Time_t deltaMicroseconds)
