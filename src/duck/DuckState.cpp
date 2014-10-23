@@ -208,19 +208,22 @@ namespace duck
         texture = GetCache().GetTexture("bird_head.tex");
         head->SetTexture(texture);
 
-        GameObject *neck0 = CreateObject();
-        bodyDef.position = ToB2(position + vec2f(0.85f, 0.85f));
-        b2Body *neck0body = m_world->CreateBody(&bodyDef);
-        neck0->SetBody(neck0body);
-
+        // Neck
         b2PolygonShape neckShape;
         neckShape.SetAsBox(0.4f, 0.25f);
-        neck0body->CreateFixture(&neckShape, 5.0f);
-
+        TextureHandle neckTex = GetCache().GetTexture("bird_neck.tex");
         const float neckJlen = 0.25f;
 
         b2RevoluteJointDef neckJ;
         neckJ.collideConnected = false;
+
+        GameObject *neck0 = CreateObject();
+        bodyDef.position = ToB2(position + vec2f(0.85f, 0.85f));
+        b2Body *neck0body = m_world->CreateBody(&bodyDef);
+        neck0body->CreateFixture(&neckShape, 5.0f);
+        neck0->SetBody(neck0body);
+        neck0->SetTexture(neckTex);
+
         neckJ.bodyA = body;
         neckJ.bodyB = neck0body;
         neckJ.localAnchorA.Set(0.5f, 0.5f);
@@ -230,8 +233,9 @@ namespace duck
         GameObject *neck1 = CreateObject();
         bodyDef.position = ToB2(position + vec2f(1.0f, 1.0f));
         b2Body *neck1body = m_world->CreateBody(&bodyDef);
-        neck1->SetBody(neck1body);
         neck1body->CreateFixture(&neckShape, 5.0f);
+        neck1->SetBody(neck1body);
+        neck1->SetTexture(neckTex);
 
         neckJ.bodyA = neck0body;
         neckJ.bodyB = neck1body;
@@ -242,8 +246,9 @@ namespace duck
         GameObject *neck2 = CreateObject();
         bodyDef.position = ToB2(position + vec2f(1.15f, 1.15f));
         b2Body *neck2body = m_world->CreateBody(&bodyDef);
-        neck2->SetBody(neck2body);
         neck2body->CreateFixture(&neckShape, 5.0f);
+        neck2->SetBody(neck2body);
+        neck2->SetTexture(neckTex);
 
         neckJ.bodyA = neck1body;
         neckJ.bodyB = neck2body;
