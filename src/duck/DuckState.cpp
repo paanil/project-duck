@@ -79,11 +79,10 @@ namespace duck
         CreateBird(vec2f::Zero);
         CreateBird(vec2f(-2.0f, 0.0f));
         CreateBird(vec2f(-1.0f, 0.0f));
-        GameObject *bird = CreateBird(vec2f(1.0f, 0.0f));
+        CreateBird(vec2f(1.0f, 0.0f));
         CreateBird(vec2f(-2.5f, 2.0f));
         CreateBird(vec2f(-4.5f, 4.0f));
         CreateBird(vec2f(8.5f, 6.0f));
-        DestroyObject(bird);
         return true;
     }
 
@@ -212,6 +211,7 @@ namespace duck
         object->SetBody(body);
         TextureHandle texture = GetCache().GetTexture("bird_body.tex");
         object->SetTexture(texture);
+        object->SetColor(Color(0.25f, 0.25f, 0.25f));
 
         GameObject *head = CreateObject(object);
         bodyDef.position = ToB2(position + vec2f(0.5f, 0.5f));
@@ -464,6 +464,8 @@ namespace duck
 
         if (m_mouseJoint != nullptr)
             return;
+        if (!g_playArea.IsInside(m_mouseWorld))
+            return;
 
         // Make a small box.
         b2AABB aabb;
@@ -512,11 +514,11 @@ namespace duck
                 const b2Vec2 target(m_mouseWorld.x, m_mouseWorld.y);
                 m_mouseJoint->SetTarget(target);
             }
-            else
-            {
-                m_world->DestroyJoint(m_mouseJoint);
-                m_mouseJoint = nullptr;
-            }
+//            else
+//            {
+//                m_world->DestroyJoint(m_mouseJoint);
+//                m_mouseJoint = nullptr;
+//            }
         }
     }
 

@@ -10,6 +10,7 @@ namespace duck
 
     GameObject::GameObject()
         : m_body(nullptr)
+        , m_color(Color::White)
         , m_texture(InvalidHandle)
         , m_renderLayer(0)
         , m_next(nullptr)
@@ -49,6 +50,12 @@ namespace duck
         return FromB2(aabb.GetExtents());
     }
 
+    void GameObject::SetColor(const Color &color)
+    { m_color = color; }
+
+    Color GameObject::GetColor() const
+    { return m_color; }
+
     void GameObject::SetTexture(TextureHandle texture)
     { m_texture = texture; }
 
@@ -70,7 +77,8 @@ namespace duck
     {
         const vec2f dim = GetDimensions();
 
-        renderer->SetColor(rob::Color::White);
+//        renderer->SetColor(rob::Color::White);
+        renderer->SetColor(m_color);
 
         const b2Fixture *fixture = m_body->GetFixtureList();
         const b2Shape *shape = fixture->GetShape();
