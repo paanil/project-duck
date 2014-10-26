@@ -54,7 +54,7 @@ namespace duck
         }
 
         virtual void BeginContact(void *userData) { }
-//        virtual void EndContact(const b2Body *body) { }
+        virtual void EndContact(void *userData) { }
 
     private:
         uint16 m_maskBits;
@@ -64,7 +64,7 @@ namespace duck
     class SensorListener : public b2ContactListener
     {
     public:
-        void BeginContact(b2Contact* contact)
+        void BeginContact(b2Contact* contact) override
         {
             const b2Fixture *fixA = contact->GetFixtureA();
             const b2Fixture *fixB = contact->GetFixtureB();
@@ -77,6 +77,21 @@ namespace duck
             {
                 Sensor *sensor = (Sensor*)fixB->GetUserData();
                 sensor->BeginContact(fixA->GetUserData());
+            }
+        }
+        void EndContact(b2Contact *contact) override
+        {
+            const b2Fixture *fixA = contact->GetFixtureA();
+            const b2Fixture *fixB = contact->GetFixtureB();
+            if (fixA->GetFilterData().categoryBits == SensorBits)
+            {
+                Sensor *sensor = (Sensor*)fixA->GetUserData();
+                sensor->EndContact(fixB->GetUserData());
+            }
+            else if (fixB->GetFilterData().categoryBits == SensorBits)
+            {
+                Sensor *sensor = (Sensor*)fixB->GetUserData();
+                sensor->EndContact(fixA->GetUserData());
             }
         }
     };
@@ -108,6 +123,29 @@ namespace duck
         }
     };
 
+    class SpawnSensor : public Sensor
+    {
+    public:
+        SpawnSensor()
+            : Sensor(DuckBits)
+            , m_count(0)
+        { }
+
+        bool CanSpawn() const { return m_count == 0; }
+
+        void BeginContact(void *userData) override
+        {
+            m_count++;
+        }
+        void EndContact(void *userData) override
+        {
+            ROB_ASSERT(m_count > 0);
+            m_count--;
+        }
+    private:
+        int m_count;
+    };
+
     class DuckState : public rob::GameState
     {
     public:
@@ -123,6 +161,7 @@ namespace duck
         GameObject* CreateWaterContainer(const vec2f &position, float w, float h);
         GameObject* CreateBird(const vec2f &position);
         void CreateOven(const vec2f &position);
+        void CreateSpawnArea(const vec2f &position);
 
         void DestroyObject(GameObject *object);
         void DestroyObjectList(GameObject *object, GameObject *last);
@@ -133,6 +172,9 @@ namespace duck
         void OnResize(int w, int h) override;
 
         void RealtimeUpdate(const Time_t deltaMicroseconds) override;
+
+        void NewBird();
+
         void Update(const GameTime &gameTime) override;
         void Render() override;
 
@@ -157,7 +199,9 @@ namespace duck
         size_t m_objectCount;
 
         SensorListener m_sensorListener;
+
         OvenSensor m_ovenSensor;
+        SpawnSensor m_spawnSensor;
     };
 
 } // duck

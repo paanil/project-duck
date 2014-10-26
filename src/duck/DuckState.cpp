@@ -92,19 +92,26 @@ namespace duck
 
     void DuckState::CreateWorld()
     {
+        const float wallSize = 1.25f;
         // Convoyer belt
-        for (int i = 0; i < 48; i++)
+        for (int i = 0; i < 60; i++)
         {
-            CreateWheel(vec2f(-12.0f + -12.0f + float(i) * 0.5f, PLAY_AREA_BOTTOM));
+            CreateWheel(vec2f(-30.0f + 0.25f + float(i) * 0.5f, PLAY_AREA_BOTTOM));
         }
-        CreateStaticBox(vec2f(-12.0f, PLAY_AREA_BOTTOM - 4.0f), 0.0f, 11.5f, 4.0f);
-        // Left wall
-        CreateStaticBox(vec2f(PLAY_AREA_LEFT - 1.0f, 6.0f), 0.0f, 2.0f, PLAY_AREA_H - 8.0f);
-        // Right wall
-        CreateStaticBox(vec2f(PLAY_AREA_RIGHT + 1.0f, -PLAY_AREA_H / 2.0f), 0.0f, 2.0f, PLAY_AREA_H / 2.0f);
+        // Floor
+        CreateStaticBox(vec2f(-16.0f, PLAY_AREA_BOTTOM - 4.0f), 0.0f, 16.0f, 4.0f);
+        // Left wall at the start of convoyer belt
+        CreateStaticBox(vec2f(PLAY_AREA_LEFT - 18.0f, 0.0f), 0.0f, wallSize, PLAY_AREA_H / 2.0f);
 
-        // "Output slide"
-        GameObject *slide = CreateStaticBox(vec2f(12.0f, 0.0f), -30.0f * DEG2RAD_f, 5.0f, 0.25f);
+        // Left wall
+        CreateStaticBox(vec2f(PLAY_AREA_LEFT - 1.0f, 4.0f), 0.0f, wallSize, PLAY_AREA_H / 2.0f);
+        // Right wall
+        CreateStaticBox(vec2f(PLAY_AREA_RIGHT + wallSize / 4.0f, -PLAY_AREA_H / 2.0f + 1.0f), 0.0f, wallSize / 2.0f, PLAY_AREA_H / 2.0f);
+        // Ceiling
+        CreateStaticBox(vec2f(0.0f, PLAY_AREA_TOP + 2.0f), 0.0f, PLAY_AREA_W / 2.0f, wallSize);
+
+        // Bird slide
+        GameObject *slide = CreateStaticBox(vec2f(PLAY_AREA_RIGHT + 2.0f, 0.0f), -30.0f * DEG2RAD_f, 8.0f, 0.5f);
         slide->GetBody()->GetFixtureList()->SetFriction(0.0f);
 
         // Water container
@@ -113,6 +120,8 @@ namespace duck
         CreateStaticBox(vec2f(-8.0f, 4.0f), 0.0f, 2.0f, 0.5f);
 
         CreateOven(vec2f(PLAY_AREA_RIGHT / 2.0f, PLAY_AREA_BOTTOM));
+
+        CreateSpawnArea(vec2f(PLAY_AREA_LEFT * 2.0f, 3.0f));
     }
 
     GameObject* DuckState::CreateObject(GameObject *prevLink /*= nullptr*/)
@@ -344,6 +353,19 @@ namespace duck
         m_ovenSensor.SetShape(&shape);
     }
 
+    void DuckState::CreateSpawnArea(const vec2f &position)
+    {
+        b2BodyDef def;
+        def.type = b2_staticBody;
+        def.position = ToB2(position);
+        b2Body *body = m_world->CreateBody(&def);
+        m_spawnSensor.SetBody(body);
+
+        b2PolygonShape shape;
+        shape.SetAsBox(PLAY_AREA_W / 8.0f, PLAY_AREA_H / 2.0f);
+        m_spawnSensor.SetShape(&shape);
+    }
+
     void DuckState::DestroyObject(GameObject *object)
     {
         GameObject *next = object->GetNext();
@@ -414,6 +436,12 @@ namespace duck
     void DuckState::RealtimeUpdate(const Time_t deltaMicroseconds)
     { }
 
+    void DuckState::NewBird()
+    {
+        if (m_spawnSensor.CanSpawn())
+            CreateBird(vec2f(PLAY_AREA_LEFT * 2.0f, PLAY_AREA_BOTTOM + 4.0f));
+    }
+
     void DuckState::Update(const GameTime &gameTime)
     {
         m_world->Step(gameTime.GetDeltaSeconds(), 8, 8);
@@ -473,16 +501,18 @@ namespace duck
     {
         if (key == Keyboard::Key::Tab)
             m_drawBox2D = !m_drawBox2D;
+        if (key == Keyboard::Key::B)
+            NewBird();
         if (key == Keyboard::Key::Space)
             ChangeState(STATE_Game);
         if (key == Keyboard::Key::Kp_Plus)
         {
-            g_zoom = Clamp(g_zoom * 2.0f, 0.25f, 4.0f);
+            g_zoom = Clamp(g_zoom / 1.5f, 0.25f, 4.0f);
             RecalcProj();
         }
         else if (key == Keyboard::Key::Kp_Minus)
         {
-            g_zoom = Clamp(g_zoom * 0.5f, 0.25f, 4.0f);
+            g_zoom = Clamp(g_zoom * 1.5f, 0.25f, 4.0f);
             RecalcProj();
         }
     }
