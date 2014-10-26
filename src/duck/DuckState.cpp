@@ -19,6 +19,8 @@ namespace duck
     static const float PLAY_AREA_BOTTOM = -PLAY_AREA_H / 2.0f;
     static const float PLAY_AREA_TOP    = -PLAY_AREA_BOTTOM;
 
+    float g_zoom = 1.0f;
+
     struct Rect
     {
         float left, right;
@@ -96,9 +98,14 @@ namespace duck
             CreateWheel(vec2f(-12.0f + -12.0f + float(i) * 0.5f, PLAY_AREA_BOTTOM));
         }
         CreateStaticBox(vec2f(-12.0f, PLAY_AREA_BOTTOM - 4.0f), 0.0f, 11.5f, 4.0f);
+        // Left wall
+        CreateStaticBox(vec2f(PLAY_AREA_LEFT - 1.0f, 6.0f), 0.0f, 2.0f, PLAY_AREA_H - 8.0f);
+        // Right wall
+        CreateStaticBox(vec2f(PLAY_AREA_RIGHT + 1.0f, -PLAY_AREA_H / 2.0f), 0.0f, 2.0f, PLAY_AREA_H / 2.0f);
 
         // "Output slide"
-        CreateStaticBox(vec2f(12.0f, 0.0f), -30.0f * DEG2RAD_f, 5.0f, 0.25f);
+        GameObject *slide = CreateStaticBox(vec2f(12.0f, 0.0f), -30.0f * DEG2RAD_f, 5.0f, 0.25f);
+        slide->GetBody()->GetFixtureList()->SetFriction(0.0f);
 
         // Water container
         CreateWaterContainer(vec2f(0.0f, -2.0f), 2.0f, 0.15f);
@@ -374,6 +381,14 @@ namespace duck
         m_objectCount = 0;
     }
 
+    void DuckState::RecalcProj()
+    {
+        m_view.m_projection = Projection_Orthogonal_lh(PLAY_AREA_LEFT * g_zoom,
+                                                       PLAY_AREA_RIGHT * g_zoom,
+                                                       PLAY_AREA_BOTTOM * g_zoom,
+                                                       PLAY_AREA_TOP * g_zoom, -1.0f, 1.0f);
+    }
+
     void DuckState::OnResize(int w, int h)
     {
         const float x_scl = w / PLAY_AREA_W;
@@ -383,10 +398,11 @@ namespace duck
         const int vpW = scale * PLAY_AREA_W;
         const int vpH = scale * PLAY_AREA_H;
         m_view.SetViewport((w - vpW) / 2, (h - vpH) / 2, vpW, vpH);
-        m_view.m_projection = Projection_Orthogonal_lh(PLAY_AREA_LEFT,
-                                                       PLAY_AREA_RIGHT,
-                                                       PLAY_AREA_BOTTOM,
-                                                       PLAY_AREA_TOP, -1.0f, 1.0f);
+        RecalcProj();
+//        m_view.m_projection = Projection_Orthogonal_lh(PLAY_AREA_LEFT,
+//                                                       PLAY_AREA_RIGHT,
+//                                                       PLAY_AREA_BOTTOM,
+//                                                       PLAY_AREA_TOP, -1.0f, 1.0f);
     }
 
     void DuckState::RealtimeUpdate(const Time_t deltaMicroseconds)
@@ -442,6 +458,16 @@ namespace duck
             m_drawBox2D = !m_drawBox2D;
         if (key == Keyboard::Key::Space)
             ChangeState(STATE_Game);
+        if (key == Keyboard::Key::Kp_Plus)
+        {
+            g_zoom = Clamp(g_zoom * 2.0f, 0.25f, 4.0f);
+            RecalcProj();
+        }
+        else if (key == Keyboard::Key::Kp_Minus)
+        {
+            g_zoom = Clamp(g_zoom * 0.5f, 0.25f, 4.0f);
+            RecalcProj();
+        }
     }
 
 

@@ -115,6 +115,7 @@ namespace duck
         void DestroySingleObject(GameObject *object);
         void DestroyAllObjects();
 
+        void RecalcProj();
         void OnResize(int w, int h) override;
 
         void RealtimeUpdate(const Time_t deltaMicroseconds) override;
