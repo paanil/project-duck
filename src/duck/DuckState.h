@@ -148,6 +148,7 @@ namespace duck
         GameObject* CreateWaterContainer(const vec2f &position, float w, float h);
         GameObject* CreateBird(const vec2f &position);
         void CreateOven(const vec2f &position);
+        void CreateSpawnArea(const vec2f &position);
 
         void DestroyObject(GameObject *object);
         void DestroyObjectList(GameObject *object, GameObject *last);

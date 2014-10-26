@@ -97,7 +97,8 @@ namespace duck
         {
             CreateWheel(vec2f(-12.0f + -12.0f + float(i) * 0.5f, PLAY_AREA_BOTTOM));
         }
-        CreateStaticBox(vec2f(-12.0f, PLAY_AREA_BOTTOM - 4.0f), 0.0f, 11.5f, 4.0f);
+        // Floor
+        CreateStaticBox(vec2f(-12.0f - 6.0f, PLAY_AREA_BOTTOM - 4.0f), 0.0f, 11.5f + 6.0f, 4.0f);
         // Left wall
         CreateStaticBox(vec2f(PLAY_AREA_LEFT - 1.0f, 6.0f), 0.0f, 2.0f, PLAY_AREA_H - 8.0f);
         // Right wall
@@ -113,6 +114,8 @@ namespace duck
         CreateStaticBox(vec2f(-8.0f, 4.0f), 0.0f, 2.0f, 0.5f);
 
         CreateOven(vec2f(PLAY_AREA_RIGHT / 2.0f, PLAY_AREA_BOTTOM));
+
+        CreateSpawnArea(vec2f(PLAY_AREA_LEFT * 2.0f, 0.0f));
     }
 
     GameObject* DuckState::CreateObject(GameObject *prevLink /*= nullptr*/)
@@ -343,6 +346,19 @@ namespace duck
         m_duckSensor.SetShape(&shape);
     }
 
+    void DuckState::CreateSpawnArea(const vec2f &position)
+    {
+        b2BodyDef def;
+        def.type = b2_staticBody;
+        def.position = ToB2(position);
+        b2Body *body = m_world->CreateBody(&def);
+        m_spawnSensor.SetBody(body);
+
+        b2PolygonShape shape;
+        shape.SetAsBox(PLAY_AREA_W / 8.0f, PLAY_AREA_H / 2.0f);
+        m_spawnSensor.SetShape(&shape);
+    }
+
     void DuckState::DestroyObject(GameObject *object)
     {
         GameObject *next = object->GetNext();
@@ -415,8 +431,8 @@ namespace duck
 
     void DuckState::NewBird()
     {
-//        if (m_)
-        CreateBird(vec2f(PLAY_AREA_LEFT * 2.0f, PLAY_AREA_BOTTOM + 2.0f));
+        if (m_spawnSensor.CanSpawn())
+            CreateBird(vec2f(PLAY_AREA_LEFT * 2.0f, PLAY_AREA_BOTTOM + 4.0f));
     }
 
     void DuckState::Update(const GameTime &gameTime)
