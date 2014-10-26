@@ -122,7 +122,7 @@ namespace duck
             do
             {
                 part->SetBurned();
-                part->SetColor(Color(0.0f, 0.0f, 0.0f, 1.0f));
+                part->SetColor(Color(0.02f, 0.02f, 0.02f, 1.0f));
                 part = part->GetNext();
             } while (part != firstPart);
 
@@ -164,9 +164,13 @@ namespace duck
         {
             GameObject *bird = (GameObject*)userData;
             ROB_ASSERT(bird != nullptr);
-            if (bird && bird->IsAlive())
+            if (!bird->IsBurned())
             {
                 bird->SetSaved(true);
+            }
+            else
+            {
+                bird->SetAlive(false);
             }
         }
     };
