@@ -78,7 +78,8 @@ namespace rob
         void DrawRectangle(float x0, float y0, float x1, float y1);
         void DrawFilledRectangle(float x0, float y0, float x1, float y1);
         void DrawTexturedRectangle(float x0, float y0, float x1, float y1);
-        void DrawVerticalGradientRectangle(float x0, float y0, float x1, float y1, const Color &color0, const Color &color1);
+        void DrawColorQuad(const vec2f &p0, const Color &color0, const vec2f &p1, const Color &color1,
+                           const vec2f &p2, const Color &color2, const vec2f &p3, const Color &color3);
         void DrawCircle(float x, float y, float radius);
         void DrawFilledCircle(float x, float y, float radius);
         void DrawFilledCircle(float x, float y, float radius, const Color &center);

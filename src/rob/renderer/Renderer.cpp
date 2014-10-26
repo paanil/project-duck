@@ -293,16 +293,17 @@ namespace rob
         m_vb_alloc.Reset();
     }
 
-    void Renderer::DrawVerticalGradientRectangle(float x0, float y0, float x1, float y1, const Color &color0, const Color &color1)
+    void Renderer::DrawColorQuad(const vec2f &p0, const Color &color0, const vec2f &p1, const Color &color1,
+                                 const vec2f &p2, const Color &color2, const vec2f &p3, const Color &color3)
     {
         const size_t vertexCount = 4;
         ColorVertex* vertices = m_vb_alloc.AllocateArray<ColorVertex>(vertexCount);
-        vertices[0] = { x0, y0, color0.r, color0.g, color0.b, color0.a };
-        vertices[1] = { x1, y0, color0.r, color0.g, color0.b, color0.a };
-        vertices[2] = { x0, y1, color1.r, color1.g, color1.b, color1.a };
-        vertices[3] = { x1, y1, color1.r, color1.g, color1.b, color1.a };
+        vertices[0] = { p0.x, p0.y, color0.r, color0.g, color0.b, color0.a };
+        vertices[1] = { p1.x, p1.y, color1.r, color1.g, color1.b, color1.a };
+        vertices[2] = { p3.x, p3.y, color3.r, color3.g, color3.b, color3.a };
+        vertices[3] = { p2.x, p2.y, color2.r, color2.g, color2.b, color2.a };
 
-        m_graphics->SetUniform(m_globals.position, vec4f(x0, y0, 0.0f, 1.0f));
+        m_graphics->SetUniform(m_globals.position, vec4f(p0.x, p0.y, 0.0f, 1.0f));
 
         m_graphics->BindVertexBuffer(m_vertexBuffer);
         VertexBuffer *buffer = m_graphics->GetVertexBuffer(m_vertexBuffer);
