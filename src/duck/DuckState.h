@@ -9,7 +9,6 @@
 
 #include "GameObject.h"
 
-#include "rob/Log.h"
 #define BIT(x) (1 << x)
 
 namespace duck
@@ -19,10 +18,11 @@ namespace duck
     using rob::GameTime;
 
     class DebugDraw;
+    class DuckState;
 
     enum
     {
-        DuckBits = BIT(5),
+        BirdBits = BIT(5),
         SensorBits = BIT(6),
         StaticBits = BIT(7),
         WheelBits = BIT(8)
@@ -37,6 +37,9 @@ namespace duck
 
         virtual ~Sensor()
         { }
+
+        void SetDuckState(DuckState *duckState)
+        { m_duckState = duckState; }
 
         void SetBody(b2Body *body)
         { m_body = body; }
@@ -54,8 +57,11 @@ namespace duck
             m_body->CreateFixture(&fixDef);
         }
 
-        virtual void BeginContact(const b2Body *body) { }
-        virtual void EndContact(const b2Body *body) { }
+        virtual void BeginContact(void *userData) { }
+        virtual void EndContact(void *userData) { }
+
+    protected:
+        DuckState *m_duckState;
 
     private:
         uint16 m_maskBits;
@@ -72,12 +78,12 @@ namespace duck
             if (fixA->GetFilterData().categoryBits == SensorBits)
             {
                 Sensor *sensor = (Sensor*)fixA->GetUserData();
-                sensor->BeginContact(fixB->GetBody());
+                sensor->BeginContact(fixB->GetUserData());
             }
             else if (fixB->GetFilterData().categoryBits == SensorBits)
             {
                 Sensor *sensor = (Sensor*)fixB->GetUserData();
-                sensor->BeginContact(fixA->GetBody());
+                sensor->BeginContact(fixA->GetUserData());
             }
         }
         void EndContact(b2Contact *contact) override
@@ -87,26 +93,40 @@ namespace duck
             if (fixA->GetFilterData().categoryBits == SensorBits)
             {
                 Sensor *sensor = (Sensor*)fixA->GetUserData();
-                sensor->EndContact(fixB->GetBody());
+                sensor->EndContact(fixB->GetUserData());
             }
             else if (fixB->GetFilterData().categoryBits == SensorBits)
             {
                 Sensor *sensor = (Sensor*)fixB->GetUserData();
-                sensor->EndContact(fixA->GetBody());
+                sensor->EndContact(fixA->GetUserData());
             }
         }
     };
 
-    class DuckSensor : public Sensor
+    class OvenSensor : public Sensor
     {
     public:
-        DuckSensor()
-            : Sensor(DuckBits)
+        OvenSensor()
+            : Sensor(BirdBits)
         { }
 
-        virtual void BeginContact(const b2Body *body) override
+        virtual void BeginContact(void *userData) override
         {
-            rob::log::Debug("Duck sensor: begin contact!");
+            GameObject *firstPart = (GameObject*)userData;
+
+            if (firstPart->IsBurned())
+                return;
+
+            GameObject *part = firstPart;
+
+            do
+            {
+                part->SetBurned();
+                part->SetColor(Color(0.0f, 0.0f, 0.0f, 1.0f));
+                part = part->GetNext();
+            } while (part != firstPart);
+
+            //duckState->BirdGotBurned(firstPart);
         }
     };
 
@@ -114,17 +134,17 @@ namespace duck
     {
     public:
         SpawnSensor()
-            : Sensor(DuckBits)
+            : Sensor(BirdBits)
             , m_count(0)
         { }
 
         bool CanSpawn() const { return m_count == 0; }
 
-        void BeginContact(const b2Body *body) override
+        void BeginContact(void *userData) override
         {
             m_count++;
         }
-        void EndContact(const b2Body *body) override
+        void EndContact(void *userData) override
         {
             ROB_ASSERT(m_count > 0);
             m_count--;
@@ -137,13 +157,14 @@ namespace duck
     {
     public:
         SlideSensor()
-            : Sensor(DuckBits)
+            : Sensor(BirdBits)
         { }
 
-        void BeginContact(const b2Body *body) override
+        void BeginContact(void *userData) override
         {
-            GameObject *bird = (GameObject*)body->GetUserData();
-            if (bird->IsAlive())
+            GameObject *bird = (GameObject*)userData;
+            ROB_ASSERT(bird != nullptr);
+            if (bird && bird->IsAlive())
             {
                 bird->SetSaved(true);
             }
@@ -204,8 +225,8 @@ namespace duck
         size_t m_objectCount;
 
         SensorListener m_sensorListener;
-        DuckSensor m_duckSensor;
 
+        OvenSensor m_ovenSensor;
         SpawnSensor m_spawnSensor;
         SlideSensor m_slideSensor;
     };

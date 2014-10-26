@@ -47,6 +47,9 @@ namespace duck
         , m_objectPool()
         , m_objects(nullptr)
         , m_objectCount(0)
+        , m_sensorListener()
+        , m_ovenSensor()
+        , m_spawnSensor()
     { }
 
     DuckState::~DuckState()
@@ -78,6 +81,9 @@ namespace duck
         def.type = b2_staticBody;
         def.position.Set(0.0f, PLAY_AREA_BOTTOM - 2.0f);
         m_worldBody = m_world->CreateBody(&def);
+
+        m_ovenSensor.SetDuckState(this);
+        m_spawnSensor.SetDuckState(this);
 
         CreateWorld();
         CreateBird(vec2f::Zero);
@@ -237,9 +243,8 @@ namespace duck
         fixDef.shape = &shape;
         fixDef.userData = object;
         fixDef.density = 10.0f;
-        fixDef.filter.categoryBits = DuckBits;
+        fixDef.filter.categoryBits = BirdBits;
         body->CreateFixture(&fixDef);
-//        body->CreateFixture(&shape, 10.0f);
 
         object->SetBody(body);
         TextureHandle texture = GetCache().GetTexture("bird_body.tex");
@@ -344,11 +349,11 @@ namespace duck
         def.type = b2_staticBody;
         def.position = ToB2(position);
         b2Body *body = m_world->CreateBody(&def);
-        m_duckSensor.SetBody(body);
+        m_ovenSensor.SetBody(body);
 
         b2PolygonShape shape;
         shape.SetAsBox(PLAY_AREA_W / 4.0f, 1.0f);
-        m_duckSensor.SetShape(&shape);
+        m_ovenSensor.SetShape(&shape);
     }
 
     void DuckState::CreateSpawnArea(const vec2f &position)

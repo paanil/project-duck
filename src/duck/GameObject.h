@@ -42,10 +42,20 @@ namespace duck
         void SetLayer(int layer);
         int GetLayer() const;
 
-        void SetAlive(bool alive) { m_alive = alive; }
-        bool IsAlive() const { return m_alive; }
-        void SetSaved(bool saved) { m_saved = saved; }
-        bool IsSaved() const { return m_saved; }
+        void SetAlive(bool alive)
+        { m_alive = alive; }
+        bool IsAlive() const
+        { return m_alive; }
+
+        void SetSaved(bool saved)
+        { m_saved = saved; }
+        bool IsSaved() const
+        { return m_saved; }
+
+        void SetBurned()
+        { m_burned = true; }
+        bool IsBurned() const
+        { return m_burned; }
 
         void Update(const GameTime &gameTime);
         void Render(rob::Renderer *renderer);
@@ -61,6 +71,7 @@ namespace duck
 
         bool m_alive;
         bool m_saved;
+        bool m_burned;
 
         GameObject *m_next;
     };

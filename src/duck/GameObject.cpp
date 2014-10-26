@@ -15,6 +15,7 @@ namespace duck
         , m_renderLayer(0)
         , m_alive(true)
         , m_saved(false)
+        , m_burned(false)
         , m_next(nullptr)
     { }
 
