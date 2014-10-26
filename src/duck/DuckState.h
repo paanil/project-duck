@@ -23,7 +23,9 @@ namespace duck
     enum
     {
         DuckBits = BIT(5),
-        SensorBits = BIT(6)
+        SensorBits = BIT(6),
+        StaticBits = BIT(7),
+        WheelBits = BIT(8)
     };
 
     class Sensor

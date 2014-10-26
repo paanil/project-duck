@@ -91,11 +91,11 @@ namespace duck
     void DuckState::CreateWorld()
     {
         // Convoyer belt
-//        CreateStaticBox(vec2f(-12.0f, PLAY_AREA_BOTTOM), 0.0f, 11.0f, 1.0f);
         for (int i = 0; i < 48; i++)
         {
             CreateWheel(vec2f(-12.0f + -12.0f + float(i) * 0.5f, PLAY_AREA_BOTTOM));
         }
+        CreateStaticBox(vec2f(-12.0f, PLAY_AREA_BOTTOM - 4.0f), 0.0f, 11.5f, 4.0f);
 
         // "Output slide"
         CreateStaticBox(vec2f(12.0f, 0.0f), -30.0f * DEG2RAD_f, 5.0f, 0.25f);
@@ -137,7 +137,12 @@ namespace duck
 
         b2CircleShape shape;
         shape.m_radius = 0.25f;
-        body->CreateFixture(&shape, 10.0f);
+        b2Fixture *fix = body->CreateFixture(&shape, 10.0f);
+        b2Filter filter;
+        filter.categoryBits = WheelBits;
+        filter.maskBits &= ~StaticBits;
+        filter.maskBits &= ~WheelBits;
+        fix->SetFilterData(filter);
 
         b2RevoluteJointDef revDef;
         revDef.Initialize(body, m_worldBody, body->GetWorldCenter());
@@ -200,7 +205,10 @@ namespace duck
 
         b2PolygonShape shape;
         shape.SetAsBox(w, h);
-        body->CreateFixture(&shape, 1.0f);
+        b2Fixture *fix = body->CreateFixture(&shape, 1.0f);
+        b2Filter filter;
+        filter.categoryBits = StaticBits;
+        fix->SetFilterData(filter);
 
         object->SetBody(body);
         m_objects[m_objectCount++] = object;
