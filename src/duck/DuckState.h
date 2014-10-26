@@ -9,6 +9,9 @@
 
 #include "GameObject.h"
 
+#include "rob/Log.h"
+#define BIT(x) (1 << x)
+
 namespace duck
 {
 
@@ -16,6 +19,79 @@ namespace duck
     using rob::GameTime;
 
     class DebugDraw;
+
+    enum
+    {
+        DuckBits = BIT(5),
+        SensorBits = BIT(6)
+    };
+
+    class Sensor
+    {
+    public:
+        Sensor(uint16 maskBits)
+            : m_maskBits(maskBits)
+        { }
+
+        virtual ~Sensor()
+        { }
+
+        void SetBody(b2Body *body)
+        { m_body = body; }
+        b2Body* GetBody(b2Body *body) const
+        { return m_body; }
+
+        void SetShape(const b2Shape *shape)
+        {
+            b2FixtureDef fixDef;
+            fixDef.shape = shape;
+            fixDef.userData = this;
+            fixDef.isSensor = true;
+            fixDef.filter.categoryBits = SensorBits;
+            fixDef.filter.maskBits = m_maskBits;
+            m_body->CreateFixture(&fixDef);
+        }
+
+        virtual void BeginContact(const b2Body *body) { }
+//        virtual void EndContact(const b2Body *body) { }
+
+    private:
+        uint16 m_maskBits;
+        b2Body *m_body;
+    };
+
+    class SensorListener : public b2ContactListener
+    {
+    public:
+        void BeginContact(b2Contact* contact)
+        {
+            const b2Fixture *fixA = contact->GetFixtureA();
+            const b2Fixture *fixB = contact->GetFixtureA();
+            if (fixA->GetFilterData().categoryBits == SensorBits)
+            {
+                Sensor *sensor = (Sensor*)fixA->GetUserData();
+                sensor->BeginContact(fixB->GetBody());
+            }
+            else if (fixB->GetFilterData().categoryBits == SensorBits)
+            {
+                Sensor *sensor = (Sensor*)fixB->GetUserData();
+                sensor->BeginContact(fixA->GetBody());
+            }
+        }
+    };
+
+    class DuckSensor : public Sensor
+    {
+    public:
+        DuckSensor()
+            : Sensor(DuckBits)
+        { }
+
+        virtual void BeginContact(const b2Body *body) override
+        {
+            rob::log::Debug("Duck sensor: begin contact!");
+        }
+    };
 
     class DuckState : public rob::GameState
     {
@@ -63,6 +139,8 @@ namespace duck
         GameObject **m_objects;
         size_t m_objectCount;
 
+        SensorListener m_sensorListener;
+        DuckSensor m_duckSensor;
     };
 
 } // duck

@@ -70,6 +70,8 @@ namespace duck
         m_world = GetAllocator().new_object<b2World>(b2Vec2(0.0, -9.81f));
         m_world->SetDebugDraw(m_debugDraw);
 
+        m_world->SetContactListener(&m_sensorListener);
+
         b2BodyDef def;
         def.type = b2_staticBody;
         def.position.Set(0.0f, PLAY_AREA_BOTTOM - 2.0f);
@@ -102,6 +104,16 @@ namespace duck
         CreateWaterContainer(vec2f(0.0f, -2.0f), 2.0f, 0.15f);
         // Drying platform
         CreateStaticBox(vec2f(-8.0f, 4.0f), 0.0f, 2.0f, 0.5f);
+
+        b2BodyDef bodyDef;
+        bodyDef.type = b2_staticBody;
+        bodyDef.position = b2Vec2(0.0f, 0.0f);
+        b2Body *body = m_world->CreateBody(&bodyDef);
+        m_duckSensor.SetBody(body);
+
+        b2CircleShape shape;
+        shape.m_radius = 1.0f;
+        m_duckSensor.SetShape(&shape);
     }
 
     GameObject* DuckState::CreateObject(GameObject *prevLink /*= nullptr*/)
@@ -206,7 +218,13 @@ namespace duck
         b2Body *body = m_world->CreateBody(&bodyDef);
 
         shape.m_radius = 1.0f;
-        body->CreateFixture(&shape, 10.0f);
+        b2FixtureDef fixDef;
+        fixDef.shape = &shape;
+        fixDef.userData = object;
+        fixDef.density = 10.0f;
+        fixDef.filter.categoryBits = DuckBits;
+        body->CreateFixture(&fixDef);
+//        body->CreateFixture(&shape, 10.0f);
 
         object->SetBody(body);
         TextureHandle texture = GetCache().GetTexture("bird_body.tex");
