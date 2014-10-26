@@ -42,6 +42,11 @@ namespace duck
         void SetLayer(int layer);
         int GetLayer() const;
 
+        void SetBurned()
+        { m_burned = true; }
+        bool IsBurned() const
+        { return m_burned; }
+
         void Update(const GameTime &gameTime);
         void Render(rob::Renderer *renderer);
 
@@ -53,6 +58,7 @@ namespace duck
         Color m_color;
         rob::TextureHandle m_texture;
         int m_renderLayer;
+        bool m_burned;
 
         GameObject *m_next;
     };

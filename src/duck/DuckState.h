@@ -9,7 +9,6 @@
 
 #include "GameObject.h"
 
-#include "rob/Log.h"
 #define BIT(x) (1 << x)
 
 namespace duck
@@ -54,7 +53,7 @@ namespace duck
             m_body->CreateFixture(&fixDef);
         }
 
-        virtual void BeginContact(const b2Body *body) { }
+        virtual void BeginContact(void *userData) { }
 //        virtual void EndContact(const b2Body *body) { }
 
     private:
@@ -68,30 +67,44 @@ namespace duck
         void BeginContact(b2Contact* contact)
         {
             const b2Fixture *fixA = contact->GetFixtureA();
-            const b2Fixture *fixB = contact->GetFixtureA();
+            const b2Fixture *fixB = contact->GetFixtureB();
             if (fixA->GetFilterData().categoryBits == SensorBits)
             {
                 Sensor *sensor = (Sensor*)fixA->GetUserData();
-                sensor->BeginContact(fixB->GetBody());
+                sensor->BeginContact(fixB->GetUserData());
             }
             else if (fixB->GetFilterData().categoryBits == SensorBits)
             {
                 Sensor *sensor = (Sensor*)fixB->GetUserData();
-                sensor->BeginContact(fixA->GetBody());
+                sensor->BeginContact(fixA->GetUserData());
             }
         }
     };
 
-    class DuckSensor : public Sensor
+    class OvenSensor : public Sensor
     {
     public:
-        DuckSensor()
+        OvenSensor()
             : Sensor(DuckBits)
         { }
 
-        virtual void BeginContact(const b2Body *body) override
+        virtual void BeginContact(void *userData) override
         {
-            rob::log::Debug("Duck sensor: begin contact!");
+            GameObject *firstDuck = (GameObject*)userData;
+
+            if (firstDuck->IsBurned())
+                return;
+
+            GameObject *duck = firstDuck;
+
+            do
+            {
+                duck->SetBurned();
+                duck->SetColor(Color(0.0f, 0.0f, 0.0f, 1.0f));
+                duck = duck->GetNext();
+            } while (duck != firstDuck);
+
+            //game->DuckGotBurned(firstDuck);
         }
     };
 
@@ -144,7 +157,7 @@ namespace duck
         size_t m_objectCount;
 
         SensorListener m_sensorListener;
-        DuckSensor m_duckSensor;
+        OvenSensor m_ovenSensor;
     };
 
 } // duck

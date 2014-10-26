@@ -222,6 +222,7 @@ namespace duck
         GameObject *object = CreateObject();
         bodyDef.type = b2_dynamicBody;
         bodyDef.position = ToB2(position);
+        //bodyDef.userData = object;
         b2Body *body = m_world->CreateBody(&bodyDef);
 
         shape.m_radius = 1.0f;
@@ -336,11 +337,11 @@ namespace duck
         def.type = b2_staticBody;
         def.position = ToB2(position);
         b2Body *body = m_world->CreateBody(&def);
-        m_duckSensor.SetBody(body);
+        m_ovenSensor.SetBody(body);
 
         b2PolygonShape shape;
         shape.SetAsBox(PLAY_AREA_W / 4.0f, 1.0f);
-        m_duckSensor.SetShape(&shape);
+        m_ovenSensor.SetShape(&shape);
     }
 
     void DuckState::DestroyObject(GameObject *object)
