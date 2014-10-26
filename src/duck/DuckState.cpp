@@ -413,6 +413,11 @@ namespace duck
         m_objectCount = 0;
     }
 
+    void DuckState::BirdGotBurned(GameObject *birdPart)
+    {
+        rob::log::Info("Bird got burned");
+    }
+
     void DuckState::RecalcProj()
     {
         m_view.m_projection = Projection_Orthogonal_lh(PLAY_AREA_LEFT * g_zoom,
