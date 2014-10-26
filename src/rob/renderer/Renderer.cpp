@@ -293,6 +293,27 @@ namespace rob
         m_vb_alloc.Reset();
     }
 
+    void Renderer::DrawVerticalGradientRectangle(float x0, float y0, float x1, float y1, const Color &color0, const Color &color1)
+    {
+        const size_t vertexCount = 4;
+        ColorVertex* vertices = m_vb_alloc.AllocateArray<ColorVertex>(vertexCount);
+        vertices[0] = { x0, y0, color0.r, color0.g, color0.b, color0.a };
+        vertices[1] = { x1, y0, color0.r, color0.g, color0.b, color0.a };
+        vertices[2] = { x0, y1, color1.r, color1.g, color1.b, color1.a };
+        vertices[3] = { x1, y1, color1.r, color1.g, color1.b, color1.a };
+
+        m_graphics->SetUniform(m_globals.position, vec4f(x0, y0, 0.0f, 1.0f));
+
+        m_graphics->BindVertexBuffer(m_vertexBuffer);
+        VertexBuffer *buffer = m_graphics->GetVertexBuffer(m_vertexBuffer);
+        buffer->Write(0, vertexCount * sizeof(ColorVertex), vertices);
+        m_graphics->SetAttrib(0, 2, sizeof(ColorVertex), 0);
+        m_graphics->SetAttrib(1, 4, sizeof(ColorVertex), sizeof(float) * 2);
+        m_graphics->DrawTriangleStripArrays(0, vertexCount);
+
+        m_vb_alloc.Reset();
+    }
+
     static const size_t CIRCLE_SEGMENTS = 48;
     static const float SEG_RADIUS_SCALE = 1.0f;
 

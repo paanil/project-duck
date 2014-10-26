@@ -105,15 +105,7 @@ namespace duck
         // Drying platform
         CreateStaticBox(vec2f(-8.0f, 4.0f), 0.0f, 2.0f, 0.5f);
 
-        b2BodyDef bodyDef;
-        bodyDef.type = b2_staticBody;
-        bodyDef.position = b2Vec2(0.0f, 0.0f);
-        b2Body *body = m_world->CreateBody(&bodyDef);
-        m_duckSensor.SetBody(body);
-
-        b2CircleShape shape;
-        shape.m_radius = 1.0f;
-        m_duckSensor.SetShape(&shape);
+        CreateOven(vec2f(0.0f, 0.0f));
     }
 
     GameObject* DuckState::CreateObject(GameObject *prevLink /*= nullptr*/)
@@ -319,6 +311,26 @@ namespace duck
         return object;
     }
 
+    void DuckState::CreateOven(const vec2f &position)
+    {
+        float w4 = PLAY_AREA_W / 4.0f;
+
+        b2BodyDef def;
+        def.type = b2_staticBody;
+        def.position = b2Vec2(w4, 0.0f);//ToB2(position);
+        b2Body *body = m_world->CreateBody(&def);
+        m_duckSensor.SetBody(body);
+
+        b2PolygonShape shape;
+        shape.SetAsBox(w4, 1.0f);
+        m_duckSensor.SetShape(&shape);
+
+//        object->SetBody(body);
+//        TextureHandle texture = GetCache().GetTexture("container.tex");
+//        object->SetTexture(texture);
+//        object->SetLayer(1);
+    }
+
     void DuckState::DestroyObject(GameObject *object)
     {
         GameObject *next = object->GetNext();
@@ -407,6 +419,11 @@ namespace duck
                     maxLayer = l;
             }
         }
+
+
+        float w2 = PLAY_AREA_W / 2.0f;
+        float h4 = PLAY_AREA_H / 4.0f;
+        renderer.DrawVerticalGradientRectangle(0.0f, h4, w2, 2.0f * h4, Color(1.0f, 0.0f, 0.0f, 0.0f), Color(1.0f, 1.0f, 0.0f, 1.0f));
 
         if (m_drawBox2D)
         {
