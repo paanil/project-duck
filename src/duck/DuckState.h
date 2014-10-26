@@ -55,7 +55,7 @@ namespace duck
         }
 
         virtual void BeginContact(const b2Body *body) { }
-//        virtual void EndContact(const b2Body *body) { }
+        virtual void EndContact(const b2Body *body) { }
 
     private:
         uint16 m_maskBits;
@@ -65,7 +65,7 @@ namespace duck
     class SensorListener : public b2ContactListener
     {
     public:
-        void BeginContact(b2Contact* contact)
+        void BeginContact(b2Contact* contact) override
         {
             const b2Fixture *fixA = contact->GetFixtureA();
             const b2Fixture *fixB = contact->GetFixtureA();
@@ -78,6 +78,21 @@ namespace duck
             {
                 Sensor *sensor = (Sensor*)fixB->GetUserData();
                 sensor->BeginContact(fixA->GetBody());
+            }
+        }
+        void EndContact(b2Contact *contact) override
+        {
+            const b2Fixture *fixA = contact->GetFixtureA();
+            const b2Fixture *fixB = contact->GetFixtureA();
+            if (fixA->GetFilterData().categoryBits == SensorBits)
+            {
+                Sensor *sensor = (Sensor*)fixA->GetUserData();
+                sensor->EndContact(fixB->GetBody());
+            }
+            else if (fixB->GetFilterData().categoryBits == SensorBits)
+            {
+                Sensor *sensor = (Sensor*)fixB->GetUserData();
+                sensor->EndContact(fixA->GetBody());
             }
         }
     };
@@ -93,6 +108,29 @@ namespace duck
         {
             rob::log::Debug("Duck sensor: begin contact!");
         }
+    };
+
+    class BirdSpawnSensor : public DuckSensor
+    {
+    public:
+        BirdSpawnSensor()
+            : DuckSensor()
+            , m_count(0)
+        { }
+
+        bool CanSpawn() const { return m_count == 0; }
+
+        void BeginContact(const b2Body *body) override
+        {
+            m_count++;
+        }
+        void EndContact(const b2Body *body) override
+        {
+            ROB_ASSERT(m_count > 0);
+            m_count--;
+        }
+    private:
+        int m_count;
     };
 
     class DuckState : public rob::GameState
@@ -119,6 +157,9 @@ namespace duck
         void OnResize(int w, int h) override;
 
         void RealtimeUpdate(const Time_t deltaMicroseconds) override;
+
+        void NewBird();
+
         void Update(const GameTime &gameTime) override;
         void Render() override;
 
@@ -144,6 +185,8 @@ namespace duck
 
         SensorListener m_sensorListener;
         DuckSensor m_duckSensor;
+
+        BirdSpawnSensor m_spawnSensor;
     };
 
 } // duck

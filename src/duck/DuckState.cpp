@@ -408,6 +408,12 @@ namespace duck
     void DuckState::RealtimeUpdate(const Time_t deltaMicroseconds)
     { }
 
+    void DuckState::NewBird()
+    {
+//        if (m_)
+        CreateBird(vec2f(PLAY_AREA_LEFT * 2.0f, PLAY_AREA_BOTTOM + 2.0f));
+    }
+
     void DuckState::Update(const GameTime &gameTime)
     {
         m_world->Step(gameTime.GetDeltaSeconds(), 8, 8);
@@ -456,6 +462,8 @@ namespace duck
     {
         if (key == Keyboard::Key::Tab)
             m_drawBox2D = !m_drawBox2D;
+        if (key == Keyboard::Key::B)
+            NewBird();
         if (key == Keyboard::Key::Space)
             ChangeState(STATE_Game);
         if (key == Keyboard::Key::Kp_Plus)
