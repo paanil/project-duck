@@ -99,19 +99,19 @@ namespace duck
             CreateWheel(vec2f(-30.0f + 0.25f + float(i) * 0.5f, PLAY_AREA_BOTTOM));
         }
         // Floor
-        CreateStaticBox(vec2f(-18.0f, PLAY_AREA_BOTTOM - 4.0f), 0.0f, 18.0f, 4.0f);
+        CreateStaticBox(vec2f(-16.0f, PLAY_AREA_BOTTOM - 4.0f), 0.0f, 16.0f, 4.0f);
         // Left wall at the start of convoyer belt
         CreateStaticBox(vec2f(PLAY_AREA_LEFT - 18.0f, 0.0f), 0.0f, wallSize, PLAY_AREA_H / 2.0f);
 
         // Left wall
         CreateStaticBox(vec2f(PLAY_AREA_LEFT - 1.0f, 4.0f), 0.0f, wallSize, PLAY_AREA_H / 2.0f);
         // Right wall
-        CreateStaticBox(vec2f(PLAY_AREA_RIGHT + 1.0f, -PLAY_AREA_H / 2.0f), 0.0f, wallSize, PLAY_AREA_H / 2.0f);
+        CreateStaticBox(vec2f(PLAY_AREA_RIGHT + wallSize / 4.0f, -PLAY_AREA_H / 2.0f), 0.0f, wallSize / 2.0f, PLAY_AREA_H / 2.0f);
         // Ceiling
         CreateStaticBox(vec2f(0.0f, PLAY_AREA_TOP + 2.0f), 0.0f, PLAY_AREA_W / 2.0f, wallSize);
 
-        // "Output slide"
-        GameObject *slide = CreateStaticBox(vec2f(12.0f, 0.0f), -30.0f * DEG2RAD_f, 5.0f, 0.25f);
+        // Bird slide
+        GameObject *slide = CreateStaticBox(vec2f(12.0f, 0.0f), -30.0f * DEG2RAD_f, 5.0f, 0.5f);
         slide->GetBody()->GetFixtureList()->SetFriction(0.0f);
 
         // Water container
