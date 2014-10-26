@@ -293,6 +293,28 @@ namespace rob
         m_vb_alloc.Reset();
     }
 
+    void Renderer::DrawColorQuad(const vec2f &p0, const Color &color0, const vec2f &p1, const Color &color1,
+                                 const vec2f &p2, const Color &color2, const vec2f &p3, const Color &color3)
+    {
+        const size_t vertexCount = 4;
+        ColorVertex* vertices = m_vb_alloc.AllocateArray<ColorVertex>(vertexCount);
+        vertices[0] = { p0.x, p0.y, color0.r, color0.g, color0.b, color0.a };
+        vertices[1] = { p1.x, p1.y, color1.r, color1.g, color1.b, color1.a };
+        vertices[2] = { p3.x, p3.y, color3.r, color3.g, color3.b, color3.a };
+        vertices[3] = { p2.x, p2.y, color2.r, color2.g, color2.b, color2.a };
+
+        m_graphics->SetUniform(m_globals.position, vec4f(p0.x, p0.y, 0.0f, 1.0f));
+
+        m_graphics->BindVertexBuffer(m_vertexBuffer);
+        VertexBuffer *buffer = m_graphics->GetVertexBuffer(m_vertexBuffer);
+        buffer->Write(0, vertexCount * sizeof(ColorVertex), vertices);
+        m_graphics->SetAttrib(0, 2, sizeof(ColorVertex), 0);
+        m_graphics->SetAttrib(1, 4, sizeof(ColorVertex), sizeof(float) * 2);
+        m_graphics->DrawTriangleStripArrays(0, vertexCount);
+
+        m_vb_alloc.Reset();
+    }
+
     static const size_t CIRCLE_SEGMENTS = 48;
     static const float SEG_RADIUS_SCALE = 1.0f;
 

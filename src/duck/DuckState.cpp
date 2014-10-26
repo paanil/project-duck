@@ -112,15 +112,7 @@ namespace duck
         // Drying platform
         CreateStaticBox(vec2f(-8.0f, 4.0f), 0.0f, 2.0f, 0.5f);
 
-        b2BodyDef bodyDef;
-        bodyDef.type = b2_staticBody;
-        bodyDef.position = b2Vec2(0.0f, 0.0f);
-        b2Body *body = m_world->CreateBody(&bodyDef);
-        m_duckSensor.SetBody(body);
-
-        b2CircleShape shape;
-        shape.m_radius = 1.0f;
-        m_duckSensor.SetShape(&shape);
+        CreateOven(vec2f(PLAY_AREA_RIGHT / 2.0f, PLAY_AREA_BOTTOM));
     }
 
     GameObject* DuckState::CreateObject(GameObject *prevLink /*= nullptr*/)
@@ -338,6 +330,19 @@ namespace duck
         return object;
     }
 
+    void DuckState::CreateOven(const vec2f &position)
+    {
+        b2BodyDef def;
+        def.type = b2_staticBody;
+        def.position = ToB2(position);
+        b2Body *body = m_world->CreateBody(&def);
+        m_duckSensor.SetBody(body);
+
+        b2PolygonShape shape;
+        shape.SetAsBox(PLAY_AREA_W / 4.0f, 1.0f);
+        m_duckSensor.SetShape(&shape);
+    }
+
     void DuckState::DestroyObject(GameObject *object)
     {
         GameObject *next = object->GetNext();
@@ -428,6 +433,17 @@ namespace duck
         renderer.SetColor(Color(0.25,0.2,0.2));
         renderer.BindColorShader();
         renderer.DrawFilledRectangle(PLAY_AREA_LEFT, PLAY_AREA_BOTTOM, PLAY_AREA_RIGHT, PLAY_AREA_TOP);
+
+        float x0 = 0.0f;
+        float y0 = PLAY_AREA_BOTTOM;
+        float x1 = PLAY_AREA_RIGHT - 1.0f;
+        float y1 = y0 + 4.0f;
+        Color color0(1.0f, 1.0f, 0.0f, 0.7f);
+        Color color1(1.0f, 0.0f, 0.0f, 0.0f);
+        //renderer.SetModel(mat4f::Identity);
+        //renderer.BindColorShader();
+        renderer.DrawColorQuad(vec2f(x0, y0), color0, vec2f(x0 - 1.0f, y1), color1,
+                               vec2f(x1, y1), color1, vec2f(x1 + 1.0f, y0), color0);
 
         int maxLayer = 0;
         for (int layer = 0; layer < maxLayer + 1; layer++)
