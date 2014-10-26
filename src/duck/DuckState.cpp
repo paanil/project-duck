@@ -106,12 +106,12 @@ namespace duck
         // Left wall
         CreateStaticBox(vec2f(PLAY_AREA_LEFT - 1.0f, 4.0f), 0.0f, wallSize, PLAY_AREA_H / 2.0f);
         // Right wall
-        CreateStaticBox(vec2f(PLAY_AREA_RIGHT + wallSize / 4.0f, -PLAY_AREA_H / 2.0f), 0.0f, wallSize / 2.0f, PLAY_AREA_H / 2.0f);
+        CreateStaticBox(vec2f(PLAY_AREA_RIGHT + wallSize / 4.0f, -PLAY_AREA_H / 2.0f + 1.0f), 0.0f, wallSize / 2.0f, PLAY_AREA_H / 2.0f);
         // Ceiling
         CreateStaticBox(vec2f(0.0f, PLAY_AREA_TOP + 2.0f), 0.0f, PLAY_AREA_W / 2.0f, wallSize);
 
         // Bird slide
-        GameObject *slide = CreateStaticBox(vec2f(12.0f, 0.0f), -30.0f * DEG2RAD_f, 5.0f, 0.5f);
+        GameObject *slide = CreateStaticBox(vec2f(PLAY_AREA_RIGHT + 2.0f, 0.0f), -30.0f * DEG2RAD_f, 8.0f, 0.5f);
         slide->GetBody()->GetFixtureList()->SetFriction(0.0f);
 
         // Water container
@@ -121,7 +121,7 @@ namespace duck
 
         CreateOven(vec2f(PLAY_AREA_RIGHT / 2.0f, PLAY_AREA_BOTTOM));
 
-        CreateSpawnArea(vec2f(PLAY_AREA_LEFT * 2.0f, 0.0f));
+        CreateSpawnArea(vec2f(PLAY_AREA_LEFT * 2.0f, 3.0f));
     }
 
     GameObject* DuckState::CreateObject(GameObject *prevLink /*= nullptr*/)
@@ -506,12 +506,12 @@ namespace duck
             ChangeState(STATE_Game);
         if (key == Keyboard::Key::Kp_Plus)
         {
-            g_zoom = Clamp(g_zoom * 2.0f, 0.25f, 4.0f);
+            g_zoom = Clamp(g_zoom / 1.5f, 0.25f, 4.0f);
             RecalcProj();
         }
         else if (key == Keyboard::Key::Kp_Minus)
         {
-            g_zoom = Clamp(g_zoom * 0.5f, 0.25f, 4.0f);
+            g_zoom = Clamp(g_zoom * 1.5f, 0.25f, 4.0f);
             RecalcProj();
         }
     }
