@@ -211,7 +211,7 @@ namespace duck
         object->SetBody(body);
         TextureHandle texture = GetCache().GetTexture("bird_body.tex");
         object->SetTexture(texture);
-        object->SetColor(Color(0.25f, 0.25f, 0.25f));
+        object->SetColor(Color(0.08f, 0.08f, 0.08f));
 
         GameObject *head = CreateObject(object);
         bodyDef.position = ToB2(position + vec2f(0.5f, 0.5f));
@@ -223,6 +223,7 @@ namespace duck
         head->SetBody(headBody);
         texture = GetCache().GetTexture("bird_head.tex");
         head->SetTexture(texture);
+        head->SetColor(Color(0.08f, 0.08f, 0.08f));
 
         // Neck
         b2PolygonShape neckShape;
@@ -239,6 +240,7 @@ namespace duck
         neck0body->CreateFixture(&neckShape, 5.0f);
         neck0->SetBody(neck0body);
         neck0->SetTexture(neckTex);
+        neck0->SetColor(Color(0.08f, 0.08f, 0.08f));
 
         neckJoint.bodyA = body;
         neckJoint.bodyB = neck0body;
@@ -252,6 +254,7 @@ namespace duck
         neck1body->CreateFixture(&neckShape, 5.0f);
         neck1->SetBody(neck1body);
         neck1->SetTexture(neckTex);
+        neck1->SetColor(Color(0.08f, 0.08f, 0.08f));
 
         neckJoint.bodyA = neck0body;
         neckJoint.bodyB = neck1body;
@@ -265,6 +268,7 @@ namespace duck
         neck2body->CreateFixture(&neckShape, 5.0f);
         neck2->SetBody(neck2body);
         neck2->SetTexture(neckTex);
+        neck2->SetColor(Color(0.08f, 0.08f, 0.08f));
 
         neck2->SetNext(object);
 
