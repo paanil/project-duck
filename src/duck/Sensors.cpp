@@ -1,6 +1,5 @@
 
 #include "Sensors.h"
-#include "GameObject.h"
 #include "DuckState.h"
 
 namespace duck

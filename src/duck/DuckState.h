@@ -18,24 +18,6 @@ namespace duck
 
     class DebugDraw;
 
-    class SlideSensor : public Sensor
-    {
-    public:
-        SlideSensor()
-            : Sensor(BirdBits)
-        { }
-
-        void BeginContact(void *userData) override
-        {
-            GameObject *bird = (GameObject*)userData;
-            ROB_ASSERT(bird != nullptr);
-            if (bird && bird->IsAlive())
-            {
-                bird->SetSaved(true);
-            }
-        }
-    };
-
     class DuckState : public rob::GameState
     {
     public:

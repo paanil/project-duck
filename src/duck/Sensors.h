@@ -3,6 +3,7 @@
 #define H_DUCK_SENSORS_H
 
 #include "Sensor.h"
+#include "GameObject.h"
 
 #include "rob/Assert.h"
 
@@ -40,6 +41,28 @@ namespace duck
         }
     private:
         int m_count;
+    };
+
+    class SlideSensor : public Sensor
+    {
+    public:
+        SlideSensor()
+            : Sensor(BirdBits)
+        { }
+
+        void BeginContact(void *userData) override
+        {
+            GameObject *bird = (GameObject*)userData;
+            ROB_ASSERT(bird != nullptr);
+            if (!bird->IsBurned())
+            {
+                bird->SetSaved(true);
+            }
+            else
+            {
+                bird->SetAlive(false);
+            }
+        }
     };
 
 } // duck
