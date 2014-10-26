@@ -239,7 +239,7 @@ namespace duck
         fixDef.shape = &shape;
         fixDef.userData = object;
         fixDef.density = 10.0f;
-        fixDef.filter.categoryBits = DuckBits;
+        fixDef.filter.categoryBits = BirdBits;
         body->CreateFixture(&fixDef);
 //        body->CreateFixture(&shape, 10.0f);
 

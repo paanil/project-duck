@@ -18,10 +18,11 @@ namespace duck
     using rob::GameTime;
 
     class DebugDraw;
+    class DuckState;
 
     enum
     {
-        DuckBits = BIT(5),
+        BirdBits = BIT(5),
         SensorBits = BIT(6),
         StaticBits = BIT(7),
         WheelBits = BIT(8)
@@ -36,6 +37,9 @@ namespace duck
 
         virtual ~Sensor()
         { }
+
+        void SetDuckState(DuckState *duckState)
+        { m_duckState = duckState; }
 
         void SetBody(b2Body *body)
         { m_body = body; }
@@ -55,6 +59,9 @@ namespace duck
 
         virtual void BeginContact(void *userData) { }
         virtual void EndContact(void *userData) { }
+
+    protected:
+        DuckState *m_duckState;
 
     private:
         uint16 m_maskBits;
@@ -100,26 +107,26 @@ namespace duck
     {
     public:
         OvenSensor()
-            : Sensor(DuckBits)
+            : Sensor(BirdBits)
         { }
 
         virtual void BeginContact(void *userData) override
         {
-            GameObject *firstDuck = (GameObject*)userData;
+            GameObject *firstPart = (GameObject*)userData;
 
-            if (firstDuck->IsBurned())
+            if (firstPart->IsBurned())
                 return;
 
-            GameObject *duck = firstDuck;
+            GameObject *part = firstPart;
 
             do
             {
-                duck->SetBurned();
-                duck->SetColor(Color(0.0f, 0.0f, 0.0f, 1.0f));
-                duck = duck->GetNext();
-            } while (duck != firstDuck);
+                part->SetBurned();
+                part->SetColor(Color(0.0f, 0.0f, 0.0f, 1.0f));
+                part = part->GetNext();
+            } while (part != firstPart);
 
-            //game->DuckGotBurned(firstDuck);
+            //duckState->BirdGotBurned(firstPart);
         }
     };
 
@@ -127,7 +134,7 @@ namespace duck
     {
     public:
         SpawnSensor()
-            : Sensor(DuckBits)
+            : Sensor(BirdBits)
             , m_count(0)
         { }
 
