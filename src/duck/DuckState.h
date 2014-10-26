@@ -68,7 +68,7 @@ namespace duck
         void BeginContact(b2Contact* contact) override
         {
             const b2Fixture *fixA = contact->GetFixtureA();
-            const b2Fixture *fixB = contact->GetFixtureA();
+            const b2Fixture *fixB = contact->GetFixtureB();
             if (fixA->GetFilterData().categoryBits == SensorBits)
             {
                 Sensor *sensor = (Sensor*)fixA->GetUserData();
@@ -83,7 +83,7 @@ namespace duck
         void EndContact(b2Contact *contact) override
         {
             const b2Fixture *fixA = contact->GetFixtureA();
-            const b2Fixture *fixB = contact->GetFixtureA();
+            const b2Fixture *fixB = contact->GetFixtureB();
             if (fixA->GetFilterData().categoryBits == SensorBits)
             {
                 Sensor *sensor = (Sensor*)fixA->GetUserData();
@@ -110,11 +110,11 @@ namespace duck
         }
     };
 
-    class BirdSpawnSensor : public DuckSensor
+    class SpawnSensor : public Sensor
     {
     public:
-        BirdSpawnSensor()
-            : DuckSensor()
+        SpawnSensor()
+            : Sensor(DuckBits)
             , m_count(0)
         { }
 
@@ -188,7 +188,7 @@ namespace duck
         SensorListener m_sensorListener;
         DuckSensor m_duckSensor;
 
-        BirdSpawnSensor m_spawnSensor;
+        SpawnSensor m_spawnSensor;
     };
 
 } // duck
