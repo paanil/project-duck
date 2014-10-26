@@ -13,6 +13,8 @@ namespace duck
         , m_color(Color::White)
         , m_texture(InvalidHandle)
         , m_renderLayer(0)
+        , m_alive(true)
+        , m_saved(false)
         , m_burned(false)
         , m_next(nullptr)
     { }
