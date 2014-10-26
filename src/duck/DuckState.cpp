@@ -111,8 +111,7 @@ namespace duck
         CreateStaticBox(vec2f(0.0f, PLAY_AREA_TOP + 2.0f), 0.0f, PLAY_AREA_W / 2.0f, wallSize);
 
         // Bird slide
-        GameObject *slide = CreateStaticBox(vec2f(PLAY_AREA_RIGHT + 2.0f, 0.0f), -30.0f * DEG2RAD_f, 8.0f, 0.5f);
-        slide->GetBody()->GetFixtureList()->SetFriction(0.0f);
+        CreateSlide();
 
         // Water container
         CreateWaterContainer(vec2f(0.0f, -2.0f), 2.0f, 0.15f);
@@ -120,7 +119,6 @@ namespace duck
         CreateStaticBox(vec2f(-8.0f, 4.0f), 0.0f, 2.0f, 0.5f);
 
         CreateOven(vec2f(PLAY_AREA_RIGHT / 2.0f, PLAY_AREA_BOTTOM));
-
         CreateSpawnArea(vec2f(PLAY_AREA_LEFT * 2.0f, 3.0f));
     }
 
@@ -231,6 +229,7 @@ namespace duck
         GameObject *object = CreateObject();
         bodyDef.type = b2_dynamicBody;
         bodyDef.position = ToB2(position);
+        bodyDef.userData = (void*)object;
         b2Body *body = m_world->CreateBody(&bodyDef);
 
         shape.m_radius = 1.0f;
@@ -365,6 +364,22 @@ namespace duck
         m_spawnSensor.SetShape(&shape);
     }
 
+    void DuckState::CreateSlide()
+    {
+        GameObject *slide = CreateStaticBox(vec2f(PLAY_AREA_RIGHT + 2.0f, 0.0f), -30.0f * DEG2RAD_f, 8.0f, 0.5f);
+        slide->GetBody()->GetFixtureList()->SetFriction(0.0f);
+
+        b2BodyDef def;
+        def.type = b2_staticBody;
+        def.position.Set(PLAY_AREA_RIGHT + 8.0d, 0.0f);
+        b2Body *body = m_world->CreateBody(&def);
+        m_slideSensor.SetBody(body);
+
+        b2PolygonShape shape;
+        shape.SetAsBox(4.0f, 4.0f);
+        m_slideSensor.SetShape(&shape);
+    }
+
     void DuckState::DestroyObject(GameObject *object)
     {
         GameObject *next = object->GetNext();
@@ -444,6 +459,27 @@ namespace duck
     void DuckState::Update(const GameTime &gameTime)
     {
         m_world->Step(gameTime.GetDeltaSeconds(), 8, 8);
+
+        size_t deadCount = 0;
+        GameObject *dead[MAX_OBJECTS];
+
+        for (size_t i = 0; i < m_objectCount; i++)
+        {
+            if (m_objects[i]->IsAlive())
+            {
+                if (m_objects[i]->IsSaved())
+                {
+                    log::Info("Bird saved");
+                    dead[deadCount++] = m_objects[i];
+                }
+            }
+            else
+            {
+                dead[deadCount++] = m_objects[i];
+            }
+        }
+        for (size_t i = 0; i < deadCount; i++)
+            DestroyObject(dead[i]);
     }
 
     void DuckState::Render()
@@ -506,12 +542,12 @@ namespace duck
             ChangeState(STATE_Game);
         if (key == Keyboard::Key::Kp_Plus)
         {
-            g_zoom = Clamp(g_zoom / 1.5f, 0.25f, 4.0f);
+            g_zoom = Clamp(g_zoom / 1.5f, 0.4444f, 4.0f);
             RecalcProj();
         }
         else if (key == Keyboard::Key::Kp_Minus)
         {
-            g_zoom = Clamp(g_zoom * 1.5f, 0.25f, 4.0f);
+            g_zoom = Clamp(g_zoom * 1.5f, 0.4444f, 4.5f);
             RecalcProj();
         }
     }

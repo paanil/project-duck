@@ -42,6 +42,11 @@ namespace duck
         void SetLayer(int layer);
         int GetLayer() const;
 
+        void SetAlive(bool alive) { m_alive = alive; }
+        bool IsAlive() const { return m_alive; }
+        void SetSaved(bool saved) { m_saved = saved; }
+        bool IsSaved() const { return m_saved; }
+
         void Update(const GameTime &gameTime);
         void Render(rob::Renderer *renderer);
 
@@ -53,6 +58,9 @@ namespace duck
         Color m_color;
         rob::TextureHandle m_texture;
         int m_renderLayer;
+
+        bool m_alive;
+        bool m_saved;
 
         GameObject *m_next;
     };

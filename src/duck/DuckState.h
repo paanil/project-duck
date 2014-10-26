@@ -133,6 +133,23 @@ namespace duck
         int m_count;
     };
 
+    class SlideSensor : public Sensor
+    {
+    public:
+        SlideSensor()
+            : Sensor(DuckBits)
+        { }
+
+        void BeginContact(const b2Body *body) override
+        {
+            GameObject *bird = (GameObject*)body->GetUserData();
+            if (bird->IsAlive())
+            {
+                bird->SetSaved(true);
+            }
+        }
+    };
+
     class DuckState : public rob::GameState
     {
     public:
@@ -149,6 +166,7 @@ namespace duck
         GameObject* CreateBird(const vec2f &position);
         void CreateOven(const vec2f &position);
         void CreateSpawnArea(const vec2f &position);
+        void CreateSlide();
 
         void DestroyObject(GameObject *object);
         void DestroyObjectList(GameObject *object, GameObject *last);
@@ -189,6 +207,7 @@ namespace duck
         DuckSensor m_duckSensor;
 
         SpawnSensor m_spawnSensor;
+        SlideSensor m_slideSensor;
     };
 
 } // duck
