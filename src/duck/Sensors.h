@@ -65,6 +65,13 @@ namespace duck
         }
     };
 
+    class KillSensor : public Sensor
+    {
+    public:
+        KillSensor();
+        void BeginContact(void *userData) override;
+    };
+
 } // duck
 
 #endif // H_DUCK_SENSORS_H

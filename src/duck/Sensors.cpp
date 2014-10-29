@@ -24,4 +24,14 @@ namespace duck
         m_duckState->BirdGotBurned(firstPart);
     }
 
+    KillSensor::KillSensor()
+        : Sensor(0xFFFF)
+    { }
+
+    void KillSensor::BeginContact(void *userData)
+    {
+        GameObject *obj = (GameObject*)userData;
+        if (obj) obj->SetAlive(false);
+    }
+
 } // duck

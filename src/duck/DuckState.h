@@ -78,6 +78,7 @@ namespace duck
         OvenSensor m_ovenSensor;
         SpawnSensor m_spawnSensor;
         SlideSensor m_slideSensor;
+        KillSensor m_killSensor;
     };
 
 } // duck

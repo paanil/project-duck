@@ -50,6 +50,7 @@ namespace duck
         , m_sensorListener()
         , m_ovenSensor()
         , m_spawnSensor()
+        , m_killSensor()
     { }
 
     DuckState::~DuckState()
@@ -84,6 +85,7 @@ namespace duck
 
         m_ovenSensor.SetDuckState(this);
         m_spawnSensor.SetDuckState(this);
+        m_killSensor.SetDuckState(this);
 
         CreateWorld();
         CreateBird(vec2f::Zero);
@@ -126,6 +128,17 @@ namespace duck
 
         CreateOven(vec2f(PLAY_AREA_RIGHT / 2.0f, PLAY_AREA_BOTTOM));
         CreateSpawnArea(vec2f(PLAY_AREA_LEFT * 2.0f, 3.0f));
+
+
+        b2BodyDef def;
+        def.type = b2_staticBody;
+        def.position.Set(8.0f, PLAY_AREA_BOTTOM - 16.0f);
+        b2Body *body = m_world->CreateBody(&def);
+        m_killSensor.SetBody(body);
+
+        b2PolygonShape shape;
+        shape.SetAsBox(2 * PLAY_AREA_W, 8.0f);
+        m_killSensor.SetShape(&shape);
     }
 
     GameObject* DuckState::CreateObject(GameObject *prevLink /*= nullptr*/)
@@ -376,12 +389,12 @@ namespace duck
 
         b2BodyDef def;
         def.type = b2_staticBody;
-        def.position.Set(PLAY_AREA_RIGHT + 8.0d, 0.0f);
+        def.position.Set(PLAY_AREA_RIGHT + 8.0d, 2.0f);
         b2Body *body = m_world->CreateBody(&def);
         m_slideSensor.SetBody(body);
 
         b2PolygonShape shape;
-        shape.SetAsBox(4.0f, 4.0f);
+        shape.SetAsBox(4.0f, 8.0f);
         m_slideSensor.SetShape(&shape);
     }
 
