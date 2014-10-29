@@ -159,6 +159,10 @@ namespace duck
         bodyDef.type = b2_dynamicBody;
         bodyDef.position = ToB2(position);
         b2Body *body = m_world->CreateBody(&bodyDef);
+        wheel->SetBody(body);
+//        wheel->SetColor(Color(0.2f, 0.2f, 0.2f));
+        TextureHandle texture = GetCache().GetTexture("wheel.tex");
+        wheel->SetTexture(texture);
 
         b2CircleShape shape;
         shape.m_radius = 0.25f;
@@ -176,7 +180,6 @@ namespace duck
         revDef.maxMotorTorque = 1000.0f;
         m_world->CreateJoint(&revDef);
 
-        wheel->SetBody(body);
         return wheel;
     }
 
@@ -227,6 +230,8 @@ namespace duck
         def.position = ToB2(position);
         def.angle = angle;
         b2Body *body = m_world->CreateBody(&def);
+        object->SetBody(body);
+        object->SetColor(Color(0.65f, 0.63f, 0.65f));
 
         b2PolygonShape shape;
         shape.SetAsBox(w, h);
@@ -235,7 +240,6 @@ namespace duck
         filter.categoryBits = StaticBits;
         fix->SetFilterData(filter);
 
-        object->SetBody(body);
         m_objects[m_objectCount++] = object;
         return object;
     }
@@ -513,7 +517,7 @@ namespace duck
         renderer.SetView(m_view);
         renderer.SetModel(mat4f::Identity);
 
-        renderer.SetColor(Color(0.25,0.2,0.2));
+        renderer.SetColor(Color(0.18f, 0.14f, 0.14f));
         renderer.BindColorShader();
         renderer.DrawFilledRectangle(PLAY_AREA_LEFT, PLAY_AREA_BOTTOM, PLAY_AREA_RIGHT, PLAY_AREA_TOP);
 
