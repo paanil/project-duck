@@ -284,6 +284,7 @@ namespace duck
         TextureHandle texture = GetCache().GetTexture("bird_body.tex");
         object->SetTexture(texture);
         object->SetFlameTexture(flameTexture);
+        object->SetOily();
         object->SetColor(Color(0.08f, 0.08f, 0.08f));
         object->SetLayer(1);
 
@@ -298,6 +299,7 @@ namespace duck
         texture = GetCache().GetTexture("bird_head.tex");
         head->SetTexture(texture);
         head->SetFlameTexture(flameTexture);
+        head->SetOily();
         head->SetColor(Color(0.08f, 0.08f, 0.08f));
 
         // Neck
@@ -316,6 +318,7 @@ namespace duck
         neck0->SetBody(neck0body);
         neck0->SetTexture(neckTex);
         neck0->SetFlameTexture(flameTexture);
+        neck0->SetOily();
         neck0->SetColor(Color(0.08f, 0.08f, 0.08f));
 
         neckJoint.bodyA = body;
@@ -334,6 +337,7 @@ namespace duck
         neck1->SetBody(neck1body);
         neck1->SetTexture(neckTex);
         neck1->SetFlameTexture(flameTexture);
+        neck1->SetOily();
         neck1->SetColor(Color(0.08f, 0.08f, 0.08f));
 
         neckJoint.bodyA = neck0body;
@@ -349,6 +353,7 @@ namespace duck
         neck2->SetBody(neck2body);
         neck2->SetTexture(neckTex);
         neck2->SetFlameTexture(flameTexture);
+        neck2->SetOily();
         neck2->SetColor(Color(0.08f, 0.08f, 0.08f));
 
 //        neck2->SetNext(object);
@@ -399,6 +404,8 @@ namespace duck
             GameObject *leg = CreateObject(neck2);
             leg->SetBody(legBody);
             leg->SetTexture(legTex);
+            leg->SetFlameTexture(flameTexture);
+            leg->SetOily();
 //            leg->SetNext(object);
 
             b2RevoluteJointDef hipDef;
@@ -420,6 +427,8 @@ namespace duck
             leg = CreateObject(leg);
             leg->SetBody(legBody);
             leg->SetTexture(legTex);
+            leg->SetFlameTexture(flameTexture);
+            leg->SetOily();
             leg->SetNext(object);
 
             hipDef.bodyA = body;
