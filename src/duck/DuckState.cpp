@@ -387,6 +387,7 @@ namespace duck
             GameObject *leg = CreateObject(neck2);
             leg->SetBody(legBody);
             leg->SetTexture(legTex);
+            leg->SetFlameTexture(flameTexture);
 //            leg->SetNext(object);
 
             b2RevoluteJointDef hipDef;
@@ -408,6 +409,7 @@ namespace duck
             leg = CreateObject(leg);
             leg->SetBody(legBody);
             leg->SetTexture(legTex);
+            leg->SetFlameTexture(flameTexture);
             leg->SetNext(object);
 
             hipDef.bodyA = body;
