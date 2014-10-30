@@ -220,7 +220,7 @@ namespace duck
         object->SetBody(body);
         TextureHandle texture = GetCache().GetTexture("container.tex");
         object->SetTexture(texture);
-        object->SetLayer(1);
+        object->SetLayer(2);
 
         // Sensor
         b2BodyDef def2;
@@ -285,6 +285,7 @@ namespace duck
         object->SetTexture(texture);
         object->SetFlameTexture(flameTexture);
         object->SetColor(Color(0.08f, 0.08f, 0.08f));
+        object->SetLayer(1);
 
         GameObject *head = CreateObject(object);
         bodyDef.position = ToB2(position + vec2f(0.5f, 0.5f));
@@ -385,6 +386,7 @@ namespace duck
 //        neckDef.collideConnected = true;
 //        m_world->CreateJoint(&neckDef);
         {
+            const TextureHandle legTex = GetCache().GetTexture("bird_leg.tex");
             b2BodyDef legDef;
             legDef.type = b2_dynamicBody;
             legDef.position = ToB2(position - vec2f(0.5f, 0.5f));
@@ -396,6 +398,7 @@ namespace duck
 
             GameObject *leg = CreateObject(neck2);
             leg->SetBody(legBody);
+            leg->SetTexture(legTex);
 //            leg->SetNext(object);
 
             b2RevoluteJointDef hipDef;
@@ -416,6 +419,7 @@ namespace duck
 
             leg = CreateObject(leg);
             leg->SetBody(legBody);
+            leg->SetTexture(legTex);
             leg->SetNext(object);
 
             hipDef.bodyA = body;
@@ -642,13 +646,13 @@ namespace duck
             m_world->DrawDebugData();
         }
 
-        renderer.SetView(GetDefaultView());
-        renderer.BindFontShader();
-        renderer.SetColor(Color::White);
-
-        char text[40];
-        StringPrintF(text, "mouse=%f, %f", m_mouseWorld.x, m_mouseWorld.y);
-        renderer.DrawText(0.0f, 0.0f, text);
+//        renderer.SetView(GetDefaultView());
+//        renderer.BindFontShader();
+//        renderer.SetColor(Color::White);
+//
+//        char text[40];
+//        StringPrintF(text, "mouse=%f, %f", m_mouseWorld.x, m_mouseWorld.y);
+//        renderer.DrawText(0.0f, 0.0f, text);
     }
 
     void DuckState::OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods)

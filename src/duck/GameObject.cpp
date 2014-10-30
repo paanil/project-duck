@@ -24,6 +24,11 @@ namespace duck
         , m_next(nullptr)
     { }
 
+    GameObject::~GameObject()
+    {
+        delete m_logic;
+    }
+
     void GameObject::SetPosition(const vec2f &pos)
     { m_body->SetTransform(ToB2(pos), m_body->GetAngle()); }
 
