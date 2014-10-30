@@ -12,7 +12,9 @@ namespace duck
         : m_body(nullptr)
         , m_color(Color::White)
         , m_texture(InvalidHandle)
+        , m_flameTexture(InvalidHandle)
         , m_renderLayer(0)
+        , m_burnTimer(0.0f)
         , m_alive(true)
         , m_saved(false)
         , m_burned(false)
@@ -73,7 +75,8 @@ namespace duck
 
     void GameObject::Update(const GameTime &gameTime)
     {
-
+        if (m_burnTimer > 0.0f)
+            m_burnTimer -= gameTime.GetDeltaSeconds();
     }
 
     void GameObject::Render(Renderer *renderer)
@@ -112,6 +115,21 @@ namespace duck
             renderer->GetGraphics()->BindTexture(1, m_texture);
             renderer->BindTextureShader();
             renderer->DrawTexturedRectangle(-dim.x, -dim.y, dim.x, dim.y);
+            if (m_burnTimer > 0.0f)
+            {
+                int i = m_burnTimer / 0.1f;
+                float f = (i & 1) ? -1.0f : 1.0f;
+                float s = 2.0f + (m_burnTimer / 1.5f);
+                vec2f pos = GetPosition() * 2.0f;
+                mat4f mat;
+                mat.SetTranslation(pos.x, pos.y, 0.0f);
+                mat += mat4f::Identity;
+                mat /= 2.0f;
+                renderer->SetModel(mat);
+                renderer->SetColor(Color(1.0f, 1.0f, 1.0f, 1.0f));
+                renderer->GetGraphics()->BindTexture(1, m_flameTexture);
+                renderer->DrawTexturedRectangle(-dim.x*s*f, -dim.y*s, dim.x*s*f, dim.y*1.5f*s);
+            }
         }
     }
 

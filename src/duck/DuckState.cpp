@@ -126,7 +126,7 @@ namespace duck
         // Drying platform
         CreateStaticBox(vec2f(-8.0f, 4.0f), 0.0f, 2.0f, 0.5f);
 
-        CreateOven(vec2f(PLAY_AREA_RIGHT / 2.0f, PLAY_AREA_BOTTOM));
+        CreateOven();
         CreateSpawnArea(vec2f(PLAY_AREA_LEFT * 2.0f, 3.0f));
 
 
@@ -246,6 +246,8 @@ namespace duck
 
     GameObject* DuckState::CreateBird(const vec2f &position)
     {
+        TextureHandle flameTexture = GetCache().GetTexture("flame.tex");
+
         b2BodyDef bodyDef;
         b2CircleShape shape;
 
@@ -266,6 +268,7 @@ namespace duck
         object->SetBody(body);
         TextureHandle texture = GetCache().GetTexture("bird_body.tex");
         object->SetTexture(texture);
+        object->SetFlameTexture(flameTexture);
         object->SetColor(Color(0.08f, 0.08f, 0.08f));
 
         GameObject *head = CreateObject(object);
@@ -278,6 +281,7 @@ namespace duck
         head->SetBody(headBody);
         texture = GetCache().GetTexture("bird_head.tex");
         head->SetTexture(texture);
+        head->SetFlameTexture(flameTexture);
         head->SetColor(Color(0.08f, 0.08f, 0.08f));
 
         // Neck
@@ -295,6 +299,7 @@ namespace duck
         neck0body->CreateFixture(&neckShape, 5.0f);
         neck0->SetBody(neck0body);
         neck0->SetTexture(neckTex);
+        neck0->SetFlameTexture(flameTexture);
         neck0->SetColor(Color(0.08f, 0.08f, 0.08f));
 
         neckJoint.bodyA = body;
@@ -309,6 +314,7 @@ namespace duck
         neck1body->CreateFixture(&neckShape, 5.0f);
         neck1->SetBody(neck1body);
         neck1->SetTexture(neckTex);
+        neck1->SetFlameTexture(flameTexture);
         neck1->SetColor(Color(0.08f, 0.08f, 0.08f));
 
         neckJoint.bodyA = neck0body;
@@ -323,6 +329,7 @@ namespace duck
         neck2body->CreateFixture(&neckShape, 5.0f);
         neck2->SetBody(neck2body);
         neck2->SetTexture(neckTex);
+        neck2->SetFlameTexture(flameTexture);
         neck2->SetColor(Color(0.08f, 0.08f, 0.08f));
 
         neck2->SetNext(object);
@@ -360,11 +367,11 @@ namespace duck
         return object;
     }
 
-    void DuckState::CreateOven(const vec2f &position)
+    void DuckState::CreateOven()
     {
         b2BodyDef def;
         def.type = b2_staticBody;
-        def.position = ToB2(position);
+        def.position = b2Vec2(PLAY_AREA_RIGHT / 2.0f, PLAY_AREA_BOTTOM - 2.0f);
         b2Body *body = m_world->CreateBody(&def);
         m_ovenSensor.SetBody(body);
 
@@ -492,6 +499,7 @@ namespace duck
 
         for (size_t i = 0; i < m_objectCount; i++)
         {
+            m_objects[i]->Update(gameTime);
             if (m_objects[i]->IsAlive())
             {
                 if (m_objects[i]->IsSaved())
