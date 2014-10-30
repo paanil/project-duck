@@ -168,7 +168,7 @@ namespace duck
 
         b2CircleShape shape;
         shape.m_radius = 0.25f;
-        b2Fixture *fix = body->CreateFixture(&shape, 10.0f);
+        b2Fixture *fix = body->CreateFixture(&shape, 200.0f);
         b2Filter filter;
         filter.categoryBits = WheelBits;
         filter.maskBits &= ~StaticBits;
@@ -331,7 +331,7 @@ namespace duck
         neck2->SetTexture(neckTex);
         neck2->SetColor(Color(0.08f, 0.08f, 0.08f));
 
-        neck2->SetNext(object);
+//        neck2->SetNext(object);
 
         neckJoint.bodyA = neck1body;
         neckJoint.bodyB = neck2body;
@@ -365,6 +365,50 @@ namespace duck
 //        neckDef.maxLength = 2.5f;
 //        neckDef.collideConnected = true;
 //        m_world->CreateJoint(&neckDef);
+        {
+            b2BodyDef legDef;
+            legDef.type = b2_dynamicBody;
+            legDef.position = ToB2(position - vec2f(0.5f, 0.5f));
+            b2PolygonShape legShape;
+            legShape.SetAsBox(0.25f, 0.5f);
+
+            b2Body *legBody = m_world->CreateBody(&legDef);
+            legBody->CreateFixture(&legShape, 1.0f);
+
+            GameObject *leg = CreateObject(neck2);
+            leg->SetBody(legBody);
+//            leg->SetNext(object);
+
+            b2RevoluteJointDef hipDef;
+            hipDef.bodyA = body;
+            hipDef.bodyB = legBody;
+            hipDef.localAnchorA.Set(-0.5f, -0.5f);
+            hipDef.localAnchorB.Set(0.0f, 0.5f);
+            hipDef.collideConnected = false;
+            hipDef.enableLimit = true;
+            hipDef.lowerAngle = -90.0f * rob::DEG2RAD_f;
+            hipDef.upperAngle = 0.0f * rob::DEG2RAD_f;
+            m_world->CreateJoint(&hipDef);
+
+
+            legDef.position = ToB2(position + vec2f(0.5f, -0.5f));
+            legBody = m_world->CreateBody(&legDef);
+            legBody->CreateFixture(&legShape, 1.0f);
+
+            leg = CreateObject(leg);
+            leg->SetBody(legBody);
+            leg->SetNext(object);
+
+            hipDef.bodyA = body;
+            hipDef.bodyB = legBody;
+            hipDef.localAnchorA.Set(0.5f, -0.5f);
+            hipDef.localAnchorB.Set(0.0f, 0.5f);
+            hipDef.collideConnected = false;
+            hipDef.enableLimit = true;
+            hipDef.lowerAngle = 0.0f * rob::DEG2RAD_f;
+            hipDef.upperAngle = 90.0f * rob::DEG2RAD_f;
+            m_world->CreateJoint(&hipDef);
+        }
 
         return object;
     }
@@ -435,6 +479,12 @@ namespace duck
                     m_objects[m_objectCount - 1] : nullptr;
                 m_objectCount--;
 
+                if (m_mouseJoint && object->GetBody() == m_mouseJoint->GetBodyB())
+                {
+                    m_world->DestroyJoint(m_mouseJoint);
+                    m_mouseJoint = nullptr;
+                }
+
                 m_world->DestroyBody(object->GetBody());
                 m_objectPool.Return(object);
                 return;
@@ -477,10 +527,6 @@ namespace duck
         const int vpH = scale * PLAY_AREA_H;
         m_view.SetViewport((w - vpW) / 2, (h - vpH) / 2, vpW, vpH);
         RecalcProj();
-//        m_view.m_projection = Projection_Orthogonal_lh(PLAY_AREA_LEFT,
-//                                                       PLAY_AREA_RIGHT,
-//                                                       PLAY_AREA_BOTTOM,
-//                                                       PLAY_AREA_TOP, -1.0f, 1.0f);
     }
 
     void DuckState::RealtimeUpdate(const Time_t deltaMicroseconds)
@@ -502,8 +548,7 @@ namespace duck
             const float bodyAngle = body->GetAngle();
             const float nextAngle = bodyAngle + body->GetAngularVelocity() * deltaTime;
             const float totalRotation = m_originalAngle - nextAngle;
-//            body->ApplyTorque(totalRotation < 0.0f ? -100.0f : 100.0f, true);
-            body->ApplyTorque(totalRotation * 1000.0f, true);
+            body->ApplyTorque(totalRotation * body->GetMass(), true);
         }
 
         m_world->Step(deltaTime, 8, 8);
