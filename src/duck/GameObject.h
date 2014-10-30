@@ -26,6 +26,7 @@ namespace duck
     {
     public:
         GameObject();
+        ~GameObject();
 
         void SetPosition(const vec2f &pos);
         vec2f GetPosition() const;
