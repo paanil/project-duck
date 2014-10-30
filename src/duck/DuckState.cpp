@@ -266,29 +266,29 @@ namespace duck
         b2BodyDef bodyDef;
         b2CircleShape shape;
 
-        GameObject *object = CreateObject();
+        GameObject *bird = CreateObject();
         bodyDef.type = b2_dynamicBody;
         bodyDef.position = ToB2(position);
-        bodyDef.userData = (void*)object;
+        bodyDef.userData = (void*)bird;
         b2Body *body = m_world->CreateBody(&bodyDef);
 
         shape.m_radius = 1.0f;
         b2FixtureDef fixDef;
         fixDef.shape = &shape;
-        fixDef.userData = object;
+        fixDef.userData = bird;
         fixDef.density = 10.0f;
         fixDef.filter.categoryBits = BirdBits;
         body->CreateFixture(&fixDef);
 
-        object->SetBody(body);
+        bird->SetBody(body);
         TextureHandle texture = GetCache().GetTexture("bird_body.tex");
-        object->SetTexture(texture);
-        object->SetFlameTexture(flameTexture);
-        object->SetOily();
-        object->SetColor(Color(0.08f, 0.08f, 0.08f));
-        object->SetLayer(1);
+        bird->SetTexture(texture);
+        bird->SetFlameTexture(flameTexture);
+        bird->SetOily();
+        bird->SetColor(Color(0.08f, 0.08f, 0.08f));
+        bird->SetLayer(1);
 
-        GameObject *head = CreateObject(object);
+        GameObject *head = CreateObject(bird);
         bodyDef.position = ToB2(position + vec2f(0.5f, 0.5f));
         b2Body *headBody = m_world->CreateBody(&bodyDef);
 
@@ -328,7 +328,7 @@ namespace duck
         neckJoint.enableMotor = true;
         neckJoint.motorSpeed = 0.0f;
         neckJoint.maxMotorTorque = 200.0f;
-        m_world->CreateJoint(&neckJoint);
+        b2RevoluteJoint* neckj = (b2RevoluteJoint*)m_world->CreateJoint(&neckJoint);
 
         GameObject *neck1 = CreateObject(neck0);
         bodyDef.position = ToB2(position + vec2f(1.0f, 1.0f));
@@ -356,8 +356,6 @@ namespace duck
         neck2->SetOily();
         neck2->SetColor(Color(0.08f, 0.08f, 0.08f));
 
-//        neck2->SetNext(object);
-
         neckJoint.bodyA = neck1body;
         neckJoint.bodyB = neck2body;
         neckJoint.localAnchorA.Set(neckJlen, 0.0f);
@@ -370,8 +368,8 @@ namespace duck
         neckJoint.localAnchorB.Set(-0.4f, -0.4f);
         b2RevoluteJoint* neck2j = (b2RevoluteJoint*)m_world->CreateJoint(&neckJoint);
 
-        BirdLogic *logic = new BirdLogic(headBody, neck0j, neck1j, neck2j);
-        object->SetLogic(logic);
+        BirdLogic *logic = new BirdLogic(headBody, neckj, neck0j, neck1j, neck2j);
+        bird->SetLogic(logic);
 
 //        // Ropes
 //        b2RopeJointDef neckDef;
@@ -429,7 +427,7 @@ namespace duck
             leg->SetTexture(legTex);
             leg->SetFlameTexture(flameTexture);
             leg->SetOily();
-            leg->SetNext(object);
+            leg->SetNext(bird);
 
             hipDef.bodyA = body;
             hipDef.bodyB = legBody;
@@ -442,7 +440,7 @@ namespace duck
             m_world->CreateJoint(&hipDef);
         }
 
-        return object;
+        return bird;
     }
 
     void DuckState::CreateOven()
@@ -626,12 +624,12 @@ namespace duck
 
         float x0 = 0.0f;
         float y0 = PLAY_AREA_BOTTOM;
-        float x1 = PLAY_AREA_RIGHT - 1.0f;
+        float x1 = PLAY_AREA_RIGHT; // - 1.0f;
         float y1 = y0 + 4.0f;
-        Color color0(1.0f, 1.0f, 0.0f, 0.7f);
+        Color color0(1.0f, 1.0f, 0.0f, 0.5f);
         Color color1(1.0f, 0.0f, 0.0f, 0.0f);
-        //renderer.SetModel(mat4f::Identity);
-        //renderer.BindColorShader();
+        renderer.SetModel(mat4f::Identity);
+        renderer.BindColorShader();
         renderer.DrawColorQuad(vec2f(x0, y0), color0, vec2f(x0 - 1.0f, y1), color1,
                                vec2f(x1, y1), color1, vec2f(x1 + 1.0f, y0), color0);
 
@@ -647,6 +645,13 @@ namespace duck
                     maxLayer = l;
             }
         }
+
+        Color color2(1.0f, 1.0f, 0.0f, 0.2f);
+        Color color3(1.0f, 0.0f, 0.0f, 0.0f);
+        renderer.SetModel(mat4f::Identity);
+        renderer.BindColorShader();
+        renderer.DrawColorQuad(vec2f(x0, y0), color2, vec2f(x0 - 1.0f, y1), color3,
+                               vec2f(x1, y1), color3, vec2f(x1 + 1.0f, y0), color2);
 
         if (m_drawBox2D)
         {
@@ -786,7 +791,6 @@ namespace duck
                 const b2Vec2 target(m_mouseWorld.x, m_mouseWorld.y);
                 m_mouseJoint->SetTarget(target);
             }
-            log::Debug("Angle: ", m_mouseJoint->GetBodyB()->GetAngle());
         }
     }
 
