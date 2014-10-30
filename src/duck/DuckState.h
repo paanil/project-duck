@@ -32,7 +32,7 @@ namespace duck
         GameObject* CreateWheel(const vec2f &position);
         GameObject* CreateWaterContainer(const vec2f &position, float w, float h);
         GameObject* CreateBird(const vec2f &position);
-        void CreateOven(const vec2f &position);
+        void CreateOven();
         void CreateSpawnArea(const vec2f &position);
         void CreateSlide();
 

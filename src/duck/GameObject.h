@@ -44,6 +44,9 @@ namespace duck
         void SetTexture(rob::TextureHandle texture);
         rob::TextureHandle GetTexture() const;
 
+        void SetFlameTexture(rob::TextureHandle texture)
+        { m_flameTexture = texture; }
+
         void SetLayer(int layer);
         int GetLayer() const;
 
@@ -58,7 +61,7 @@ namespace duck
         { return m_saved; }
 
         void SetBurned()
-        { m_burned = true; }
+        { m_burned = true; m_burnTimer = 1.5f; }
         bool IsBurned() const
         { return m_burned; }
 
@@ -74,7 +77,10 @@ namespace duck
 
         Color m_color;
         rob::TextureHandle m_texture;
+        rob::TextureHandle m_flameTexture;
         int m_renderLayer;
+
+        float m_burnTimer;
 
         bool m_alive;
         bool m_saved;
