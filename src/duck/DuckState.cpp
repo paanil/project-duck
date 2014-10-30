@@ -3,6 +3,8 @@
 #include "GameState.h"
 #include "B2DebugDraw.h"
 
+#include "Logic.h"
+
 #include "rob/renderer/Renderer.h"
 #include "rob/resource/MasterCache.h"
 #include "rob/math/Projection.h"
@@ -172,11 +174,12 @@ namespace duck
         filter.maskBits &= ~StaticBits;
         filter.maskBits &= ~WheelBits;
         fix->SetFilterData(filter);
+        fix->SetFriction(2.0f);
 
         b2RevoluteJointDef revDef;
         revDef.Initialize(body, m_worldBody, body->GetWorldCenter());
         revDef.enableMotor = true;
-        revDef.motorSpeed = 30.0f;
+        revDef.motorSpeed = 15.0f;
         revDef.maxMotorTorque = 1000.0f;
         m_world->CreateJoint(&revDef);
 
@@ -301,6 +304,9 @@ namespace duck
         neckJoint.bodyB = neck0body;
         neckJoint.localAnchorA.Set(0.5f, 0.5f);
         neckJoint.localAnchorB.Set(-neckJlen, 0.0f);
+        neckJoint.enableMotor = true;
+        neckJoint.motorSpeed = 0.0f;
+        neckJoint.maxMotorTorque = 200.0f;
         m_world->CreateJoint(&neckJoint);
 
         GameObject *neck1 = CreateObject(neck0);
@@ -315,7 +321,7 @@ namespace duck
         neckJoint.bodyB = neck1body;
         neckJoint.localAnchorA.Set(neckJlen, 0.0f);
         neckJoint.localAnchorB.Set(-neckJlen, 0.0f);
-        m_world->CreateJoint(&neckJoint);
+        b2RevoluteJoint* neck0j = (b2RevoluteJoint*)m_world->CreateJoint(&neckJoint);
 
         GameObject *neck2 = CreateObject(neck1);
         bodyDef.position = ToB2(position + vec2f(1.15f, 1.15f));
@@ -331,31 +337,34 @@ namespace duck
         neckJoint.bodyB = neck2body;
         neckJoint.localAnchorA.Set(neckJlen, 0.0f);
         neckJoint.localAnchorB.Set(-neckJlen, 0.0f);
-        m_world->CreateJoint(&neckJoint);
+        b2RevoluteJoint* neck1j = (b2RevoluteJoint*)m_world->CreateJoint(&neckJoint);
 
         neckJoint.bodyA = neck2body;
         neckJoint.bodyB = headBody;
         neckJoint.localAnchorA.Set(neckJlen, 0.0f);
         neckJoint.localAnchorB.Set(-0.4f, -0.4f);
-        m_world->CreateJoint(&neckJoint);
+        b2RevoluteJoint* neck2j = (b2RevoluteJoint*)m_world->CreateJoint(&neckJoint);
 
-        // Ropes
-        b2RopeJointDef neckDef;
-        neckDef.bodyA = body;
-        neckDef.bodyB = headBody;
-        neckDef.localAnchorA.Set(0.5f, 0.3f);
-        neckDef.localAnchorB.Set(-0.1f, -0.2f);
-        neckDef.maxLength = 2.5f;
-        neckDef.collideConnected = true;
-        m_world->CreateJoint(&neckDef);
+        BirdLogic *logic = new BirdLogic(headBody, neck0j, neck1j, neck2j);
+        object->SetLogic(logic);
 
-        neckDef.bodyA = body;
-        neckDef.bodyB = headBody;
-        neckDef.localAnchorA.Set(0.3f, 0.5f);
-        neckDef.localAnchorB.Set(-0.3f, -0.3f);
-        neckDef.maxLength = 2.5f;
-        neckDef.collideConnected = true;
-        m_world->CreateJoint(&neckDef);
+//        // Ropes
+//        b2RopeJointDef neckDef;
+//        neckDef.bodyA = body;
+//        neckDef.bodyB = headBody;
+//        neckDef.localAnchorA.Set(0.5f, 0.3f);
+//        neckDef.localAnchorB.Set(-0.1f, -0.2f);
+//        neckDef.maxLength = 2.5f;
+//        neckDef.collideConnected = true;
+//        m_world->CreateJoint(&neckDef);
+//
+//        neckDef.bodyA = body;
+//        neckDef.bodyB = headBody;
+//        neckDef.localAnchorA.Set(0.3f, 0.5f);
+//        neckDef.localAnchorB.Set(-0.3f, -0.3f);
+//        neckDef.maxLength = 2.5f;
+//        neckDef.collideConnected = true;
+//        m_world->CreateJoint(&neckDef);
 
         return object;
     }
@@ -485,7 +494,19 @@ namespace duck
 
     void DuckState::Update(const GameTime &gameTime)
     {
-        m_world->Step(gameTime.GetDeltaSeconds(), 8, 8);
+        const float deltaTime = gameTime.GetDeltaSeconds();
+
+        if (m_mouseJoint)
+        {
+            b2Body *body = m_mouseJoint->GetBodyB();
+            const float bodyAngle = body->GetAngle();
+            const float nextAngle = bodyAngle + body->GetAngularVelocity() * deltaTime;
+            const float totalRotation = m_originalAngle - nextAngle;
+//            body->ApplyTorque(totalRotation < 0.0f ? -100.0f : 100.0f, true);
+            body->ApplyTorque(totalRotation * 1000.0f, true);
+        }
+
+        m_world->Step(deltaTime, 8, 8);
 
         size_t deadCount = 0;
         GameObject *dead[MAX_OBJECTS];
@@ -498,6 +519,10 @@ namespace duck
                 {
                     log::Info("Bird saved");
                     dead[deadCount++] = m_objects[i];
+                }
+                else
+                {
+                    m_objects[i]->Update(gameTime);
                 }
             }
             else
@@ -657,6 +682,8 @@ namespace duck
             md.dampingRatio = 0.98f;
             m_mouseJoint = (b2MouseJoint*)m_world->CreateJoint(&md);
             body->SetAwake(true);
+
+            m_originalAngle = body->GetAngle();
         }
     }
 
@@ -681,11 +708,7 @@ namespace duck
                 const b2Vec2 target(m_mouseWorld.x, m_mouseWorld.y);
                 m_mouseJoint->SetTarget(target);
             }
-//            else
-//            {
-//                m_world->DestroyJoint(m_mouseJoint);
-//                m_mouseJoint = nullptr;
-//            }
+            log::Debug("Angle: ", m_mouseJoint->GetBodyB()->GetAngle());
         }
     }
 

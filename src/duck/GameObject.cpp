@@ -1,5 +1,6 @@
 
 #include "GameObject.h"
+#include "Logic.h"
 #include "rob/renderer/Renderer.h"
 #include "rob/graphics/Graphics.h"
 
@@ -10,6 +11,7 @@ namespace duck
 
     GameObject::GameObject()
         : m_body(nullptr)
+        , m_logic(nullptr)
         , m_color(Color::White)
         , m_texture(InvalidHandle)
         , m_renderLayer(0)
@@ -73,7 +75,7 @@ namespace duck
 
     void GameObject::Update(const GameTime &gameTime)
     {
-
+        if (m_logic) m_logic->Update(gameTime.GetDeltaSeconds());
     }
 
     void GameObject::Render(Renderer *renderer)

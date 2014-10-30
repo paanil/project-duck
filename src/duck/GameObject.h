@@ -20,6 +20,8 @@ namespace duck
     using rob::GameTime;
     using rob::Color;
 
+    class Logic;
+
     class GameObject
     {
     public:
@@ -32,6 +34,9 @@ namespace duck
 
         void SetBody(b2Body *body) { m_body = body; }
         b2Body* GetBody() { return m_body; }
+
+        void SetLogic(Logic *logic) { m_logic = logic; }
+        Logic* GetLogic() { return m_logic; }
 
         void SetColor(const Color &color);
         Color GetColor() const;
@@ -65,6 +70,8 @@ namespace duck
 
     private:
         b2Body *m_body;
+        Logic *m_logic;
+
         Color m_color;
         rob::TextureHandle m_texture;
         int m_renderLayer;

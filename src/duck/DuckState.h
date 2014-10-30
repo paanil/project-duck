@@ -67,6 +67,7 @@ namespace duck
         b2Body *m_worldBody;
 
         b2MouseJoint *m_mouseJoint;
+        float m_originalAngle;
         vec2f m_mouseWorld;
 
         rob::Pool<GameObject> m_objectPool;
