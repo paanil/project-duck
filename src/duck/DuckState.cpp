@@ -607,12 +607,12 @@ namespace duck
 
         float x0 = 0.0f;
         float y0 = PLAY_AREA_BOTTOM;
-        float x1 = PLAY_AREA_RIGHT - 1.0f;
+        float x1 = PLAY_AREA_RIGHT; // - 1.0f;
         float y1 = y0 + 4.0f;
-        Color color0(1.0f, 1.0f, 0.0f, 0.7f);
+        Color color0(1.0f, 1.0f, 0.0f, 0.5f);
         Color color1(1.0f, 0.0f, 0.0f, 0.0f);
-        //renderer.SetModel(mat4f::Identity);
-        //renderer.BindColorShader();
+        renderer.SetModel(mat4f::Identity);
+        renderer.BindColorShader();
         renderer.DrawColorQuad(vec2f(x0, y0), color0, vec2f(x0 - 1.0f, y1), color1,
                                vec2f(x1, y1), color1, vec2f(x1 + 1.0f, y0), color0);
 
@@ -628,6 +628,13 @@ namespace duck
                     maxLayer = l;
             }
         }
+
+        Color color2(1.0f, 1.0f, 0.0f, 0.2f);
+        Color color3(1.0f, 0.0f, 0.0f, 0.0f);
+        renderer.SetModel(mat4f::Identity);
+        renderer.BindColorShader();
+        renderer.DrawColorQuad(vec2f(x0, y0), color2, vec2f(x0 - 1.0f, y1), color3,
+                               vec2f(x1, y1), color3, vec2f(x1 + 1.0f, y0), color2);
 
         if (m_drawBox2D)
         {
