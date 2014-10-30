@@ -36,8 +36,8 @@ namespace duck
         void SetBody(b2Body *body) { m_body = body; }
         b2Body* GetBody() { return m_body; }
 
-        void SetLogic(Logic *logic) { m_logic = logic; }
-        Logic* GetLogic() { return m_logic; }
+        void SetLogic(Logic *logic);
+        Logic* GetLogic();
 
         void SetColor(const Color &color);
         Color GetColor() const;

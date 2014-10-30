@@ -34,6 +34,12 @@ namespace duck
     vec2f GameObject::GetPosition() const
     { return FromB2(m_body->GetPosition()); }
 
+    void GameObject::SetLogic(Logic *logic)
+    { m_logic = logic; m_logic->SetOwner(this); }
+
+    Logic* GameObject::GetLogic()
+    { return m_logic; }
+
     vec2f GameObject::GetDimensions() const
     {
         const b2Fixture *fixture = m_body->GetFixtureList();

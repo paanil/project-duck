@@ -254,28 +254,28 @@ namespace duck
         b2BodyDef bodyDef;
         b2CircleShape shape;
 
-        GameObject *object = CreateObject();
+        GameObject *bird = CreateObject();
         bodyDef.type = b2_dynamicBody;
         bodyDef.position = ToB2(position);
-        bodyDef.userData = (void*)object;
+        bodyDef.userData = (void*)bird;
         b2Body *body = m_world->CreateBody(&bodyDef);
 
         shape.m_radius = 1.0f;
         b2FixtureDef fixDef;
         fixDef.shape = &shape;
-        fixDef.userData = object;
+        fixDef.userData = bird;
         fixDef.density = 10.0f;
         fixDef.filter.categoryBits = BirdBits;
         body->CreateFixture(&fixDef);
 
-        object->SetBody(body);
+        bird->SetBody(body);
         TextureHandle texture = GetCache().GetTexture("bird_body.tex");
-        object->SetTexture(texture);
-        object->SetFlameTexture(flameTexture);
-        object->SetColor(Color(0.08f, 0.08f, 0.08f));
-        object->SetLayer(1);
+        bird->SetTexture(texture);
+        bird->SetFlameTexture(flameTexture);
+        bird->SetColor(Color(0.08f, 0.08f, 0.08f));
+        bird->SetLayer(1);
 
-        GameObject *head = CreateObject(object);
+        GameObject *head = CreateObject(bird);
         bodyDef.position = ToB2(position + vec2f(0.5f, 0.5f));
         b2Body *headBody = m_world->CreateBody(&bodyDef);
 
@@ -313,7 +313,7 @@ namespace duck
         neckJoint.enableMotor = true;
         neckJoint.motorSpeed = 0.0f;
         neckJoint.maxMotorTorque = 200.0f;
-        m_world->CreateJoint(&neckJoint);
+        b2RevoluteJoint* neckj = (b2RevoluteJoint*)m_world->CreateJoint(&neckJoint);
 
         GameObject *neck1 = CreateObject(neck0);
         bodyDef.position = ToB2(position + vec2f(1.0f, 1.0f));
@@ -339,8 +339,6 @@ namespace duck
         neck2->SetFlameTexture(flameTexture);
         neck2->SetColor(Color(0.08f, 0.08f, 0.08f));
 
-//        neck2->SetNext(object);
-
         neckJoint.bodyA = neck1body;
         neckJoint.bodyB = neck2body;
         neckJoint.localAnchorA.Set(neckJlen, 0.0f);
@@ -353,8 +351,8 @@ namespace duck
         neckJoint.localAnchorB.Set(-0.4f, -0.4f);
         b2RevoluteJoint* neck2j = (b2RevoluteJoint*)m_world->CreateJoint(&neckJoint);
 
-        BirdLogic *logic = new BirdLogic(headBody, neck0j, neck1j, neck2j);
-        object->SetLogic(logic);
+        BirdLogic *logic = new BirdLogic(headBody, neckj, neck0j, neck1j, neck2j);
+        bird->SetLogic(logic);
 
 //        // Ropes
 //        b2RopeJointDef neckDef;
@@ -410,7 +408,7 @@ namespace duck
             leg->SetBody(legBody);
             leg->SetTexture(legTex);
             leg->SetFlameTexture(flameTexture);
-            leg->SetNext(object);
+            leg->SetNext(bird);
 
             hipDef.bodyA = body;
             hipDef.bodyB = legBody;
@@ -423,7 +421,7 @@ namespace duck
             m_world->CreateJoint(&hipDef);
         }
 
-        return object;
+        return bird;
     }
 
     void DuckState::CreateOven()
@@ -774,7 +772,6 @@ namespace duck
                 const b2Vec2 target(m_mouseWorld.x, m_mouseWorld.y);
                 m_mouseJoint->SetTarget(target);
             }
-            log::Debug("Angle: ", m_mouseJoint->GetBodyB()->GetAngle());
         }
     }
 
