@@ -53,6 +53,7 @@ namespace duck
         , m_ovenSensor()
         , m_spawnSensor()
         , m_killSensor()
+        , m_waterSensor()
     { }
 
     DuckState::~DuckState()
@@ -220,6 +221,17 @@ namespace duck
         TextureHandle texture = GetCache().GetTexture("container.tex");
         object->SetTexture(texture);
         object->SetLayer(1);
+
+        // Sensor
+        b2BodyDef def2;
+        def2.type = b2_staticBody;
+        def2.position = ToB2(position);
+        b2Body *body2 = m_world->CreateBody(&def2);
+        m_waterSensor.SetBody(body2);
+
+        b2PolygonShape shape;
+        shape.SetAsBox(w, h);
+        m_waterSensor.SetShape(&shape);
 
         return object;
     }
@@ -555,7 +567,7 @@ namespace duck
             const float bodyAngle = body->GetAngle();
             const float nextAngle = bodyAngle + body->GetAngularVelocity() * deltaTime;
             const float totalRotation = m_originalAngle - nextAngle;
-            body->ApplyTorque(totalRotation * body->GetMass(), true);
+            body->ApplyTorque(totalRotation * body->GetMass() * 10.0f, true);
         }
 
         m_world->Step(deltaTime, 8, 8);

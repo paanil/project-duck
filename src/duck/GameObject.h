@@ -61,9 +61,12 @@ namespace duck
         { return m_saved; }
 
         void SetBurned()
-        { m_burned = true; m_burnTimer = 1.5f; }
+        { m_burned = true; m_burnTimer = 3.5f; }
         bool IsBurned() const
         { return m_burned; }
+
+        void SetInWater(bool inWater)
+        { m_inWater = inWater; }
 
         void Update(const GameTime &gameTime);
         void Render(rob::Renderer *renderer);
@@ -85,6 +88,7 @@ namespace duck
         bool m_alive;
         bool m_saved;
         bool m_burned;
+        bool m_inWater;
 
         GameObject *m_next;
     };
