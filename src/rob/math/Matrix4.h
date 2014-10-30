@@ -300,9 +300,9 @@ namespace rob
 
         inline void SetTranslation(T x, T y, T z)
         {
-            row0 = simd_::Set(T(0), T(0), T(0), x);
-            row1 = simd_::Set(T(0), T(0), T(0), y);
-            row2 = simd_::Set(T(0), T(0), T(0), z);
+            row0 = simd_::Set(T(1), T(0), T(0), x);
+            row1 = simd_::Set(T(0), T(1), T(0), y);
+            row2 = simd_::Set(T(0), T(0), T(1), z);
             row3 = simd_::Set(T(0), T(0), T(0), T(1));
         }
 

@@ -80,6 +80,7 @@ namespace duck
         SpawnSensor m_spawnSensor;
         SlideSensor m_slideSensor;
         KillSensor m_killSensor;
+        WaterSensor m_waterSensor;
     };
 
 } // duck

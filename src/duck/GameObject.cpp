@@ -20,6 +20,7 @@ namespace duck
         , m_alive(true)
         , m_saved(false)
         , m_burned(false)
+        , m_inWater(false)
         , m_next(nullptr)
     { }
 
@@ -91,6 +92,17 @@ namespace duck
         if (m_logic) m_logic->Update(gameTime.GetDeltaSeconds());
         if (m_burnTimer > 0.0f)
             m_burnTimer -= gameTime.GetDeltaSeconds();
+        if (m_inWater && !m_burned)
+        {
+            float dt = gameTime.GetDeltaSeconds();
+            float speed = 0.1f;
+            m_color.r += speed * dt;
+            m_color.g += speed * dt;
+            m_color.b += speed * dt;
+            if (m_color.r > 1.0f) m_color.r = 1.0f;
+            if (m_color.g > 1.0f) m_color.g = 1.0f;
+            if (m_color.b > 1.0f) m_color.b = 1.0f;
+        }
     }
 
     void GameObject::Render(Renderer *renderer)
@@ -133,14 +145,13 @@ namespace duck
             {
                 int i = m_burnTimer / 0.1f;
                 float f = (i & 1) ? -1.0f : 1.0f;
-                float s = 2.0f + (m_burnTimer / 1.5f);
-                vec2f pos = GetPosition() * 2.0f;
+                float k = (m_burnTimer / 3.5f);
+                float s = 1.0f + k*0.5f;
+                vec2f pos = GetPosition();
                 mat4f mat;
                 mat.SetTranslation(pos.x, pos.y, 0.0f);
-                mat += mat4f::Identity;
-                mat /= 2.0f;
                 renderer->SetModel(mat);
-                renderer->SetColor(Color(1.0f, 1.0f, 1.0f, 1.0f));
+                renderer->SetColor(Color(1.0f, 1.0f, 1.0f, k * 2.0f));
                 renderer->GetGraphics()->BindTexture(1, m_flameTexture);
                 renderer->DrawTexturedRectangle(-dim.x*s*f, -dim.y*s, dim.x*s*f, dim.y*1.5f*s);
             }

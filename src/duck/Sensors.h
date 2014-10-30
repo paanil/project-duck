@@ -72,6 +72,14 @@ namespace duck
         void BeginContact(void *userData) override;
     };
 
+    class WaterSensor : public Sensor
+    {
+    public:
+        WaterSensor();
+        void BeginContact(void *userData) override;
+        void EndContact(void *userData) override;
+    };
+
 } // duck
 
 #endif // H_DUCK_SENSORS_H
