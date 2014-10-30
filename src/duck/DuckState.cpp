@@ -293,7 +293,12 @@ namespace duck
         b2Body *headBody = m_world->CreateBody(&bodyDef);
 
         shape.m_radius = 0.75f;
-        headBody->CreateFixture(&shape, 5.0f);
+        fixDef.shape = &shape;
+        fixDef.userData = head;
+        fixDef.density = 5.0f;
+        fixDef.filter.categoryBits = BirdBits;
+        headBody->CreateFixture(&fixDef);
+        //headBody->CreateFixture(&shape, 5.0f);
 
         head->SetBody(headBody);
         texture = GetCache().GetTexture("bird_head.tex");
