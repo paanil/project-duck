@@ -37,6 +37,8 @@ namespace duck
         void CreateSlide();
 
         void DestroyObject(GameObject *object);
+        void DestroyLinkedObjects(GameObject *object);
+
         void DestroyObjectList(GameObject *object, GameObject *last);
         void DestroySingleObject(GameObject *object);
         void DestroyAllObjects();
@@ -63,6 +65,8 @@ namespace duck
         b2World *m_world;
         DebugDraw *m_debugDraw;
         bool m_drawBox2D;
+
+        bool m_inUpdate;
 
         b2Body *m_worldBody;
 

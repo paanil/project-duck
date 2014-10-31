@@ -44,6 +44,7 @@ namespace duck
         , m_world(nullptr)
         , m_debugDraw(nullptr)
         , m_drawBox2D(false)
+        , m_inUpdate(false)
         , m_worldBody(nullptr)
         , m_mouseJoint(nullptr)
         , m_objectPool()
@@ -480,15 +481,16 @@ namespace duck
 
     void DuckState::DestroyObject(GameObject *object)
     {
-        GameObject *next = object->GetNext();
-        DestroySingleObject(object);
-        if (next) DestroyObjectList(next, object);
+        if (m_inUpdate)
+            object->SetDestroyed(true);
+        else
+            DestroySingleObject(object);
     }
 
     void DuckState::DestroyObjectList(GameObject *object, GameObject *last)
     {
         GameObject *next = object->GetNext();
-        DestroySingleObject(object);
+        DestroyObject(object);
         if (next && next != last) DestroyObjectList(next, last);
     }
 
@@ -514,6 +516,13 @@ namespace duck
             }
         }
         ROB_ASSERT(0);
+    }
+
+    void DuckState::DestroyLinkedObjects(GameObject *object)
+    {
+        GameObject *next = object->GetNext();
+        DestroyObject(object);
+        if (next) DestroyObjectList(next, object);
     }
 
     void DuckState::DestroyAllObjects()
@@ -563,6 +572,8 @@ namespace duck
 
     void DuckState::Update(const GameTime &gameTime)
     {
+        m_inUpdate = true;
+
         const float deltaTime = gameTime.GetDeltaSeconds();
 
         if (m_mouseJoint)
@@ -581,28 +592,28 @@ namespace duck
 
         for (size_t i = 0; i < m_objectCount; i++)
         {
-            m_objects[i]->Update(gameTime);
-            if (m_objects[i]->IsAlive())
+            if (!m_objects[i]->IsDestroyed())
             {
                 if (m_objects[i]->IsSaved())
                 {
                     log::Info("Bird saved");
-                    dead[deadCount++] = m_objects[i];
+                    DestroyLinkedObjects(m_objects[i]);
                 }
                 else
                 {
                     m_objects[i]->Update(gameTime);
                 }
             }
-            else
-            {
+
+            if (m_objects[i]->IsDestroyed())
                 dead[deadCount++] = m_objects[i];
-            }
         }
         for (size_t i = 0; i < deadCount; i++)
         {
-            DestroyObject(dead[i]);
+            DestroySingleObject(dead[i]);
         }
+
+        m_inUpdate = false;
     }
 
     void DuckState::Render()
@@ -737,9 +748,8 @@ namespace duck
 
         // Make a small box.
         b2AABB aabb;
-        b2Vec2 d;
+        b2Vec2 d(0.001f, 0.001f);
         b2Vec2 p = ToB2(m_mouseWorld);
-        d.Set(0.001f, 0.001f);
         aabb.lowerBound = p - d;
         aabb.upperBound = p + d;
 
@@ -749,13 +759,16 @@ namespace duck
 
         if (callback.m_fixture)
         {
+            const float force = (button == MouseButton::Left) ?
+                1000.0f : 20.0f;
+
             b2Body* body = callback.m_fixture->GetBody();
             b2MouseJointDef md;
             md.bodyA = m_worldBody;
             md.bodyB = body;
             md.target = p;
-            md.maxForce = 1000.0f * body->GetMass();
-            md.dampingRatio = 0.98f;
+            md.maxForce = force * body->GetMass();
+            md.dampingRatio = 0.98f * force / 1000.0f; // TODO: not sure if this does anything good.
             m_mouseJoint = (b2MouseJoint*)m_world->CreateJoint(&md);
             body->SetAwake(true);
 
@@ -767,8 +780,6 @@ namespace duck
     {
         if (m_mouseJoint)
         {
-//            b2Body *body = m_mouseJoint->GetBodyB();
-//            body->ApplyForceToCenter(-1000.0f * body->GetLinearVelocity(), false);
             m_world->DestroyJoint(m_mouseJoint);
             m_mouseJoint = nullptr;
         }

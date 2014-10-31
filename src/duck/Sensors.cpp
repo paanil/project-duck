@@ -24,6 +24,26 @@ namespace duck
         m_duckState->BirdGotBurned(firstPart);
     }
 
+
+    SlideSensor::SlideSensor()
+        : Sensor(BirdBits)
+    { }
+
+    void SlideSensor::BeginContact(void *userData)
+    {
+        GameObject *bird = (GameObject*)userData;
+        ROB_ASSERT(bird != nullptr);
+        if (!bird->IsBurned())
+        {
+            bird->SetSaved(true);
+        }
+        else
+        {
+            m_duckState->DestroyLinkedObjects(bird);
+        }
+    }
+
+
     KillSensor::KillSensor()
         : Sensor(0xFFFF)
     { }
@@ -31,7 +51,8 @@ namespace duck
     void KillSensor::BeginContact(void *userData)
     {
         GameObject *obj = (GameObject*)userData;
-        if (obj) obj->SetAlive(false);
+//        if (obj) obj->SetDestroyed(true);
+        if (obj) m_duckState->DestroyLinkedObjects(obj);
     }
 
     WaterSensor::WaterSensor()

@@ -51,10 +51,10 @@ namespace duck
         void SetLayer(int layer);
         int GetLayer() const;
 
-        void SetAlive(bool alive)
-        { m_alive = alive; }
-        bool IsAlive() const
-        { return m_alive; }
+        void SetDestroyed(bool destroyed)
+        { m_destroyed = destroyed; }
+        bool IsDestroyed() const
+        { return m_destroyed; }
 
         void SetSaved(bool saved)
         { m_saved = saved; }
@@ -82,14 +82,16 @@ namespace duck
         Color m_color;
         rob::TextureHandle m_texture;
         rob::TextureHandle m_flameTexture;
+        rob::TextureHandle m_bubbleTexture;
         int m_renderLayer;
 
         float m_burnTimer;
 
-        bool m_alive;
+        bool m_destroyed;
         bool m_saved;
         bool m_burned;
         bool m_inWater;
+//        bool m_isWashed;
 
         GameObject *m_next;
     };

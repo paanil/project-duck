@@ -17,7 +17,7 @@ namespace duck
         , m_flameTexture(InvalidHandle)
         , m_renderLayer(0)
         , m_burnTimer(0.0f)
-        , m_alive(true)
+        , m_destroyed(false)
         , m_saved(false)
         , m_burned(false)
         , m_inWater(false)
@@ -155,6 +155,20 @@ namespace duck
                 renderer->GetGraphics()->BindTexture(1, m_flameTexture);
                 renderer->DrawTexturedRectangle(-dim.x*s*f, -dim.y*s, dim.x*s*f, dim.y*1.5f*s);
             }
+//            else if (m_isWashed)
+//            {
+//                int i = m_burnTimer / 0.1f;
+//                float f = (i & 1) ? -1.0f : 1.0f;
+//                float k = (m_burnTimer / 3.5f);
+//                float s = 1.0f + k*0.5f;
+//                vec2f pos = GetPosition();
+//                mat4f mat;
+//                mat.SetTranslation(pos.x, pos.y, 0.0f);
+//                renderer->SetModel(mat);
+//                renderer->SetColor(Color(1.0f, 1.0f, 1.0f, k * 2.0f));
+//                renderer->GetGraphics()->BindTexture(1, m_bubbleTexture);
+//                renderer->DrawTexturedRectangle(-dim.x*s*f, -dim.y*s, dim.x*s*f, dim.y*1.5f*s);
+//            }
         }
     }
 

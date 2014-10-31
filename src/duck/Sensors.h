@@ -46,23 +46,8 @@ namespace duck
     class SlideSensor : public Sensor
     {
     public:
-        SlideSensor()
-            : Sensor(BirdBits)
-        { }
-
-        void BeginContact(void *userData) override
-        {
-            GameObject *bird = (GameObject*)userData;
-            ROB_ASSERT(bird != nullptr);
-            if (!bird->IsBurned())
-            {
-                bird->SetSaved(true);
-            }
-            else
-            {
-                bird->SetAlive(false);
-            }
-        }
+        SlideSensor();
+        void BeginContact(void *userData) override;
     };
 
     class KillSensor : public Sensor
