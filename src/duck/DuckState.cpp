@@ -89,6 +89,7 @@ namespace duck
 
         m_ovenSensor.SetDuckState(this);
         m_spawnSensor.SetDuckState(this);
+        m_slideSensor.SetDuckState(this);
         m_killSensor.SetDuckState(this);
 
         CreateWorld();
@@ -263,6 +264,7 @@ namespace duck
     GameObject* DuckState::CreateBird(const vec2f &position)
     {
         TextureHandle flameTexture = GetCache().GetTexture("flame.tex");
+        TextureHandle bubbleTexture = GetCache().GetTexture("bubbles.tex");
 
         b2BodyDef bodyDef;
         b2CircleShape shape;
@@ -285,6 +287,7 @@ namespace duck
         TextureHandle texture = GetCache().GetTexture("bird_body.tex");
         bird->SetTexture(texture);
         bird->SetFlameTexture(flameTexture);
+        bird->SetBubbleTexture(bubbleTexture);
         bird->SetOily();
         bird->SetColor(Color(0.08f, 0.08f, 0.08f));
         bird->SetLayer(1);
@@ -305,6 +308,7 @@ namespace duck
         texture = GetCache().GetTexture("bird_head.tex");
         head->SetTexture(texture);
         head->SetFlameTexture(flameTexture);
+        head->SetBubbleTexture(bubbleTexture);
         head->SetOily();
         head->SetColor(Color(0.08f, 0.08f, 0.08f));
 
@@ -324,6 +328,7 @@ namespace duck
         neck0->SetBody(neck0body);
         neck0->SetTexture(neckTex);
         neck0->SetFlameTexture(flameTexture);
+        neck0->SetBubbleTexture(bubbleTexture);
         neck0->SetOily();
         neck0->SetColor(Color(0.08f, 0.08f, 0.08f));
 
@@ -343,6 +348,7 @@ namespace duck
         neck1->SetBody(neck1body);
         neck1->SetTexture(neckTex);
         neck1->SetFlameTexture(flameTexture);
+        neck1->SetBubbleTexture(bubbleTexture);
         neck1->SetOily();
         neck1->SetColor(Color(0.08f, 0.08f, 0.08f));
 
@@ -359,6 +365,7 @@ namespace duck
         neck2->SetBody(neck2body);
         neck2->SetTexture(neckTex);
         neck2->SetFlameTexture(flameTexture);
+        neck2->SetBubbleTexture(bubbleTexture);
         neck2->SetOily();
         neck2->SetColor(Color(0.08f, 0.08f, 0.08f));
 
@@ -771,8 +778,8 @@ namespace duck
 
         if (callback.m_fixture)
         {
-            const float force = (button == MouseButton::Left) ?
-                1000.0f : 20.0f;
+            bool wash = !(button == MouseButton::Left);
+            const float force = wash ? 20.0f : 1000.0f;
 
             b2Body* body = callback.m_fixture->GetBody();
             b2MouseJointDef md;
@@ -785,6 +792,12 @@ namespace duck
             body->SetAwake(true);
 
             m_originalAngle = body->GetAngle();
+
+            if (wash && body->GetUserData())
+            {
+                GameObject *bird = (GameObject*)body->GetUserData();
+                bird->Wash();
+            }
         }
     }
 
