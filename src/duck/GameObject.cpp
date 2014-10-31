@@ -95,21 +95,6 @@ namespace duck
         if (m_logic) m_logic->Update(dt);
         if (m_burnTimer > 0.0f) m_burnTimer -= dt;
         if (m_washTimer > 0.0f) m_washTimer -= dt;
-        if (!m_burned)
-        {
-            if (m_oilyness > 0.0f && m_partsInWater != 0)
-            {
-                float speed = 0.1f;
-                m_oilyness -= speed * dt;
-                if (m_oilyness < 0.0f) m_oilyness = 0.0f;
-            }
-
-            float f = m_oilyness;
-            float k = 1.0f - f;
-            m_color.r = 0.1f * f + 1.0f * k;
-            m_color.g = 0.1f * f + 1.0f * k;
-            m_color.b = 0.1f * f + 1.0f * k;
-        }
     }
 
     void GameObject::Render(Renderer *renderer)

@@ -71,6 +71,10 @@ namespace duck
 
         void SetOily()
         { m_oilyness = 1.0f; }
+        void SetOilyness(float oilyness)
+        { m_oilyness = oilyness; }
+        float GetOilyness() const
+        { return m_oilyness; }
 
         void SetInWater(bool inWater)
         {
@@ -78,6 +82,8 @@ namespace duck
             else m_partsInWater--;
             ROB_ASSERT(m_partsInWater >= 0);
         }
+        bool IsInWater() const
+        { return m_partsInWater != 0; }
 
         void Wash()
         {

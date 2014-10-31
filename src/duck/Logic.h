@@ -97,6 +97,33 @@ namespace duck
                 UpdateHead(deltaTime);
             else
                 DisableHead();
+
+            if (!m_owner->IsBurned())
+            {
+                float oilyness = m_owner->GetOilyness();
+                if (oilyness > 0.0f && m_owner->IsInWater())
+                {
+                    float speed = 0.1f;
+                    oilyness -= speed * deltaTime;
+                    if (oilyness < 0.0f) oilyness = 0.0f;
+
+                    GameObject *obj = m_owner;
+                    do
+                    {
+                        obj->SetOilyness(oilyness);
+                        obj = obj->GetNext();
+                    } while (obj != m_owner);
+                }
+
+                float c = 0.1f * oilyness + 1.0f * (1.0 - oilyness);
+
+                GameObject *obj = m_owner;
+                do
+                {
+                    obj->SetColor(Color(c, c, c));
+                    obj = obj->GetNext();
+                } while (obj != m_owner);
+            }
         }
     private:
         PidController m_neck0Controller;
