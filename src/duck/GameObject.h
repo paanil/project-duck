@@ -7,6 +7,7 @@
 #include "rob/application/GameTime.h"
 #include "rob/graphics/GraphicsTypes.h"
 #include "rob/renderer/Color.h"
+#include "rob/Assert.h"
 
 namespace rob
 {
@@ -62,12 +63,19 @@ namespace duck
         { return m_saved; }
 
         void SetBurned()
-        { m_burned = true; m_burnTimer = 3.5f; }
+        { m_burned = true; m_burnTimer = 3.5f; m_color = Color(0.0f, 0.0f, 0.0f, 1.0f); }
         bool IsBurned() const
         { return m_burned; }
 
+        void SetOily()
+        { m_oilyness = 1.0f; }
+
         void SetInWater(bool inWater)
-        { m_inWater = inWater; }
+        {
+            if (inWater) m_partsInWater++;
+            else m_partsInWater--;
+            ROB_ASSERT(m_partsInWater >= 0);
+        }
 
         void Update(const GameTime &gameTime);
         void Render(rob::Renderer *renderer);
@@ -86,12 +94,13 @@ namespace duck
         int m_renderLayer;
 
         float m_burnTimer;
+        float m_oilyness;
+        int m_partsInWater;
 
         bool m_destroyed;
         bool m_saved;
         bool m_burned;
-        bool m_inWater;
-//        bool m_isWashed;
+        bool m_isWashed;
 
         GameObject *m_next;
     };

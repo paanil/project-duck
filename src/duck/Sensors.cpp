@@ -17,7 +17,6 @@ namespace duck
         do
         {
             part->SetBurned();
-            part->SetColor(Color(0.0f, 0.0f, 0.0f, 1.0f));
             part = part->GetNext();
         } while (part != firstPart);
 
