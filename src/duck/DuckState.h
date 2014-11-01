@@ -45,7 +45,8 @@ namespace duck
         void DestroyAllObjects();
 
         void BirdGotBurned(GameObject *birdPart);
-        void BirdGotSaved(GameObject *birdPart);
+        void BirdSaved();
+        void BirdDied();
 
         void RecalcProj();
         void OnResize(int w, int h) override;

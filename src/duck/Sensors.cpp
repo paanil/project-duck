@@ -33,13 +33,10 @@ namespace duck
         GameObject *bird = (GameObject*)userData;
         ROB_ASSERT(bird != nullptr);
         if (!bird->IsBurned())
-        {
-            m_duckState->BirdGotSaved(bird);
-        }
-//        elses
-//        {
-            m_duckState->DestroyLinkedObjects(bird);
-//        }
+            m_duckState->BirdSaved();
+        else
+            m_duckState->BirdDied();
+        m_duckState->DestroyLinkedObjects(bird);
     }
 
 

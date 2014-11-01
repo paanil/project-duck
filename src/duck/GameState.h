@@ -10,6 +10,7 @@ namespace duck
         STATE_NoChange = 0,
         STATE_MainMenu,
         STATE_Game,
+        STATE_Info,
     };
 
 } // duck

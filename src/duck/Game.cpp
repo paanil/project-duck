@@ -47,9 +47,14 @@ namespace duck
             layout.AddLine();
 
             renderer.SetFontScale(1.0f);
+            layout.AddLine();
+            layout.AddLine();
+
+            renderer.SetFontScale(1.0f);
             layout.AddTextAlignR("[space]", -20.0f);
             layout.AddTextAlignL("- New game", 10.0f);
             layout.AddLine();
+//            layout.AddLine();
 //            layout.AddTextAlignR("[return]", -20.0f);
 //            layout.AddTextAlignL("- High scores", 10.0f);
 //            layout.AddLine();
@@ -63,12 +68,54 @@ namespace duck
             if (key == Keyboard::Key::Escape)
                 QuitState();
             if (key == Keyboard::Key::Space)
-                ChangeState(2);
+                ChangeState(STATE_Info);
 //            if (key == Keyboard::Key::Return)
 //                ChangeState(3);
         }
     private:
 //        GameData &m_gameData;
+    };
+
+
+    class InfoState : public rob::GameState
+    {
+    public:
+        InfoState()
+        { }
+
+        bool Initialize() override
+        {
+            return true;
+        }
+
+        ~InfoState()
+        { }
+
+        void Render() override
+        {
+            Delay(20);
+
+            Renderer &renderer = GetRenderer();
+            renderer.SetView(GetDefaultView());
+            renderer.SetColor(Color(1.0f, 1.0f, 1.0f));
+            renderer.BindFontShader();
+
+            const Viewport vp = renderer.GetView().m_viewport;
+            TextLayout layout(renderer, vp.w / 2.0f, vp.h / 5.0f * 2.0f);
+
+            renderer.SetFontScale(1.0f);
+            layout.AddTextAlignC("Thousands of birds die in every oil accident.", 0.0f);
+            layout.AddLine();
+        }
+
+        void OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods) override
+        {
+            if (key == Keyboard::Key::Escape)
+                QuitState();
+            if (key == Keyboard::Key::Space)
+                ChangeState(STATE_Game);
+        }
+    private:
     };
 
 
@@ -94,6 +141,7 @@ namespace duck
 
         case STATE_MainMenu:    ChangeState<MenuState>(/*m_gameData*/); break;
         case STATE_Game:        ChangeState<DuckState>(m_gameData); break;
+        case STATE_Info:        ChangeState<InfoState>(); break;
         default:
             rob::log::Error("Invalid state change (", state, ")");
             break;

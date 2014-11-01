@@ -7,7 +7,7 @@ namespace duck
 
     struct GameData
     {
-        int m_birdsBurned;
+        int m_birdsKilled;
         int m_birdsSaved;
     };
 

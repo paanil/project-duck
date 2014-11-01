@@ -57,7 +57,7 @@ namespace duck
         , m_killSensor()
         , m_waterSensor()
     {
-        m_gameData.m_birdsBurned = 0;
+        m_gameData.m_birdsKilled = 0;
         m_gameData.m_birdsSaved = 0;
     }
 
@@ -545,13 +545,19 @@ namespace duck
     void DuckState::BirdGotBurned(GameObject *birdPart)
     {
         rob::log::Info("Bird got burned");
-        m_gameData.m_birdsBurned++;
+        m_gameData.m_birdsKilled++;
     }
 
-    void DuckState::BirdGotSaved(GameObject *birdPart)
+    void DuckState::BirdSaved()
     {
-        rob::log::Info("Bird got saved");
+        rob::log::Info("Bird saved");
         m_gameData.m_birdsSaved++;
+    }
+
+    void DuckState::BirdDied()
+    {
+        rob::log::Info("Bird died");
+        m_gameData.m_birdsKilled++;
     }
 
     void DuckState::RecalcProj()
@@ -682,7 +688,7 @@ namespace duck
         renderer.SetColor(Color::White);
 //
         char text[40];
-        StringPrintF(text, "Birds saved: %i, burned: %i", m_gameData.m_birdsSaved, m_gameData.m_birdsBurned);
+        StringPrintF(text, "Birds saved: %i, killed: %i", m_gameData.m_birdsSaved, m_gameData.m_birdsKilled);
         renderer.DrawText(0.0f, 0.0f, text);
     }
 
