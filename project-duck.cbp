@@ -255,6 +255,7 @@
 		<Unit filename="src/rob/renderer/Font.h" />
 		<Unit filename="src/rob/renderer/Renderer.cpp" />
 		<Unit filename="src/rob/renderer/Renderer.h" />
+		<Unit filename="src/rob/renderer/TextLayout.h" />
 		<Unit filename="src/rob/resource/BmfFont.internal.h" />
 		<Unit filename="src/rob/resource/FontCache.cpp" />
 		<Unit filename="src/rob/resource/FontCache.h" />
