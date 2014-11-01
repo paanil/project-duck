@@ -6,6 +6,7 @@
 #include "Logic.h"
 
 #include "rob/renderer/Renderer.h"
+#include "rob/graphics/Graphics.h"
 #include "rob/resource/MasterCache.h"
 #include "rob/math/Projection.h"
 
@@ -36,6 +37,8 @@ namespace duck
         PLAY_AREA_LEFT, PLAY_AREA_RIGHT,
         PLAY_AREA_BOTTOM, PLAY_AREA_TOP
     };
+
+    static const float MAX_LIVES = 5;
 
     static const size_t MAX_OBJECTS = 1000;
 
@@ -693,6 +696,7 @@ namespace duck
             m_world->DrawDebugData();
         }
 
+        renderer.SetModel(mat4f::Identity);
         renderer.SetView(GetDefaultView());
         renderer.BindFontShader();
         renderer.SetColor(Color::White);
@@ -700,6 +704,21 @@ namespace duck
         char text[40];
         StringPrintF(text, "Birds saved: %i, killed: %i", m_gameData.m_birdsSaved, m_gameData.m_birdsKilled);
         renderer.DrawText(0.0f, 0.0f, text);
+
+        // Draw bird heads
+        {
+            const TextureHandle birdHead = GetCache().GetTexture("bird_head.tex");
+            renderer.BindTextureShader();
+            renderer.GetGraphics()->BindTexture(0, birdHead);
+            float bhX = 10.0f;
+            const float bhS = 40.0f;
+            const int lives = MAX_LIVES - m_gameData.m_birdsKilled;
+            for (int i = 0; i < lives; i++)
+            {
+                renderer.DrawTexturedRectangle(bhX, 30.0f + bhS, bhX + bhS, 30.0f);
+                bhX += bhS;
+            }
+        }
     }
 
     void DuckState::OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods)
