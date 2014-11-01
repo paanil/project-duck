@@ -232,6 +232,7 @@ namespace duck
         TextureHandle texture = GetCache().GetTexture("container.tex");
         object->SetTexture(texture);
         object->SetLayer(2);
+        object->SetColor(Color(1.0f, 1.0f, 1.0f, 0.5f));
 
         // Sensor
         b2BodyDef def2;
