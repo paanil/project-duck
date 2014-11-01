@@ -772,27 +772,47 @@ namespace duck
 
     void DuckState::OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods)
     {
-        if (key == Keyboard::Key::Tab)
-            m_drawBox2D = !m_drawBox2D;
-        if (key == Keyboard::Key::B)
-            NewBird();
-        if (key == Keyboard::Key::Space)
-            ChangeState(STATE_Game);
-        if (key == Keyboard::Key::Kp_Plus)
+        switch (key)
         {
-            g_zoom = Clamp(g_zoom / 1.5f, 0.4444f, 4.0f);
-            RecalcProj();
-        }
-        else if (key == Keyboard::Key::Kp_Minus)
-        {
-            g_zoom = Clamp(g_zoom * 1.5f, 0.4444f, 4.5f);
-            RecalcProj();
+            case Keyboard::Key::P:
+            {
+                if (m_time.IsPaused())
+                        m_time.Resume();
+                    else
+                        m_time.Pause();
+            }
+            case Keyboard::Key::Space:
+            {
+                if (IsGameOver())
+                    ChangeState(STATE_MainMenu);
+            }
+            case Keyboard::Key::Escape:
+            {
+                ChangeState(STATE_MainMenu);
+            }
+            default: break;
         }
 
-        if (key == Keyboard::Key::Escape)
+        // TODO: These are for debugging
         {
-            ChangeState(STATE_MainMenu);
+            if (key == Keyboard::Key::Tab)
+                m_drawBox2D = !m_drawBox2D;
+            if (key == Keyboard::Key::B)
+                NewBird();
+            if (key == Keyboard::Key::Space && !IsGameOver())
+                ChangeState(STATE_Game);
+            if (key == Keyboard::Key::Kp_Plus)
+            {
+                g_zoom = Clamp(g_zoom / 1.5f, 0.4444f, 4.0f);
+                RecalcProj();
+            }
+            else if (key == Keyboard::Key::Kp_Minus)
+            {
+                g_zoom = Clamp(g_zoom * 1.5f, 0.4444f, 4.5f);
+                RecalcProj();
+            }
         }
+
     }
 
 
