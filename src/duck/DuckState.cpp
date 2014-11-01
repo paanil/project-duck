@@ -289,7 +289,6 @@ namespace duck
         bird->SetFlameTexture(flameTexture);
         bird->SetBubbleTexture(bubbleTexture);
         bird->SetOily();
-        bird->SetColor(Color(0.08f, 0.08f, 0.08f));
         bird->SetLayer(1);
 
         GameObject *head = CreateObject(bird);
@@ -302,7 +301,6 @@ namespace duck
         fixDef.density = 5.0f;
         fixDef.filter.categoryBits = BirdBits;
         headBody->CreateFixture(&fixDef);
-        //headBody->CreateFixture(&shape, 5.0f);
 
         head->SetBody(headBody);
         texture = GetCache().GetTexture("bird_head.tex");
@@ -310,7 +308,7 @@ namespace duck
         head->SetFlameTexture(flameTexture);
         head->SetBubbleTexture(bubbleTexture);
         head->SetOily();
-        head->SetColor(Color(0.08f, 0.08f, 0.08f));
+        head->SetLayer(1);
 
         // Neck
         b2PolygonShape neckShape;
@@ -330,7 +328,6 @@ namespace duck
         neck0->SetFlameTexture(flameTexture);
         neck0->SetBubbleTexture(bubbleTexture);
         neck0->SetOily();
-        neck0->SetColor(Color(0.08f, 0.08f, 0.08f));
 
         neckJoint.bodyA = body;
         neckJoint.bodyB = neck0body;
@@ -350,7 +347,6 @@ namespace duck
         neck1->SetFlameTexture(flameTexture);
         neck1->SetBubbleTexture(bubbleTexture);
         neck1->SetOily();
-        neck1->SetColor(Color(0.08f, 0.08f, 0.08f));
 
         neckJoint.bodyA = neck0body;
         neckJoint.bodyB = neck1body;
@@ -367,7 +363,6 @@ namespace duck
         neck2->SetFlameTexture(flameTexture);
         neck2->SetBubbleTexture(bubbleTexture);
         neck2->SetOily();
-        neck2->SetColor(Color(0.08f, 0.08f, 0.08f));
 
         neckJoint.bodyA = neck1body;
         neckJoint.bodyB = neck2body;
@@ -384,23 +379,6 @@ namespace duck
         BirdLogic *logic = new BirdLogic(headBody, neckj, neck0j, neck1j, neck2j);
         bird->SetLogic(logic);
 
-//        // Ropes
-//        b2RopeJointDef neckDef;
-//        neckDef.bodyA = body;
-//        neckDef.bodyB = headBody;
-//        neckDef.localAnchorA.Set(0.5f, 0.3f);
-//        neckDef.localAnchorB.Set(-0.1f, -0.2f);
-//        neckDef.maxLength = 2.5f;
-//        neckDef.collideConnected = true;
-//        m_world->CreateJoint(&neckDef);
-//
-//        neckDef.bodyA = body;
-//        neckDef.bodyB = headBody;
-//        neckDef.localAnchorA.Set(0.3f, 0.5f);
-//        neckDef.localAnchorB.Set(-0.3f, -0.3f);
-//        neckDef.maxLength = 2.5f;
-//        neckDef.collideConnected = true;
-//        m_world->CreateJoint(&neckDef);
         {
             const TextureHandle legTex = GetCache().GetTexture("bird_leg.tex");
             b2BodyDef legDef;
@@ -452,6 +430,8 @@ namespace duck
             hipDef.upperAngle = 90.0f * rob::DEG2RAD_f;
             m_world->CreateJoint(&hipDef);
         }
+        // To update the color of the bird according to the oilyness factor
+        logic->Update(0.0f);
 
         return bird;
     }
