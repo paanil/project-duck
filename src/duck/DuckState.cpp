@@ -6,9 +6,11 @@
 #include "Logic.h"
 
 #include "rob/renderer/Renderer.h"
+#include "rob/renderer/TextLayout.h"
 #include "rob/graphics/Graphics.h"
 #include "rob/resource/MasterCache.h"
 #include "rob/math/Projection.h"
+
 
 namespace duck
 {
@@ -515,8 +517,7 @@ namespace duck
 
                 if (m_mouseJoint && object->GetBody() == m_mouseJoint->GetBodyB())
                 {
-                    m_world->DestroyJoint(m_mouseJoint);
-                    m_mouseJoint = nullptr;
+                    DestroyMouseJoint();
                 }
 
                 m_world->DestroyBody(object->GetBody());
@@ -547,20 +548,34 @@ namespace duck
 
     void DuckState::BirdGotBurned(GameObject *birdPart)
     {
-        rob::log::Info("Bird got burned");
-        m_gameData.m_birdsKilled++;
+        if (!IsGameOver())
+        {
+            rob::log::Info("Bird got burned");
+            m_gameData.m_birdsKilled++;
+        }
     }
 
     void DuckState::BirdSaved()
     {
-        rob::log::Info("Bird saved");
-        m_gameData.m_birdsSaved++;
+        if (!IsGameOver())
+        {
+            rob::log::Info("Bird saved");
+            m_gameData.m_birdsSaved++;
+        }
     }
 
     void DuckState::BirdDied()
     {
-        rob::log::Info("Bird died");
-        m_gameData.m_birdsKilled++;
+        if (!IsGameOver())
+        {
+            rob::log::Info("Bird died");
+            m_gameData.m_birdsKilled++;
+        }
+    }
+
+    bool DuckState::IsGameOver() const
+    {
+        return (MAX_LIVES - m_gameData.m_birdsKilled) <= 0;
     }
 
     void DuckState::RecalcProj()
@@ -592,11 +607,23 @@ namespace duck
             CreateBird(vec2f(PLAY_AREA_LEFT * 2.0f, PLAY_AREA_BOTTOM + 4.0f));
     }
 
+    void DuckState::DestroyMouseJoint()
+    {
+        if (m_mouseJoint)
+        {
+            m_world->DestroyJoint(m_mouseJoint);
+            m_mouseJoint = nullptr;
+        }
+    }
+
     void DuckState::Update(const GameTime &gameTime)
     {
         m_inUpdate = true;
 
         const float deltaTime = gameTime.GetDeltaSeconds();
+
+        if (IsGameOver() && m_mouseJoint)
+            DestroyMouseJoint();
 
         if (m_mouseJoint)
         {
@@ -636,6 +663,24 @@ namespace duck
         }
 
         m_inUpdate = false;
+    }
+
+    void DuckState::RenderGameOver()
+    {
+        Renderer &renderer = GetRenderer();
+        renderer.SetColor(Color(1.0f, 1.0f, 1.0f));
+        renderer.BindFontShader();
+
+        const Viewport vp = renderer.GetView().m_viewport;
+
+        TextLayout layout(renderer, vp.w / 2.0f, vp.h / 3.0f);
+
+        renderer.SetFontScale(4.0f);
+        layout.AddTextAlignC("Game over", 0.0f);
+        layout.AddLine();
+
+        renderer.SetFontScale(1.0f);
+        layout.AddTextAlignC("Press [space] to continue", 0.0f);
     }
 
     void DuckState::Render()
@@ -709,6 +754,9 @@ namespace duck
                 bhX += bhS;
             }
         }
+
+        if (IsGameOver())
+            RenderGameOver();
     }
 
     void DuckState::OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods)
@@ -784,6 +832,9 @@ namespace duck
         if (!g_playArea.IsInside(m_mouseWorld))
             return;
 
+        if (IsGameOver())
+            return;
+
         // Make a small box.
         b2AABB aabb;
         b2Vec2 d(0.001f, 0.001f);
@@ -822,11 +873,7 @@ namespace duck
 
     void DuckState::OnMouseUp(MouseButton button, int x, int y)
     {
-        if (m_mouseJoint)
-        {
-            m_world->DestroyJoint(m_mouseJoint);
-            m_mouseJoint = nullptr;
-        }
+        DestroyMouseJoint();
     }
 
     void DuckState::OnMouseMove(int x, int y)

@@ -48,6 +48,8 @@ namespace duck
         void BirdSaved();
         void BirdDied();
 
+        bool IsGameOver() const;
+
         void RecalcProj();
         void OnResize(int w, int h) override;
 
@@ -55,7 +57,10 @@ namespace duck
 
         void NewBird();
 
+        void DestroyMouseJoint();
+
         void Update(const GameTime &gameTime) override;
+        void RenderGameOver();
         void Render() override;
 
         void OnKeyPress(rob::Keyboard::Key key, rob::Keyboard::Scancode scancode, rob::uint32_t mods) override;
