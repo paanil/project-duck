@@ -601,8 +601,9 @@ namespace duck
         {
             NewBird();
             birdTimer += birdTimerAdd;
+            rob::log::Info(birdTimerAdd, " ", gameTime.GetTotalSeconds());
         }
-        birdTimerAdd = 10.0f - 3.0f * rob::Log(gameTime.GetTotalSeconds());
+        birdTimerAdd = 10.0f - rob::Log(gameTime.GetTotalSeconds());
 
         m_inUpdate = true;
 
