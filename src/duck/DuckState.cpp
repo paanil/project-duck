@@ -602,7 +602,7 @@ namespace duck
             NewBird();
             birdTimer += birdTimerAdd;
         }
-        birdTimerAdd = 10.0f - 3.0f * rob::Log(gameTime.GetDeltaSeconds());
+        birdTimerAdd = 10.0f - 3.0f * rob::Log(gameTime.GetTotalSeconds());
 
         m_inUpdate = true;
 
