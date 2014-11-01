@@ -7,6 +7,7 @@
 #include "rob/renderer/Renderer.h"
 #include "rob/memory/Pool.h"
 
+#include "GameData.h"
 #include "GameObject.h"
 #include "Sensors.h"
 
@@ -21,7 +22,7 @@ namespace duck
     class DuckState : public rob::GameState
     {
     public:
-        DuckState();
+        DuckState(GameData &gameData);
         ~DuckState();
 
         bool Initialize() override;
@@ -44,6 +45,7 @@ namespace duck
         void DestroyAllObjects();
 
         void BirdGotBurned(GameObject *birdPart);
+        void BirdGotSaved(GameObject *birdPart);
 
         void RecalcProj();
         void OnResize(int w, int h) override;
@@ -61,6 +63,7 @@ namespace duck
         void OnMouseMove(int x, int y) override;
 
     private:
+        GameData &m_gameData;
         rob::View m_view;
         b2World *m_world;
         DebugDraw *m_debugDraw;

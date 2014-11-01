@@ -39,8 +39,9 @@ namespace duck
 
     static const size_t MAX_OBJECTS = 1000;
 
-    DuckState::DuckState()
-        : m_view()
+    DuckState::DuckState(GameData &gameData)
+        : m_gameData(gameData)
+        , m_view()
         , m_world(nullptr)
         , m_debugDraw(nullptr)
         , m_drawBox2D(false)
@@ -55,7 +56,10 @@ namespace duck
         , m_spawnSensor()
         , m_killSensor()
         , m_waterSensor()
-    { }
+    {
+        m_gameData.m_birdsBurned = 0;
+        m_gameData.m_birdsSaved = 0;
+    }
 
     DuckState::~DuckState()
     {
@@ -269,6 +273,7 @@ namespace duck
         b2BodyDef bodyDef;
         b2CircleShape shape;
 
+        // Body
         GameObject *bird = CreateObject();
         bodyDef.type = b2_dynamicBody;
         bodyDef.position = ToB2(position);
@@ -291,6 +296,7 @@ namespace duck
         bird->SetOily();
         bird->SetLayer(1);
 
+        // Head
         GameObject *head = CreateObject(bird);
         bodyDef.position = ToB2(position + vec2f(0.5f, 0.5f));
         b2Body *headBody = m_world->CreateBody(&bodyDef);
@@ -376,9 +382,7 @@ namespace duck
         neckJoint.localAnchorB.Set(-0.4f, -0.4f);
         b2RevoluteJoint* neck2j = (b2RevoluteJoint*)m_world->CreateJoint(&neckJoint);
 
-        BirdLogic *logic = new BirdLogic(headBody, neckj, neck0j, neck1j, neck2j);
-        bird->SetLogic(logic);
-
+        // Legs
         {
             const TextureHandle legTex = GetCache().GetTexture("bird_leg.tex");
             b2BodyDef legDef;
@@ -430,6 +434,9 @@ namespace duck
             hipDef.upperAngle = 90.0f * rob::DEG2RAD_f;
             m_world->CreateJoint(&hipDef);
         }
+
+        BirdLogic *logic = new BirdLogic(headBody, neckj, neck0j, neck1j, neck2j);
+        bird->SetLogic(logic);
         // To update the color of the bird according to the oilyness factor
         logic->Update(0.0f);
 
@@ -538,6 +545,13 @@ namespace duck
     void DuckState::BirdGotBurned(GameObject *birdPart)
     {
         rob::log::Info("Bird got burned");
+        m_gameData.m_birdsBurned++;
+    }
+
+    void DuckState::BirdGotSaved(GameObject *birdPart)
+    {
+        rob::log::Info("Bird got saved");
+        m_gameData.m_birdsSaved++;
     }
 
     void DuckState::RecalcProj()
@@ -593,15 +607,15 @@ namespace duck
         {
             if (!m_objects[i]->IsDestroyed())
             {
-                if (m_objects[i]->IsSaved())
-                {
-                    log::Info("Bird saved");
-                    DestroyLinkedObjects(m_objects[i]);
-                }
-                else
-                {
+//                if (m_objects[i]->IsSaved())
+//                {
+//                    log::Info("Bird saved");
+//                    DestroyLinkedObjects(m_objects[i]);
+//                }
+//                else
+//                {
                     m_objects[i]->Update(gameTime);
-                }
+//                }
             }
 
             if (m_objects[i]->IsDestroyed())
@@ -663,13 +677,13 @@ namespace duck
             m_world->DrawDebugData();
         }
 
-//        renderer.SetView(GetDefaultView());
-//        renderer.BindFontShader();
-//        renderer.SetColor(Color::White);
+        renderer.SetView(GetDefaultView());
+        renderer.BindFontShader();
+        renderer.SetColor(Color::White);
 //
-//        char text[40];
-//        StringPrintF(text, "mouse=%f, %f", m_mouseWorld.x, m_mouseWorld.y);
-//        renderer.DrawText(0.0f, 0.0f, text);
+        char text[40];
+        StringPrintF(text, "Birds saved: %i, burned: %i", m_gameData.m_birdsSaved, m_gameData.m_birdsBurned);
+        renderer.DrawText(0.0f, 0.0f, text);
     }
 
     void DuckState::OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods)

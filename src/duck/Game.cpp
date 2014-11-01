@@ -93,7 +93,7 @@ namespace duck
         case STATE_NoChange:    break;
 
         case STATE_MainMenu:    ChangeState<MenuState>(/*m_gameData*/); break;
-        case STATE_Game:        ChangeState<DuckState>(); break;
+        case STATE_Game:        ChangeState<DuckState>(m_gameData); break;
         default:
             rob::log::Error("Invalid state change (", state, ")");
             break;

@@ -165,6 +165,7 @@
 		<Unit filename="src/duck/DuckState.h" />
 		<Unit filename="src/duck/Game.cpp" />
 		<Unit filename="src/duck/Game.h" />
+		<Unit filename="src/duck/GameData.h" />
 		<Unit filename="src/duck/GameObject.cpp" />
 		<Unit filename="src/duck/GameObject.h" />
 		<Unit filename="src/duck/GameState.h" />

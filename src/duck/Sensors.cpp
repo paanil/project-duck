@@ -34,12 +34,12 @@ namespace duck
         ROB_ASSERT(bird != nullptr);
         if (!bird->IsBurned())
         {
-            bird->SetSaved(true);
+            m_duckState->BirdGotSaved(bird);
         }
-        else
-        {
+//        elses
+//        {
             m_duckState->DestroyLinkedObjects(bird);
-        }
+//        }
     }
 
 

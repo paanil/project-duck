@@ -3,6 +3,7 @@
 #define H_DUCK_GAME_H
 
 #include "rob/application/Game.h"
+#include "GameData.h"
 #include "GameState.h"
 
 namespace duck
@@ -14,6 +15,8 @@ namespace duck
         bool Initialize() override;
     protected:
         void HandleStateChange(int state) override;
+    private:
+        GameData m_gameData;
     };
 
 } // duck
