@@ -618,6 +618,17 @@ namespace duck
 
     void DuckState::Update(const GameTime &gameTime)
     {
+        static float birdTimer = 0.0f;
+        static float birdTimerAdd = 10.0f;
+        birdTimer -= gameTime.GetDeltaSeconds();
+        if (birdTimer < 0.0f)
+        {
+            NewBird();
+            birdTimer += birdTimerAdd;
+            rob::log::Info(birdTimerAdd, " ", gameTime.GetTotalSeconds());
+        }
+        birdTimerAdd = 10.0f - rob::Log(gameTime.GetTotalSeconds());
+
         m_inUpdate = true;
 
         const float deltaTime = gameTime.GetDeltaSeconds();
@@ -776,6 +787,11 @@ namespace duck
         {
             g_zoom = Clamp(g_zoom * 1.5f, 0.4444f, 4.5f);
             RecalcProj();
+        }
+
+        if (key == Keyboard::Key::Escape)
+        {
+            ChangeState(STATE_MainMenu);
         }
     }
 
