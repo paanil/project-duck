@@ -58,9 +58,15 @@ namespace rob
     }
 
     template <class T>
-    inline T Log(T x)
+    inline T Log2(T x)
     {
         return std::log(x);
+    }
+
+    template <class T>
+    inline T Log10(T x)
+    {
+        return std::log10(x);
     }
 
     template <class T>
