@@ -116,7 +116,7 @@ namespace duck
                     } while (obj != m_owner);
                 }
 
-                float c = 0.1f * oilyness;
+                float c = 0.2f * oilyness;
                 if (oilyness > 0.5f)
                     c += 0.5f * (1.0 - oilyness);
                 else

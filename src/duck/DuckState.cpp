@@ -237,10 +237,10 @@ namespace duck
         body->CreateFixture(&shapeRight, 1.0f);
 
         object->SetBody(body);
-        TextureHandle texture = GetCache().GetTexture("container.tex");
+        TextureHandle texture = GetCache().GetTexture("container2.tex");
         object->SetTexture(texture);
         object->SetLayer(2);
-        object->SetColor(Color(1.0f, 1.0f, 1.0f, 0.5f));
+        object->SetColor(Color(1.0f, 1.0f, 1.0f, 0.8f));
 
         // Sensor
         b2BodyDef def2;
@@ -557,13 +557,15 @@ namespace duck
 
     void DuckState::BirdBurned(GameObject *bird)
     {
-        if (!IsGameOver())
-        {
-            m_gameData.m_birdsKilled++;
-        }
+//        if (!IsGameOver())
+//        {
+//            m_gameData.m_birdsKilled++;
+//        }
 
         //rob::log::Info("Bird burned");
         m_sounds.PlayBurningSound(bird->GetPosition());
+
+        BirdDied(bird);
     }
 
     void DuckState::BirdSaved(GameObject *bird)
@@ -597,9 +599,11 @@ namespace duck
     {
         if (!IsGameOver())
         {
-            rob::log::Info("Bird died");
             m_gameData.m_birdsKilled++;
         }
+
+        //rob::log::Info("Bird died");
+        m_sounds.PlayDyingSound(bird->GetPosition());
     }
 
     void DuckState::BirdEnteredWater(GameObject *bird)

@@ -29,6 +29,7 @@ namespace duck
             m_burning = cache.GetSound("Explosion32.wav");
             m_water = cache.GetSound("Randomize55.wav");
             m_saved = cache.GetSound("Powerup122.wav");
+            m_dying = cache.GetSound("Powerup.wav");
             m_score = cache.GetSound("Pickup_Coin.wav");
         }
 
@@ -52,6 +53,11 @@ namespace duck
             PlaySound(m_saved, 0.5f, pos);
         }
 
+        void PlayDyingSound(const vec2f &pos)
+        {
+            PlaySound(m_dying, 0.5f, pos);
+        }
+
         void PlayScoreSound(const vec2f &pos)
         {
             PlaySound(m_score, 0.5f, pos);
@@ -73,6 +79,7 @@ namespace duck
         SoundHandle m_burning;
         SoundHandle m_water;
         SoundHandle m_saved;
+        SoundHandle m_dying;
         SoundHandle m_score;
     };
 
