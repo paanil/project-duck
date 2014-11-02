@@ -725,6 +725,11 @@ namespace duck
             DestroySingleObject(dead[i]);
         }
 
+//        m_firedColor = gameTime.GetTotalMicroseconds() / 314593; // 1.0e6;
+//        m_firedColor /= 10.0f;
+//        m_firedColor = fmodf(m_firedColor, 1.0f);
+        m_firedColor = gameTime.GetTotalSeconds() * 8.0f;
+
         m_inUpdate = false;
     }
 
@@ -739,14 +744,20 @@ namespace duck
         TextLayout layout(renderer, vp.w / 2.0f, vp.h / 3.0f);
 
         renderer.SetFontScale(4.0f);
-        layout.AddTextAlignC("Game over", 0.0f);
-        layout.AddLine();
-        renderer.SetFontScale(2.0f);
-        int r = 128 + rand() % 128;
-        int g = rand() % 255; // TODO: use rob/math/Random
-        float rr = r / 255.0f;
-        float gg = g / 255.0f;
-        renderer.SetColor(Color(rr, gg * rr, rr * 0.1f));
+//        layout.AddTextAlignC("Game over", 0.0f);
+//        layout.AddLine();
+//        renderer.SetFontScale(2.0f);
+
+//        int r = 128 + rand() % 128;
+//        int g = rand() % 255; // TODO: use rob/math/Random
+//        float rr = r / 255.0f;
+//        float gg = g / 255.0f;
+
+        float rr = 1.1f + FastSin(m_firedColor) * 0.25f;
+        float gg = 0.5f + FastCos(m_firedColor*2.5f) * 0.5f;
+        float rg = 0.25f + FastCos(m_firedColor*6.45f) * 0.25f;
+
+        renderer.SetColor(Color(rr + rg, gg * rr + rg, gg * rr * 0.2f));
         layout.AddTextAlignC("You are FIRED!", 0.0f);
         layout.AddLine();
 

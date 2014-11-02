@@ -100,6 +100,7 @@ namespace duck
         WaterSensor m_waterSensor;
 
         FadeEffect m_fadeEffect;
+        float m_firedColor;
 
         float m_scoreTimer;
         int m_lastPoints;
