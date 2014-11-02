@@ -250,7 +250,7 @@ namespace duck
         m_waterSensor.SetBody(body2);
 
         b2PolygonShape shape;
-        shape.SetAsBox(w, h);
+        shape.SetAsBox(w, h * 2.0f);
         m_waterSensor.SetShape(&shape);
 
         return object;
@@ -574,7 +574,10 @@ namespace duck
 
             if (oil <= 0.5f)
             {
-                rob::log::Info("Bird saved");
+                //rob::log::Info("Bird saved");
+                m_sounds.PlaySavedSound(bird->GetPosition());
+                m_sounds.PlayScoreSound(vec2f(PLAY_AREA_LEFT, PLAY_AREA_TOP));
+
                 m_gameData.m_birdsSaved++;
                 float invOil = 1.0f - oil;
                 int points = (invOil * invOil * 100.0f);
