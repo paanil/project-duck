@@ -113,9 +113,9 @@ namespace duck
         CreateBird(vec2f(-2.0f, 0.0f));
         CreateBird(vec2f(-1.0f, 0.0f));
         CreateBird(vec2f(1.0f, 0.0f));
-        CreateBird(vec2f(-2.5f, 2.0f));
-        CreateBird(vec2f(-4.5f, 4.0f));
-        CreateBird(vec2f(8.5f, 6.0f));
+//        CreateBird(vec2f(-2.5f, 2.0f));
+//        CreateBird(vec2f(-4.5f, 4.0f));
+//        CreateBird(vec2f(8.5f, 6.0f));
         return true;
     }
 
@@ -571,8 +571,8 @@ namespace duck
         {
             float oil = bird->GetOilyness();
 
-//            if (oil <= 0.5f)
-//            {
+            if (oil <= 0.5f)
+            {
                 rob::log::Info("Bird saved");
                 m_gameData.m_birdsSaved++;
                 float invOil = 1.0f - oil;
@@ -581,11 +581,11 @@ namespace duck
 
                 m_scoreTimer = SCORE_TIME;
                 m_lastPoints = points;
-//            }
-//            else
-//            {
-//                BirdDied(bird);
-//            }
+            }
+            else
+            {
+                BirdDied(bird);
+            }
         }
     }
 

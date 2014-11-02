@@ -3,6 +3,7 @@
 #define H_DUCK_LOGIC_H
 
 #include "PidController.h"
+#include "rob/math/Functions.h"
 #include "rob/Log.h"
 
 namespace duck
@@ -115,7 +116,12 @@ namespace duck
                     } while (obj != m_owner);
                 }
 
-                float c = 0.1f * oilyness + 1.0f * (1.0 - oilyness);
+                float c = 0.1f * oilyness;
+                if (oilyness > 0.5f)
+                    c += 0.5f * (1.0 - oilyness);
+                else
+                    c += 1.0f * (1.0 - oilyness);
+                //c = rob::Pow(c, 1.0f/2.2f);
 
                 GameObject *obj = m_owner;
                 do
