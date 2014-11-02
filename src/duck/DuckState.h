@@ -49,6 +49,8 @@ namespace duck
         void BirdBurned(GameObject *bird);
         void BirdSaved(GameObject *bird);
         void BirdDied(GameObject *bird);
+        void BirdEnteredWater(GameObject *bird);
+        void BirdExitedWater(GameObject *bird);
 
         bool IsGameOver() const;
 

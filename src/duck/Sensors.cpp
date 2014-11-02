@@ -59,6 +59,10 @@ namespace duck
     {
         GameObject *firstPart = (GameObject*)userData;
         GameObject *part = firstPart;
+
+        if (!part->IsInWater())
+            m_duckState->BirdEnteredWater(part);
+
         do
         {
             part->SetInWater(true);
@@ -75,6 +79,9 @@ namespace duck
             part->SetInWater(false);
             part = part->GetNext();
         } while (part != firstPart);
+
+        if (!part->IsInWater())
+            m_duckState->BirdExitedWater(part);
     }
 
 } // duck
