@@ -865,7 +865,7 @@ namespace duck
             case Keyboard::Key::Space:
             {
                 if (IsGameOver())
-                    ChangeState(STATE_MainMenu);
+                    ChangeState(STATE_HighScore);
                 break;
             }
             case Keyboard::Key::Escape:
