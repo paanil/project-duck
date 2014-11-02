@@ -70,6 +70,12 @@ namespace rob
     }
 
     template <class T>
+    inline T Pow(T x, T y)
+    {
+        return std::pow(x, y);
+    }
+
+    template <class T>
     inline T Sin(T x)
     {
         return std::sin(x);
