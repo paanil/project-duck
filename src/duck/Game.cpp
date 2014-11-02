@@ -265,15 +265,12 @@ namespace duck
             layout.AddTextAlignC("There has been an oil accident. Your task is to save the oily birds by cleaning them.", 0.0f);
             layout.AddLines(4);
 
-//            const float textW = 400.0f;
-
             Fact fact = m_facts.GetFact(m_factIndex);
             size_t line = 0;
             for (; line + 1 < fact.m_lineCount; line++)
             {
                 const char *str = fact.m_lines[line];
                 layout.AddTextXAlignL(str, -m_textW);
-//                layout.AddTextXAlignC(str, 0.0f);
                 layout.AddLine();
             }
             layout.AddLine();
