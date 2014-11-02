@@ -130,7 +130,7 @@ namespace duck
         }
         // Floor
         CreateStaticBox(vec2f(-16.0f, PLAY_AREA_BOTTOM - 4.0f), 0.0f, 16.0f, 4.0f);
-        // Left wall at the start of convoyer belt
+        // Left wall at the start of conveyor belt
         CreateStaticBox(vec2f(PLAY_AREA_LEFT - 18.0f, 0.0f), 0.0f, wallSize, PLAY_AREA_H / 2.0f);
 
         // Left wall

@@ -19,10 +19,10 @@ namespace fs
     { std::fclose(file); }
 
     void Read(File file, char *data, size_t dataSize)
-    { ::fread(data, 1, dataSize, file); }
+    { std::fread(data, 1, dataSize, file); }
 
     void Write(File file, const char *data, size_t dataSize)
-    { ::fwrite(data, 1, dataSize, file); }
+    { std::fwrite(data, 1, dataSize, file); }
 
 } // fs
 } // rob

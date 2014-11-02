@@ -37,6 +37,12 @@ namespace rob
             m_cursor.x += width + m_renderer.GetTextWidth(str);
         }
 
+        void AddTextX(const char *str, const float width)
+        {
+            m_renderer.DrawTextX(m_cursor.x + width, m_cursor.y, str);
+            m_cursor.x += width + m_renderer.GetTextWidth(str);
+        }
+
         void DrawCursor(const float x, const float y)
         {
             m_renderer.BindColorShader();
@@ -57,9 +63,10 @@ namespace rob
         }
 
         void AddTextAlignL(const char *str, const float width)
-        {
-            m_renderer.DrawText(m_cursor.x + width, m_cursor.y, str);
-        }
+        { m_renderer.DrawText(m_cursor.x + width, m_cursor.y, str); }
+
+        void AddTextXAlignL(const char *str, const float width)
+        { m_renderer.DrawTextX(m_cursor.x + width, m_cursor.y, str); }
 
         void AddTextInputAlignL(const TextInput &input, const float width)
         {
@@ -75,6 +82,13 @@ namespace rob
         {
             const float tw = m_renderer.GetTextWidth(str);
             m_renderer.DrawText(m_cursor.x + (width - tw / 2.0f), m_cursor.y, str);
+            m_cursor.x += width;
+        }
+
+        void AddTextXAlignC(const char *str, const float width)
+        {
+            const float tw = m_renderer.GetTextWidth(str);
+            m_renderer.DrawTextX(m_cursor.x + (width - tw / 2.0f), m_cursor.y, str);
             m_cursor.x += width;
         }
 
@@ -95,6 +109,13 @@ namespace rob
         {
             const float tw = m_renderer.GetTextWidth(str);
             m_renderer.DrawText(m_cursor.x + width - tw, m_cursor.y, str);
+            m_cursor.x += width;
+        }
+
+        void AddTextXAlignR(const char *str, const float width)
+        {
+            const float tw = m_renderer.GetTextWidth(str);
+            m_renderer.DrawTextX(m_cursor.x + width - tw, m_cursor.y, str);
             m_cursor.x += width;
         }
 

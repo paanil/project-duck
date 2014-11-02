@@ -475,6 +475,35 @@ namespace rob
         cursorX += float(glyph.m_advance) * m_fontScale;
     }
 
+    void Renderer::AddFontQuadX(FontVertex *&vertex, const uint32_t c, const Glyph &glyph,
+                               float &cursorX, float &cursorY,
+                               const size_t textureW, const size_t textureH, const bool super)
+    {
+        if (c > ' ')
+        {
+            const float superF = super ? 0.6f : 1.0f;
+            const float gW = float(glyph.m_width) * m_fontScale * superF;
+            const float gH = float(glyph.m_height) * m_fontScale * superF;
+            const float uvW = float(glyph.m_width) / textureW;
+            const float uvH = -float(glyph.m_height) / textureH;
+
+            const float uvX = float(glyph.m_x) / textureW;
+            const float uvY = -float(glyph.m_y) / textureH;
+
+            const float cX = cursorX + glyph.m_offsetX * m_fontScale;
+            const float cY = cursorY + glyph.m_offsetY * m_fontScale * superF;
+
+            AddFontVertex(vertex, cX,       cY,         uvX,        uvY);
+            AddFontVertex(vertex, cX + gW,  cY,         uvX + uvW,  uvY);
+            AddFontVertex(vertex, cX,       cY + gH,    uvX,        uvY + uvH);
+            AddFontVertex(vertex, cX,       cY + gH,    uvX,        uvY + uvH);
+            AddFontVertex(vertex, cX + gW,  cY,         uvX + uvW,  uvY);
+            AddFontVertex(vertex, cX + gW,  cY + gH,    uvX + uvW,  uvY + uvH);
+        }
+
+        cursorX += float(glyph.m_advance) * m_fontScale;
+    }
+
     void Renderer::DrawText(float x, float y, const char *text)
     {
         if (!m_font.IsReady()) return;
@@ -523,6 +552,70 @@ namespace rob
                         break;
                     }
                     AddFontQuad(vertex, c, glyph, cursorX, cursorY, textureW, textureH);
+                }
+
+                const size_t vertexCount = vertex - verticesStart;
+                buffer->Write(0, vertexCount * sizeof(FontVertex), verticesStart);
+
+                m_graphics->BindTexture(0, textureHandle);
+                m_graphics->DrawTriangleArrays(0, vertexCount);
+            } while (oneMore || text != end);
+        }
+        m_vb_alloc.Reset();
+    }
+
+    void Renderer::DrawTextX(float x, float y, const char *text)
+    {
+        if (!m_font.IsReady()) return;
+
+        m_graphics->SetUniform(m_globals.position, vec4f(x, y, 0.0f, 1.0f));
+        m_graphics->SetUniform(m_globals.texture0, 0);
+        m_graphics->BindVertexBuffer(m_vertexBuffer);
+        m_graphics->SetAttrib(0, 4, sizeof(FontVertex), 0);
+        m_graphics->SetAttrib(1, 4, sizeof(FontVertex), sizeof(float) * 4);
+        VertexBuffer *buffer = m_graphics->GetVertexBuffer(m_vertexBuffer);
+
+        const size_t textLen = StringLength(text);
+        const size_t maxVertexCount = textLen * 6;
+        FontVertex * const verticesStart = m_vb_alloc.AllocateArray<FontVertex>(maxVertexCount);
+        float cursorX = x;
+        float cursorY = y;
+
+//        const char * const start = text;
+        const char * const end = text + textLen;
+        if (text != end)
+        {
+            bool oneMore = false;
+            uint32_t c = DecodeUtf8(text, end);
+            bool super = (c == '^');
+            if (super && text != end) c = DecodeUtf8(text, end);
+            do
+            {
+                FontVertex *vertex = verticesStart;
+
+                const Glyph &glyph = m_font.GetGlyph(c);
+                uint16_t texturePage = glyph.m_textureIdx;
+                const TextureHandle textureHandle = m_font.GetTexture(texturePage);
+                const Texture *texture = m_graphics->GetTexture(textureHandle);
+
+                const size_t textureW = texture->GetWidth();
+                const size_t textureH = texture->GetHeight();
+
+                AddFontQuadX(vertex, c, glyph, cursorX, cursorY, textureW, textureH, super);
+
+                oneMore = false;
+                while (text != end)
+                {
+                    c = DecodeUtf8(text, end);
+                    super = (c == '^');
+                    if (super && text != end) c = DecodeUtf8(text, end);
+                    const Glyph &glyph = m_font.GetGlyph(c);
+                    if (glyph.m_textureIdx != texturePage)
+                    {
+                        oneMore = true;
+                        break;
+                    }
+                    AddFontQuadX(vertex, c, glyph, cursorX, cursorY, textureW, textureH, super);
                 }
 
                 const size_t vertexCount = vertex - verticesStart;

@@ -32,4 +32,14 @@ namespace rob
         return time_t(0);
     }
 
+    size_t GetFileSize(const char * const path)
+    {
+        struct ::_stat s;
+        if (::_stat(path, &s) == 0)
+        {
+            return s.st_size;
+        }
+        return 0;
+    }
+
 } // rob

@@ -1,6 +1,7 @@
 
 #include "Game.h"
 #include "DuckState.h"
+#include "Facts.h"
 
 #include "rob/application/Window.h"
 #include "rob/application/GameState.h"
@@ -8,6 +9,9 @@
 #include "rob/input/Keyboard.h"
 #include "rob/time/Time.h"
 #include "rob/Log.h"
+
+#include <cstdlib>
+#include <ctime>
 
 namespace duck
 {
@@ -211,14 +215,36 @@ namespace duck
     };
 
 
+
     class InfoState : public rob::GameState
     {
     public:
         InfoState()
+            : m_facts()
+            , m_fact()
+            , m_textW(0.0f)
         { }
 
         bool Initialize() override
         {
+            if (!m_facts.Load(GetAllocator()))
+            {
+                log::Error("Could not load facts");
+                return false;
+            }
+            if (m_facts.GetFactCount() > 0)
+            {
+                const size_t factIndex = std::rand() % m_facts.GetFactCount();
+
+                m_fact = m_facts.GetFact(factIndex);
+                for (size_t line = 0; line + 1 < m_fact.m_lineCount; line++)
+                {
+                    const char *str = m_fact.m_lines[line];
+                    const float lineW = GetRenderer().GetTextWidth(str);
+                    m_textW = rob::Max(m_textW, lineW);
+                }
+                m_textW *= 0.5f;
+            }
             return true;
         }
 
@@ -238,23 +264,38 @@ namespace duck
             TextLayout layout(renderer, vp.w / 2.0f, vp.h / 5.0f * 2.0f);
 
             renderer.SetFontScale(1.0f);
-            layout.AddTextAlignC("Thousands of birds die in every oil accident.", 0.0f);
-            layout.AddLine();
-        }
+            layout.AddTextAlignC("There has been an oil accident. Your task is to save the oily birds by cleaning them.", 0.0f);
+            layout.AddLines(4);
 
-        void OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods) override
+            size_t line = 0;
+            for (; line + 1 < m_fact.m_lineCount; line++)
+            {
+                const char *str = m_fact.m_lines[line];
+                layout.AddTextXAlignL(str, -m_textW);
+                layout.AddLine();
+            }
+            layout.AddLine();
+            layout.AddTextAlignR(m_fact.m_lines[line], m_textW);
+            layout.AddLine();
+    }
+
+    void OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods) override
         {
             if (key == Keyboard::Key::Escape)
-                QuitState();
+                ChangeState(STATE_MainMenu);
             if (key == Keyboard::Key::Space)
                 ChangeState(STATE_Game);
         }
     private:
+        Facts m_facts;
+        Fact m_fact;
+        float m_textW;
     };
 
 
     bool Game::Initialize()
     {
+            std::srand(std::time(0));
         m_window->SetTitle(
         #if defined(ROB_DEBUG)
             "Duck - Debug"
