@@ -761,20 +761,22 @@ namespace duck
         renderer.SetView(m_view);
         renderer.SetModel(mat4f::Identity);
 
-        renderer.SetColor(Color(0.18f, 0.14f, 0.14f));
+//        renderer.SetColor(Color(0.18f, 0.14f, 0.14f));
+        renderer.SetColor(Color(60 / 255.0f, 71 / 255.0f, 49 / 255.0f));
         renderer.BindColorShader();
         renderer.DrawFilledRectangle(PLAY_AREA_LEFT, PLAY_AREA_BOTTOM, PLAY_AREA_RIGHT, PLAY_AREA_TOP);
 
-        float x0 = 0.0f;
-        float y0 = PLAY_AREA_BOTTOM;
-        float x1 = PLAY_AREA_RIGHT; // - 1.0f;
-        float y1 = y0 + 4.0f;
-        Color color0(1.0f, 1.0f, 0.0f, 0.5f);
-        Color color1(1.0f, 0.0f, 0.0f, 0.0f);
         renderer.SetModel(mat4f::Identity);
-        renderer.BindColorShader();
-        renderer.DrawColorQuad(vec2f(x0, y0), color0, vec2f(x0 - 1.0f, y1), color1,
-                               vec2f(x1, y1), color1, vec2f(x1 + 1.0f, y0), color0);
+        renderer.GetGraphics()->BindTexture(0, GetCache().GetTexture("bg.tex"));
+        renderer.GetGraphics()->SetUniform(renderer.GetGlobals().texture0, 0);
+        renderer.SetColor(Color(1.0f, 1.0f, 1.0f, 1.0f));
+        renderer.BindTextureShader();
+        renderer.DrawTexturedRectangle(PLAY_AREA_LEFT, PLAY_AREA_BOTTOM, PLAY_AREA_RIGHT, PLAY_AREA_TOP);
+//        renderer.SetColor(Color(1.0f, 1.0f, 1.0f, 0.8f));
+//        renderer.GetGraphics()->SetBlendAdditive();
+//        renderer.GetGraphics()->BindTexture(0, GetCache().GetTexture("oven_light.tex"));
+//        renderer.DrawTexturedRectangle(PLAY_AREA_LEFT, PLAY_AREA_BOTTOM, PLAY_AREA_RIGHT, PLAY_AREA_TOP);
+//        renderer.GetGraphics()->SetBlendAlpha();
 
         int maxLayer = 0;
         for (int layer = 0; layer < maxLayer + 1; layer++)
@@ -789,17 +791,19 @@ namespace duck
             }
         }
 
-        Color color2(1.0f, 1.0f, 0.0f, 0.2f);
-        Color color3(1.0f, 0.0f, 0.0f, 0.0f);
         renderer.SetModel(mat4f::Identity);
-        renderer.BindColorShader();
-        renderer.DrawColorQuad(vec2f(x0, y0), color2, vec2f(x0 - 1.0f, y1), color3,
-                               vec2f(x1, y1), color3, vec2f(x1 + 1.0f, y0), color2);
+        renderer.GetGraphics()->SetUniform(renderer.GetGlobals().texture0, 0);
+        renderer.BindTextureShader();
+        renderer.GetGraphics()->SetBlendAdditive();
+        renderer.SetColor(Color(1.0f, 1.0f, 1.0f, 0.8f));
+        renderer.GetGraphics()->BindTexture(0, GetCache().GetTexture("oven_light.tex"));
+        renderer.DrawTexturedRectangle(PLAY_AREA_LEFT, PLAY_AREA_BOTTOM, PLAY_AREA_RIGHT, PLAY_AREA_TOP);
+        renderer.GetGraphics()->SetBlendAlpha();
 
         if (m_drawBox2D)
         {
 //            renderer.SetModel(mat4f::Identity);
-//            renderer.BindColorShader();
+            renderer.BindColorShader();
             m_world->DrawDebugData();
         }
 

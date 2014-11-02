@@ -60,6 +60,9 @@ namespace rob
 
         void Clear();
         void SetClearColor(float r, float g, float b);
+        void SetBlendNone();
+        void SetBlendAlpha();
+        void SetBlendAdditive();
 
         void SetTexture(size_t unit, TextureHandle texture);
         void SetVertexBuffer(VertexBufferHandle buffer);

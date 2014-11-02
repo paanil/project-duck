@@ -81,8 +81,7 @@ namespace rob
         }
     #endif // ROB_DEBUG
 
-        ::glEnable(GL_BLEND);
-        ::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        SetBlendAlpha();
 
         const size_t blockSize = 1024;
         m_textures.SetMemory(alloc.Allocate(blockSize), blockSize);
@@ -146,6 +145,22 @@ namespace rob
     void Graphics::SetClearColor(float r, float g, float b)
     { ::glClearColor(r, g, b, 1.0f); }
 
+    void Graphics::SetBlendNone()
+    {
+        ::glDisable(GL_BLEND);
+    }
+
+    void Graphics::SetBlendAlpha()
+    {
+        ::glEnable(GL_BLEND);
+        ::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    void Graphics::SetBlendAdditive()
+    {
+        ::glEnable(GL_BLEND);
+        ::glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    }
 
     void Graphics::SetTexture(size_t unit, TextureHandle texture)
     {
