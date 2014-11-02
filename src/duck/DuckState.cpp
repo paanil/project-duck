@@ -732,9 +732,6 @@ namespace duck
             DestroySingleObject(dead[i]);
         }
 
-//        m_firedColor = gameTime.GetTotalMicroseconds() / 314593; // 1.0e6;
-//        m_firedColor /= 10.0f;
-//        m_firedColor = fmodf(m_firedColor, 1.0f);
         m_firedColor = gameTime.GetTotalSeconds() * 8.0f;
 
         m_inUpdate = false;

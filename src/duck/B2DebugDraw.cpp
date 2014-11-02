@@ -84,4 +84,15 @@ namespace duck
         m_renderer->DrawLine(y0.x, y0.y, y1.x, y1.y);
     }
 
+    void DebugDraw::DrawParticles(const b2Vec2 *centers, float32 radius, const b2ParticleColor *colors, int32 count)
+    {
+        for (int32 i = 0; i < count; i++)
+        {
+            const b2Vec2 &center = centers[i];
+            const b2Color color = colors[i].GetColor();
+            m_renderer->SetColor(Color(color.r, color.g, color.b));
+            m_renderer->DrawFilledCircle(center.x, center.y, radius);
+        }
+    }
+
 } // duck
