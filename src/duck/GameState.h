@@ -9,8 +9,9 @@ namespace duck
     {
         STATE_NoChange = 0,
         STATE_MainMenu,
-        STATE_Game,
+        STATE_HighScore,
         STATE_Info,
+        STATE_Game,
     };
 
 } // duck

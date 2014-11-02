@@ -106,6 +106,8 @@ namespace duck
         m_slideSensor.SetDuckState(this);
         m_killSensor.SetDuckState(this);
 
+        m_sounds.Init(GetAudio(), GetCache());
+
         CreateWorld();
         CreateBird(vec2f::Zero);
         CreateBird(vec2f(-2.0f, 0.0f));
@@ -556,9 +558,11 @@ namespace duck
     {
         if (!IsGameOver())
         {
-            rob::log::Info("Bird burned");
             m_gameData.m_birdsKilled++;
         }
+
+        //rob::log::Info("Bird burned");
+        m_sounds.PlayBurningSound(bird->GetPosition());
     }
 
     void DuckState::BirdSaved(GameObject *bird)
@@ -660,6 +664,8 @@ namespace duck
             m_scoreTimer -= deltaTime;
             if (m_scoreTimer < 0.0f) m_scoreTimer = 0.0f;
         }
+
+        m_sounds.UpdateTime(gameTime);
 
         m_inUpdate = true;
 
@@ -865,7 +871,7 @@ namespace duck
             case Keyboard::Key::Space:
             {
                 if (IsGameOver())
-                    ChangeState(STATE_MainMenu);
+                    ChangeState(STATE_HighScore);
                 break;
             }
             case Keyboard::Key::Escape:

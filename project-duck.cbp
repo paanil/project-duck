@@ -174,12 +174,15 @@
 		<Unit filename="src/duck/GameObject.cpp" />
 		<Unit filename="src/duck/GameObject.h" />
 		<Unit filename="src/duck/GameState.h" />
+		<Unit filename="src/duck/HighScoreList.cpp" />
+		<Unit filename="src/duck/HighScoreList.h" />
 		<Unit filename="src/duck/Logic.h" />
 		<Unit filename="src/duck/Physics.h" />
 		<Unit filename="src/duck/PidController.h" />
 		<Unit filename="src/duck/Sensor.h" />
 		<Unit filename="src/duck/Sensors.cpp" />
 		<Unit filename="src/duck/Sensors.h" />
+		<Unit filename="src/duck/SoundPlayer.h" />
 		<Unit filename="src/rob/Assert.cpp" />
 		<Unit filename="src/rob/Assert.h" />
 		<Unit filename="src/rob/Log.cpp" />

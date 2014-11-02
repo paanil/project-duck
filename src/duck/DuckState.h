@@ -11,6 +11,7 @@
 #include "GameObject.h"
 #include "Sensors.h"
 #include "FadeEffect.h"
+#include "SoundPlayer.h"
 
 namespace duck
 {
@@ -100,6 +101,8 @@ namespace duck
 
         float m_scoreTimer;
         int m_lastPoints;
+
+        SoundPlayer m_sounds;
     };
 
 } // duck

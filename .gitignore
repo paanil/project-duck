@@ -34,3 +34,6 @@
 # Ignored directories
 data/
 
+# High score files
+*.lst
+
