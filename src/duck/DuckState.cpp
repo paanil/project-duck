@@ -44,6 +44,8 @@ namespace duck
 
     static const size_t MAX_OBJECTS = 1000;
 
+    static const float SCORE_TIME = 1.0f; // seconds
+
     DuckState::DuckState(GameData &gameData)
         : m_gameData(gameData)
         , m_view()
@@ -62,9 +64,11 @@ namespace duck
         , m_killSensor()
         , m_waterSensor()
         , m_fadeEffect(Color(0.04f, 0.01f, 0.01f))
+        , m_scoreTimer(0.0f)
     {
         m_gameData.m_birdsKilled = 0;
         m_gameData.m_birdsSaved = 0;
+        m_gameData.m_score = 0;
     }
 
     DuckState::~DuckState()
@@ -548,25 +552,40 @@ namespace duck
         m_objectCount = 0;
     }
 
-    void DuckState::BirdGotBurned(GameObject *birdPart)
+    void DuckState::BirdBurned(GameObject *bird)
     {
         if (!IsGameOver())
         {
-            rob::log::Info("Bird got burned");
+            rob::log::Info("Bird burned");
             m_gameData.m_birdsKilled++;
         }
     }
 
-    void DuckState::BirdSaved()
+    void DuckState::BirdSaved(GameObject *bird)
     {
         if (!IsGameOver())
         {
-            rob::log::Info("Bird saved");
-            m_gameData.m_birdsSaved++;
+            float oil = bird->GetOilyness();
+
+//            if (oil <= 0.5f)
+//            {
+                rob::log::Info("Bird saved");
+                m_gameData.m_birdsSaved++;
+                float invOil = 1.0f - oil;
+                int points = (invOil * invOil * 100.0f);
+                m_gameData.m_score += points;
+
+                m_scoreTimer = SCORE_TIME;
+                m_lastPoints = points;
+//            }
+//            else
+//            {
+//                BirdDied(bird);
+//            }
         }
     }
 
-    void DuckState::BirdDied()
+    void DuckState::BirdDied(GameObject *bird)
     {
         if (!IsGameOver())
         {
@@ -623,9 +642,11 @@ namespace duck
 
     void DuckState::Update(const GameTime &gameTime)
     {
+        const float deltaTime = gameTime.GetDeltaSeconds();
+
         static float birdTimer = 0.0f;
         static float birdTimerAdd = 10.0f;
-        birdTimer -= gameTime.GetDeltaSeconds();
+        birdTimer -= deltaTime;
         if (birdTimer < 0.0f)
         {
             NewBird();
@@ -634,9 +655,13 @@ namespace duck
         }
         birdTimerAdd = 10.0f - rob::Log10(gameTime.GetTotalSeconds());
 
-        m_inUpdate = true;
+        if (m_scoreTimer > 0.0f)
+        {
+            m_scoreTimer -= deltaTime;
+            if (m_scoreTimer < 0.0f) m_scoreTimer = 0.0f;
+        }
 
-        const float deltaTime = gameTime.GetDeltaSeconds();
+        m_inUpdate = true;
 
         if (IsGameOver() && m_mouseJoint)
             DestroyMouseJoint();
@@ -701,7 +726,7 @@ namespace duck
         layout.AddLine();
         renderer.SetFontScale(2.0f);
         int r = 128 + rand() % 128;
-        int g = rand() % 255;
+        int g = rand() % 255; // TODO: use rob/math/Random
         float rr = r / 255.0f;
         float gg = g / 255.0f;
         renderer.SetColor(Color(rr, gg * rr, rr * 0.1f));
@@ -767,10 +792,24 @@ namespace duck
         renderer.SetView(GetDefaultView());
         renderer.BindFontShader();
         renderer.SetColor(Color::White);
-//
+
         char text[40];
-        StringPrintF(text, "Birds saved: %i, killed: %i", m_gameData.m_birdsSaved, m_gameData.m_birdsKilled);
-        renderer.DrawText(0.0f, 0.0f, text);
+
+        const float f = m_scoreTimer / SCORE_TIME;
+        const float k = 1.0f - f;
+
+        TextLayout layout(renderer, 0.0f, 0.0f);
+        renderer.SetFontScale(1.0f);
+
+        StringPrintF(text, "Score: %i", m_gameData.m_score);
+        renderer.SetColor(Color(k, 1.0f, k));
+        layout.AddTextAlignL(text, 0.0f);
+        layout.AddLine();
+
+        StringPrintF(text, "Birds saved: %i", m_gameData.m_birdsSaved);
+        renderer.SetColor(Color::White);
+        layout.AddTextAlignL(text, 0.0f);
+        layout.AddLine();
 
         // Draw bird heads
         {
@@ -778,13 +817,26 @@ namespace duck
             renderer.BindTextureShader();
             renderer.GetGraphics()->BindTexture(0, birdHead);
             float bhX = 10.0f;
+            const float bhY = 60.0f;
             const float bhS = 40.0f;
             const int lives = MAX_LIVES - m_gameData.m_birdsKilled;
             for (int i = 0; i < lives; i++)
             {
-                renderer.DrawTexturedRectangle(bhX, 30.0f + bhS, bhX + bhS, 30.0f);
+                renderer.DrawTexturedRectangle(bhX, bhY + bhS, bhX + bhS, bhY);
                 bhX += bhS;
             }
+        }
+
+        if (m_scoreTimer > 0.0f)
+        {
+            StringPrintF(text, "%i", m_lastPoints);
+            renderer.BindFontShader();
+            renderer.SetColor(Color(k, 1.0f, k, f));
+            float x0 = 200.0f;
+            float y0 = 0.0f;
+            float x1 = 100.0f;
+            float y1 = 0.0f;
+            renderer.DrawText(x0*f + x1*k, y0*f + y1*k, text);
         }
 
         if (IsGameOver())
