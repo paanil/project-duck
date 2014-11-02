@@ -221,23 +221,25 @@ namespace duck
     public:
         InfoState()
             : m_facts()
-            , m_factIndex(0)
+            , m_fact()
             , m_textW(0.0f)
         { }
 
         bool Initialize() override
         {
-            std::srand(std::time(0));
             if (!m_facts.Load(GetAllocator()))
+            {
                 log::Error("Could not load facts");
+                return false;
+            }
             if (m_facts.GetFactCount() > 0)
             {
-                m_factIndex = std::rand() % m_facts.GetFactCount();
+                const size_t factIndex = std::rand() % m_facts.GetFactCount();
 
-                Fact fact = m_facts.GetFact(m_factIndex);
-                for (size_t line = 0; line + 1 < fact.m_lineCount; line++)
+                m_fact = m_facts.GetFact(factIndex);
+                for (size_t line = 0; line + 1 < m_fact.m_lineCount; line++)
                 {
-                    const char *str = fact.m_lines[line];
+                    const char *str = m_fact.m_lines[line];
                     const float lineW = GetRenderer().GetTextWidth(str);
                     m_textW = rob::Max(m_textW, lineW);
                 }
@@ -265,16 +267,15 @@ namespace duck
             layout.AddTextAlignC("There has been an oil accident. Your task is to save the oily birds by cleaning them.", 0.0f);
             layout.AddLines(4);
 
-            Fact fact = m_facts.GetFact(m_factIndex);
             size_t line = 0;
-            for (; line + 1 < fact.m_lineCount; line++)
+            for (; line + 1 < m_fact.m_lineCount; line++)
             {
-                const char *str = fact.m_lines[line];
+                const char *str = m_fact.m_lines[line];
                 layout.AddTextXAlignL(str, -m_textW);
                 layout.AddLine();
             }
             layout.AddLine();
-            layout.AddTextAlignR(fact.m_lines[line], m_textW);
+            layout.AddTextAlignR(m_fact.m_lines[line], m_textW);
             layout.AddLine();
     }
 
@@ -287,13 +288,14 @@ namespace duck
         }
     private:
         Facts m_facts;
-        size_t m_factIndex;
+        Fact m_fact;
         float m_textW;
     };
 
 
     bool Game::Initialize()
     {
+            std::srand(std::time(0));
         m_window->SetTitle(
         #if defined(ROB_DEBUG)
             "Duck - Debug"
