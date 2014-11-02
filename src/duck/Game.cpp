@@ -11,6 +11,7 @@
 #include "rob/Log.h"
 
 #include <cstdlib>
+#include <ctime>
 
 namespace duck
 {
@@ -213,8 +214,7 @@ namespace duck
         TextInput m_nameInput;
     };
 
-    static const char * const g_instructions =
-        "You are a worker at a new waste sorting pipeline. Save the birds!";
+
 
     class InfoState : public rob::GameState
     {
@@ -222,14 +222,27 @@ namespace duck
         InfoState()
             : m_facts()
             , m_factIndex(0)
+            , m_textW(0.0f)
         { }
 
         bool Initialize() override
         {
+            std::srand(std::time(0));
             if (!m_facts.Load(GetAllocator()))
                 log::Error("Could not load facts");
             if (m_facts.GetFactCount() > 0)
+            {
                 m_factIndex = std::rand() % m_facts.GetFactCount();
+
+                Fact fact = m_facts.GetFact(m_factIndex);
+                for (size_t line = 0; line + 1 < fact.m_lineCount; line++)
+                {
+                    const char *str = fact.m_lines[line];
+                    const float lineW = GetRenderer().GetTextWidth(str);
+                    m_textW = rob::Max(m_textW, lineW);
+                }
+                m_textW *= 0.5f;
+            }
             return true;
         }
 
@@ -249,28 +262,26 @@ namespace duck
             TextLayout layout(renderer, vp.w / 2.0f, vp.h / 5.0f * 2.0f);
 
             renderer.SetFontScale(1.0f);
-//            layout.AddTextAlignC("Thousands of birds die in every oil accident.", 0.0f);
-//            layout.AddLine();
+            layout.AddTextAlignC("There has been an oil accident. Your task is to save the oily birds by cleaning them.", 0.0f);
+            layout.AddLines(4);
 
-            const float textW = 400.0f;
+//            const float textW = 400.0f;
 
-//            for (size_t i = 0; i < m_facts.GetFactCount(); i++)
-//            {
-//                Fact fact = m_facts.GetFact(i);
-                Fact fact = m_facts.GetFact(m_factIndex);
-                size_t line = 0;
-                for (; line + 1 < fact.m_lineCount; line++)
-                {
-                    const char *str = fact.m_lines[line];
-                    layout.AddTextXAlignL(str, -textW);
-                    layout.AddLine();
-                }
-                layout.AddTextAlignR(fact.m_lines[line], textW);
+            Fact fact = m_facts.GetFact(m_factIndex);
+            size_t line = 0;
+            for (; line + 1 < fact.m_lineCount; line++)
+            {
+                const char *str = fact.m_lines[line];
+                layout.AddTextXAlignL(str, -m_textW);
+//                layout.AddTextXAlignC(str, 0.0f);
                 layout.AddLine();
-//            }
-        }
+            }
+            layout.AddLine();
+            layout.AddTextAlignR(fact.m_lines[line], m_textW);
+            layout.AddLine();
+    }
 
-        void OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods) override
+    void OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods) override
         {
             if (key == Keyboard::Key::Escape)
                 ChangeState(STATE_MainMenu);
@@ -280,6 +291,7 @@ namespace duck
     private:
         Facts m_facts;
         size_t m_factIndex;
+        float m_textW;
     };
 
 
