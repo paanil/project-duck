@@ -11,3 +11,8 @@ seabirds, at least 2,800 sea otters, approximately 12 river otters,
 of salmon and herring."
 [Wikipedia, Exxon Valdez oil spill]
 
+"Dispersants can be used to dissipate oil slicks."
+"A 2012 study found that Corexit dispersant had
+increased the toxicity of oil by up to 52 times."
+[Wikipedia, Oil spill]
+

@@ -85,6 +85,7 @@ namespace rob
         void DrawFilledCircle(float x, float y, float radius, const Color &center);
 
         void DrawText(float x, float y, const char *text);
+        void DrawTextX(float x, float y, const char *text);
         float GetTextWidth(const char *text) const;
         float GetTextWidth(const char *text, size_t charCount) const;
 
@@ -103,6 +104,9 @@ namespace rob
         void AddFontQuad(FontVertex *&vertex, const uint32_t c, const Glyph &glyph,
                            float &cursorX, float &cursorY,
                            const size_t textureW, const size_t textureH);
+        void AddFontQuadX(FontVertex *&vertex, const uint32_t c, const Glyph &glyph,
+                           float &cursorX, float &cursorY,
+                           const size_t textureW, const size_t textureH, const bool super);
 
     private:
         LinearAllocator m_alloc;

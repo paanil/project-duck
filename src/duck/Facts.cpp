@@ -63,6 +63,8 @@ namespace duck
             line += f.m_lineCount;
         }
 
+        m_factCount--;
+
         return true;
     }
 

@@ -10,6 +10,8 @@
 #include "rob/time/Time.h"
 #include "rob/Log.h"
 
+#include <cstdlib>
+
 namespace duck
 {
 
@@ -85,12 +87,15 @@ namespace duck
     public:
         InfoState()
             : m_facts()
+            , m_factIndex(0)
         { }
 
         bool Initialize() override
         {
             if (!m_facts.Load(GetAllocator()))
                 log::Error("Could not load facts");
+            if (m_facts.GetFactCount() > 0)
+                m_factIndex = std::rand() % m_facts.GetFactCount();
             return true;
         }
 
@@ -115,30 +120,32 @@ namespace duck
 
             const float textW = 400.0f;
 
-            for (size_t i = 0; i < m_facts.GetFactCount(); i++)
-            {
-                Fact fact = m_facts.GetFact(i);
+//            for (size_t i = 0; i < m_facts.GetFactCount(); i++)
+//            {
+//                Fact fact = m_facts.GetFact(i);
+                Fact fact = m_facts.GetFact(m_factIndex);
                 size_t line = 0;
                 for (; line + 1 < fact.m_lineCount; line++)
                 {
                     const char *str = fact.m_lines[line];
-                    layout.AddTextAlignL(str, -textW);
+                    layout.AddTextXAlignL(str, -textW);
                     layout.AddLine();
                 }
                 layout.AddTextAlignR(fact.m_lines[line], textW);
                 layout.AddLine();
-            }
+//            }
         }
 
         void OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods) override
         {
             if (key == Keyboard::Key::Escape)
-                QuitState();
+                ChangeState(STATE_MainMenu);
             if (key == Keyboard::Key::Space)
                 ChangeState(STATE_Game);
         }
     private:
         Facts m_facts;
+        size_t m_factIndex;
     };
 
 
