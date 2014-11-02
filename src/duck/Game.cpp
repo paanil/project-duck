@@ -1,6 +1,7 @@
 
 #include "Game.h"
 #include "DuckState.h"
+#include "Facts.h"
 
 #include "rob/application/Window.h"
 #include "rob/application/GameState.h"
@@ -76,15 +77,20 @@ namespace duck
 //        GameData &m_gameData;
     };
 
+    static const char * const g_instructions =
+        "You are a worker at a new waste sorting pipeline. Save the birds!";
 
     class InfoState : public rob::GameState
     {
     public:
         InfoState()
+            : m_facts()
         { }
 
         bool Initialize() override
         {
+            if (!m_facts.Load(GetAllocator()))
+                log::Error("Could not load facts");
             return true;
         }
 
@@ -104,8 +110,24 @@ namespace duck
             TextLayout layout(renderer, vp.w / 2.0f, vp.h / 5.0f * 2.0f);
 
             renderer.SetFontScale(1.0f);
-            layout.AddTextAlignC("Thousands of birds die in every oil accident.", 0.0f);
-            layout.AddLine();
+//            layout.AddTextAlignC("Thousands of birds die in every oil accident.", 0.0f);
+//            layout.AddLine();
+
+            const float textW = 400.0f;
+
+            for (size_t i = 0; i < m_facts.GetFactCount(); i++)
+            {
+                Fact fact = m_facts.GetFact(i);
+                size_t line = 0;
+                for (; line + 1 < fact.m_lineCount; line++)
+                {
+                    const char *str = fact.m_lines[line];
+                    layout.AddTextAlignL(str, -textW);
+                    layout.AddLine();
+                }
+                layout.AddTextAlignR(fact.m_lines[line], textW);
+                layout.AddLine();
+            }
         }
 
         void OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods) override
@@ -116,6 +138,7 @@ namespace duck
                 ChangeState(STATE_Game);
         }
     private:
+        Facts m_facts;
     };
 
 
