@@ -163,6 +163,8 @@
 		<Unit filename="src/duck/B2DebugDraw.h" />
 		<Unit filename="src/duck/DuckState.cpp" />
 		<Unit filename="src/duck/DuckState.h" />
+		<Unit filename="src/duck/FadeEffect.cpp" />
+		<Unit filename="src/duck/FadeEffect.h" />
 		<Unit filename="src/duck/Game.cpp" />
 		<Unit filename="src/duck/Game.h" />
 		<Unit filename="src/duck/GameData.h" />

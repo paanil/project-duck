@@ -10,6 +10,7 @@
 #include "GameData.h"
 #include "GameObject.h"
 #include "Sensors.h"
+#include "FadeEffect.h"
 
 namespace duck
 {
@@ -94,6 +95,8 @@ namespace duck
         SlideSensor m_slideSensor;
         KillSensor m_killSensor;
         WaterSensor m_waterSensor;
+
+        FadeEffect m_fadeEffect;
     };
 
 } // duck

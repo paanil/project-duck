@@ -61,6 +61,7 @@ namespace duck
         , m_spawnSensor()
         , m_killSensor()
         , m_waterSensor()
+        , m_fadeEffect(Color(0.04f, 0.01f, 0.01f))
     {
         m_gameData.m_birdsKilled = 0;
         m_gameData.m_birdsSaved = 0;
@@ -599,7 +600,10 @@ namespace duck
     }
 
     void DuckState::RealtimeUpdate(const Time_t deltaMicroseconds)
-    { }
+    {
+        const float deltaTime = float(deltaMicroseconds) / 1e6f;
+        m_fadeEffect.Update(deltaTime);
+    }
 
     void DuckState::NewBird()
     {
@@ -635,6 +639,11 @@ namespace duck
 
         if (IsGameOver() && m_mouseJoint)
             DestroyMouseJoint();
+        if (IsGameOver())
+        {
+            m_fadeEffect.Activate(0.5f);
+            m_fadeEffect.Update(deltaTime);
+        }
 
         if (m_mouseJoint)
         {
@@ -689,7 +698,16 @@ namespace duck
         renderer.SetFontScale(4.0f);
         layout.AddTextAlignC("Game over", 0.0f);
         layout.AddLine();
+        renderer.SetFontScale(2.0f);
+        int r = 128 + rand() % 128;
+        int g = rand() % 255;
+        float rr = r / 255.0f;
+        float gg = g / 255.0f;
+        renderer.SetColor(Color(rr, gg * rr, rr * 0.1f));
+        layout.AddTextAlignC("You are FIRED!", 0.0f);
+        layout.AddLine();
 
+        renderer.SetColor(Color(1.0f, 1.0f, 1.0f));
         renderer.SetFontScale(1.0f);
         layout.AddTextAlignC("Press [space] to continue", 0.0f);
     }
@@ -737,12 +755,14 @@ namespace duck
 
         if (m_drawBox2D)
         {
-            renderer.SetModel(mat4f::Identity);
-            renderer.BindColorShader();
+//            renderer.SetModel(mat4f::Identity);
+//            renderer.BindColorShader();
             m_world->DrawDebugData();
         }
 
-        renderer.SetModel(mat4f::Identity);
+//        renderer.SetModel(mat4f::Identity);
+        m_fadeEffect.Render(&renderer);
+
         renderer.SetView(GetDefaultView());
         renderer.BindFontShader();
         renderer.SetColor(Color::White);
@@ -776,19 +796,29 @@ namespace duck
         {
             case Keyboard::Key::P:
             {
+                if (IsGameOver()) break;
                 if (m_time.IsPaused())
-                        m_time.Resume();
-                    else
-                        m_time.Pause();
+                {
+                    m_time.Resume();
+                    m_fadeEffect.Reset();
+                }
+                else
+                {
+                    m_time.Pause();
+                    m_fadeEffect.Activate(1.0f);
+                }
+                break;
             }
             case Keyboard::Key::Space:
             {
                 if (IsGameOver())
                     ChangeState(STATE_MainMenu);
+                break;
             }
             case Keyboard::Key::Escape:
             {
                 ChangeState(STATE_MainMenu);
+                break;
             }
             default: break;
         }
