@@ -179,6 +179,7 @@
 		<Unit filename="src/duck/Sensor.h" />
 		<Unit filename="src/duck/Sensors.cpp" />
 		<Unit filename="src/duck/Sensors.h" />
+		<Unit filename="src/duck/SoundPlayer.h" />
 		<Unit filename="src/rob/Assert.cpp" />
 		<Unit filename="src/rob/Assert.h" />
 		<Unit filename="src/rob/Log.cpp" />
