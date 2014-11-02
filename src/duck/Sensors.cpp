@@ -7,20 +7,20 @@ namespace duck
 
     void OvenSensor::BeginContact(void *userData)
     {
-        GameObject *firstPart = (GameObject*)userData;
+        GameObject *bird = (GameObject*)userData;
 
-        if (firstPart->IsBurned())
+        if (bird->IsBurned())
             return;
 
-        GameObject *part = firstPart;
+        GameObject *part = bird;
 
         do
         {
             part->SetBurned();
             part = part->GetNext();
-        } while (part != firstPart);
+        } while (part != bird);
 
-        m_duckState->BirdGotBurned(firstPart);
+        m_duckState->BirdBurned(bird);
     }
 
 
@@ -33,9 +33,9 @@ namespace duck
         GameObject *bird = (GameObject*)userData;
         ROB_ASSERT(bird != nullptr);
         if (!bird->IsBurned())
-            m_duckState->BirdSaved();
-        else
-            m_duckState->BirdDied();
+            m_duckState->BirdSaved(bird);
+//        else
+//            m_duckState->BirdDied();
         m_duckState->DestroyLinkedObjects(bird);
     }
 

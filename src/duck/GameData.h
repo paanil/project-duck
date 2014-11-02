@@ -9,6 +9,7 @@ namespace duck
     {
         int m_birdsKilled;
         int m_birdsSaved;
+        int m_score;
     };
 
 } // duck

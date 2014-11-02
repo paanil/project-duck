@@ -45,9 +45,9 @@ namespace duck
         void DestroySingleObject(GameObject *object);
         void DestroyAllObjects();
 
-        void BirdGotBurned(GameObject *birdPart);
-        void BirdSaved();
-        void BirdDied();
+        void BirdBurned(GameObject *bird);
+        void BirdSaved(GameObject *bird);
+        void BirdDied(GameObject *bird);
 
         bool IsGameOver() const;
 
@@ -97,6 +97,9 @@ namespace duck
         WaterSensor m_waterSensor;
 
         FadeEffect m_fadeEffect;
+
+        float m_scoreTimer;
+        int m_lastPoints;
     };
 
 } // duck
