@@ -105,6 +105,7 @@ namespace duck
         m_spawnSensor.SetDuckState(this);
         m_slideSensor.SetDuckState(this);
         m_killSensor.SetDuckState(this);
+        m_waterSensor.SetDuckState(this);
 
         m_sounds.Init(GetAudio(), GetCache());
 
@@ -596,6 +597,16 @@ namespace duck
             rob::log::Info("Bird died");
             m_gameData.m_birdsKilled++;
         }
+    }
+
+    void DuckState::BirdEnteredWater(GameObject *bird)
+    {
+        m_sounds.PlayWaterSound(bird->GetPosition());
+    }
+
+    void DuckState::BirdExitedWater(GameObject *bird)
+    {
+        m_sounds.PlayWaterSound(bird->GetPosition());
     }
 
     bool DuckState::IsGameOver() const

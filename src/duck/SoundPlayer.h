@@ -20,12 +20,14 @@ namespace duck
 //            , m_cache(nullptr)
             , m_currentTime(0)
             , m_burning(InvalidSound)
+            , m_water(InvalidSound)
         { }
 
         void Init(AudioSystem &audio, MasterCache &cache)
         {
             m_audio = &audio;
             m_burning = cache.GetSound("Explosion32.wav");
+            m_water = cache.GetSound("Randomize55.wav");
         }
 
         void UpdateTime(const GameTime &gameTime)
@@ -36,6 +38,11 @@ namespace duck
         void PlayBurningSound(const vec2f &pos)
         {
             PlaySound(m_burning, pos.x, pos.y);
+        }
+
+        void PlayWaterSound(const vec2f &pos)
+        {
+            PlaySound(m_water, pos.x, pos.y);
         }
 
     private:
@@ -51,6 +58,7 @@ namespace duck
         Time_t m_currentTime;
 
         SoundHandle m_burning;
+        SoundHandle m_water;
     };
 
 } // duck
