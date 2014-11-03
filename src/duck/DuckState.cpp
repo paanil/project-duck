@@ -55,6 +55,9 @@ namespace duck
         , m_inUpdate(false)
         , m_worldBody(nullptr)
         , m_mouseJoint(nullptr)
+        , m_originalAngle(0.0f)
+        , m_mouseWorld(0.0f, 0.0f)
+        , m_washing(false)
         , m_objectPool()
         , m_objects(nullptr)
         , m_objectCount(0)
@@ -111,6 +114,17 @@ namespace duck
         wasteDef.viscousStrength = 1.5f;
         wasteDef.ejectionStrength = 0.05f;
         m_waste = m_world->CreateParticleSystem(&wasteDef);
+
+        b2ParticleSystemDef bubblesDef;
+        bubblesDef.radius = 0.2f;
+        bubblesDef.density = 0.05f;
+        bubblesDef.maxCount = 100;
+        bubblesDef.destroyByAge = true;
+        bubblesDef.dampingStrength = 0.1f;
+        bubblesDef.viscousStrength = 1.0f;
+        bubblesDef.ejectionStrength = 0.015f;
+        bubblesDef.gravityScale = 0.15f;
+        m_bubbles = m_world->CreateParticleSystem(&bubblesDef);
 
         m_ovenSensor.SetDuckState(this);
         m_spawnSensor.SetDuckState(this);
@@ -201,7 +215,6 @@ namespace duck
         bodyDef.position = ToB2(position);
         b2Body *body = m_world->CreateBody(&bodyDef);
         wheel->SetBody(body);
-//        wheel->SetColor(Color(0.2f, 0.2f, 0.2f));
         TextureHandle texture = GetCache().GetTexture("wheel.tex");
         wheel->SetTexture(texture);
         wheel->SetTextureScale(1.3f);
@@ -689,17 +702,25 @@ namespace duck
         b2ParticleGroupDef groupDef;
         groupDef.shape = &shape;
         groupDef.color.Set(32, 25, 16, 255);
-        groupDef.position.Set(0.0f, 2.0f);
+        groupDef.position.Set(PLAY_AREA_LEFT * 2.0f, 2.0f);
         groupDef.flags = b2_viscousParticle; // | b2_powderParticle | b2_fixtureContactListenerParticle;
-        groupDef.lifetime = 100.0f;
+        groupDef.lifetime = 30.0f;
         m_waste->CreateParticleGroup(groupDef);
+    }
 
-//        b2ParticleDef def;
-//        def.color.Set(25, 20, 12, 255);
-//        def.position.Set(0.0f, 0.0f);
-//        def.flags = b2_waterParticle;
-//        def.group = 0;
-//        m_waste->CreateParticle(def);
+    void DuckState::CreateBubbles(const vec2f &position, float oilyness)
+    {
+        b2CircleShape shape;
+        shape.m_radius = 0.75f;
+
+        b2ParticleGroupDef groupDef;
+        groupDef.shape = &shape;
+        const float cleaness = Clamp(0.1f + 1.0f - oilyness, 0.0f, 1.0f);
+        groupDef.color.Set(232 * cleaness, 232 * cleaness, 240 * cleaness, 208);
+        groupDef.position = ToB2(position);
+        groupDef.flags = b2_viscousParticle; // | b2_powderParticle | b2_fixtureContactListenerParticle;
+        groupDef.lifetime = 10.0f;
+        m_bubbles->CreateParticleGroup(groupDef);
     }
 
     void DuckState::DestroyMouseJoint()
@@ -725,6 +746,17 @@ namespace duck
             rob::log::Info(birdTimerAdd, " ", gameTime.GetTotalSeconds());
         }
         birdTimerAdd = 10.0f - rob::Log10(gameTime.GetTotalSeconds());
+
+        static float wasteTimer = 0.0f;
+        static float wasteTimerAdd = 8.0f;
+        wasteTimer -= deltaTime;
+        if (wasteTimer < 0.0f)
+        {
+            CreateWaste();
+            wasteTimer += wasteTimerAdd;
+            rob::log::Info(wasteTimerAdd, " ", gameTime.GetTotalSeconds());
+        }
+        wasteTimerAdd = 10.0f - rob::Log10(gameTime.GetTotalSeconds());
 
         if (m_scoreTimer > 0.0f)
         {
@@ -755,23 +787,23 @@ namespace duck
 
         m_world->Step(deltaTime, 8, 8, 1);
 
-        {
-            const b2ParticleBodyContact *contacts = m_waste->GetBodyContacts();
-            for (int i = 0; i < m_waste->GetBodyContactCount(); i++)
-            {
-                const b2ParticleBodyContact &contact = contacts[i];
-//                if (m_killSensor.GetBody() == contact.body)
-//                    m_waste->DestroyParticle(contact.index);
-//                if (!contact.fixture || contact.fixture->GetFilterData().categoryBits != SensorBits) continue;
-                if (contact.fixture->GetFilterData().categoryBits != SensorBits) continue;
-                log::Debug("LOOLOLOLOL");
-                Sensor *sensor = (Sensor*)contact.fixture->GetUserData();
-                if (sensor)// && sensor->WithParticles())
-                {
-                    sensor->BeginParticleContact(m_waste, &contact);
-                }
-            }
-        }
+//        {
+//            const b2ParticleBodyContact *contacts = m_waste->GetBodyContacts();
+//            for (int i = 0; i < m_waste->GetBodyContactCount(); i++)
+//            {
+//                const b2ParticleBodyContact &contact = contacts[i];
+////                if (m_killSensor.GetBody() == contact.body)
+////                    m_waste->DestroyParticle(contact.index);
+////                if (!contact.fixture || contact.fixture->GetFilterData().categoryBits != SensorBits) continue;
+//                if (contact.fixture->GetFilterData().categoryBits != SensorBits) continue;
+//                log::Debug("LOOLOLOLOL");
+//                Sensor *sensor = (Sensor*)contact.fixture->GetUserData();
+//                if (sensor)// && sensor->WithParticles())
+//                {
+//                    sensor->BeginParticleContact(m_waste, &contact);
+//                }
+//            }
+//        }
 
         size_t deadCount = 0;
         GameObject *dead[MAX_OBJECTS];
@@ -780,15 +812,7 @@ namespace duck
         {
             if (!m_objects[i]->IsDestroyed())
             {
-//                if (m_objects[i]->IsSaved())
-//                {
-//                    log::Info("Bird saved");
-//                    DestroyLinkedObjects(m_objects[i]);
-//                }
-//                else
-//                {
-                    m_objects[i]->Update(gameTime);
-//                }
+                m_objects[i]->Update(gameTime);
             }
 
             if (m_objects[i]->IsDestroyed())
@@ -837,6 +861,23 @@ namespace duck
         layout.AddTextAlignC("Press [space] to continue", 0.0f);
     }
 
+    void DuckState::RenderParticleSystem(b2ParticleSystem *ps)
+    {
+        Renderer &renderer = GetRenderer();
+        renderer.SetModel(mat4f::Identity);
+        renderer.BindColorShader();
+
+        const b2Vec2 *positions = ps->GetPositionBuffer();
+        const b2ParticleColor *colors = ps->GetColorBuffer();
+        const float radius = ps->GetRadius();
+        for (int i = 0; i < ps->GetParticleCount(); i++)
+        {
+            const b2Color col = colors[i].GetColor();
+            renderer.SetColor(Color(col.r, col.g, col.b, colors[i].a / 255.0f));
+            renderer.DrawFilledCircle(positions[i].x, positions[i].y, radius);
+        }
+    }
+
     void DuckState::Render()
     {
         Renderer &renderer = GetRenderer();
@@ -873,18 +914,8 @@ namespace duck
             }
         }
 
-        renderer.SetModel(mat4f::Identity);
-        renderer.BindColorShader();
-
-        const b2Vec2 *positions = m_waste->GetPositionBuffer();
-        const b2ParticleColor *colors = m_waste->GetColorBuffer();
-        const float radius = m_waste->GetRadius();
-        for (int i = 0; i < m_waste->GetParticleCount(); i++)
-        {
-            const b2Color col = colors[i].GetColor();
-            renderer.SetColor(Color(col.r, col.g, col.b, colors[i].a / 255.0f));
-            renderer.DrawFilledCircle(positions[i].x, positions[i].y, radius);
-        }
+        RenderParticleSystem(m_waste);
+        RenderParticleSystem(m_bubbles);
 
         float ovenLightAlpha = 0.8f + FastSin(m_firedColor) * 0.15f + FastCos(m_firedColor + 0.26f) * 0.05f;
 
@@ -961,6 +992,8 @@ namespace duck
         if (IsGameOver())
             RenderGameOver();
     }
+
+
 
     void DuckState::OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods)
     {
@@ -1067,12 +1100,15 @@ namespace duck
     {
         m_mouseWorld = ScreenToWorld(m_view, x, y);
 
-        if (m_mouseJoint != nullptr)
+        if (IsGameOver())
             return;
         if (!g_playArea.IsInside(m_mouseWorld))
             return;
 
-        if (IsGameOver())
+        if (button == MouseButton::Right)
+            m_washing = true;
+
+        if (m_mouseJoint != nullptr)
             return;
 
         // Make a small box.
@@ -1114,6 +1150,7 @@ namespace duck
     void DuckState::OnMouseUp(MouseButton button, int x, int y)
     {
         DestroyMouseJoint();
+        m_washing = false;
     }
 
     void DuckState::OnMouseMove(int x, int y)
@@ -1125,6 +1162,51 @@ namespace duck
             {
                 const b2Vec2 target(m_mouseWorld.x, m_mouseWorld.y);
                 m_mouseJoint->SetTarget(target);
+            }
+        }
+
+        if (!g_playArea.IsInside(m_mouseWorld))
+            return;
+
+        if (IsGameOver())
+            return;
+
+        if (m_washing)
+        {
+            // Make a small box.
+            b2AABB aabb;
+            b2Vec2 d(0.001f, 0.001f);
+            b2Vec2 p = ToB2(m_mouseWorld);
+            aabb.lowerBound = p - d;
+            aabb.upperBound = p + d;
+
+            // Query the world for overlapping shapes.
+            QueryCallback callback(p);
+            m_world->QueryAABB(&callback, aabb);
+
+            if (callback.m_fixture)
+            {
+//                bool wash = !(button == MouseButton::Left);
+//                const float force = wash ? 20.0f : 1000.0f;
+
+                b2Body* body = callback.m_fixture->GetBody();
+//                b2MouseJointDef md;
+//                md.bodyA = m_worldBody;
+//                md.bodyB = body;
+//                md.target = p;
+//                md.maxForce = force * body->GetMass();
+//                md.dampingRatio = 0.98f * force / 1000.0f; // TODO: not sure if this does anything good.
+//                m_mouseJoint = (b2MouseJoint*)m_world->CreateJoint(&md);
+//                body->SetAwake(true);
+
+//                m_originalAngle = body->GetAngle();
+
+                if (body->GetUserData())
+                {
+                    GameObject *bird = (GameObject*)body->GetUserData();
+                    bird->Wash();
+                    CreateBubbles(m_mouseWorld, bird->GetOilyness());
+                }
             }
         }
     }

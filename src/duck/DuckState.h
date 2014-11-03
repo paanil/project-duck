@@ -61,11 +61,13 @@ namespace duck
 
         void NewBird();
         void CreateWaste();
+        void CreateBubbles(const vec2f &position, float oilyness);
 
         void DestroyMouseJoint();
 
         void Update(const GameTime &gameTime) override;
         void RenderGameOver();
+        void RenderParticleSystem(b2ParticleSystem *ps);
         void Render() override;
 
         void OnKeyPress(rob::Keyboard::Key key, rob::Keyboard::Scancode scancode, rob::uint32_t mods) override;
@@ -78,6 +80,7 @@ namespace duck
         rob::View m_view;
         b2World *m_world;
         b2ParticleSystem *m_waste;
+        b2ParticleSystem *m_bubbles;
         DebugDraw *m_debugDraw;
         bool m_drawBox2D;
 
@@ -88,6 +91,7 @@ namespace duck
         b2MouseJoint *m_mouseJoint;
         float m_originalAngle;
         vec2f m_mouseWorld;
+        bool m_washing;
 
         rob::Pool<GameObject> m_objectPool;
         GameObject **m_objects;
