@@ -53,6 +53,9 @@ namespace duck
         void SetBubbleTexture(rob::TextureHandle texture)
         { m_bubbleTexture = texture; }
 
+        void SetTextureScale(float scale)
+        { m_textureScale = scale; }
+
         void SetLayer(int layer);
         int GetLayer() const;
 
@@ -108,6 +111,7 @@ namespace duck
         rob::TextureHandle m_flameTexture;
         rob::TextureHandle m_flameGlowTexture;
         rob::TextureHandle m_bubbleTexture;
+        float m_textureScale;
         int m_renderLayer;
 
         float m_burnTimer;

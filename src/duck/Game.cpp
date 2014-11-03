@@ -173,7 +173,11 @@ namespace duck
 
         void OnKeyPress(Keyboard::Key key, Keyboard::Scancode scancode, uint32_t mods) override
         {
-            if (key == Keyboard::Key::Return)
+            if (key == Keyboard::Key::Space && !InsertingNewScore())
+            {
+                ChangeState(STATE_MainMenu);
+            }
+            else if (key == Keyboard::Key::Return)
             {
                 if (InsertingNewScore())
                 {

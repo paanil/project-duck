@@ -104,8 +104,12 @@ namespace duck
 
         b2ParticleSystemDef wasteDef;
         wasteDef.radius = 0.2f;
-        wasteDef.density = 1.0f;
+        wasteDef.density = 0.5f;
         wasteDef.maxCount = 200;
+        wasteDef.destroyByAge = true;
+        wasteDef.dampingStrength = 0.05f;
+        wasteDef.viscousStrength = 1.5f;
+        wasteDef.ejectionStrength = 0.05f;
         m_waste = m_world->CreateParticleSystem(&wasteDef);
 
         m_ovenSensor.SetDuckState(this);
@@ -130,10 +134,18 @@ namespace duck
     void DuckState::CreateWorld()
     {
         const float wallSize = 1.25f;
-        // Convoyer belt
-        for (int i = 0; i < 60; i++)
+        // Conveyor belt
+        const float wheelR = 0.5f;
+//        for (int i = 0; i < 60 / int(wheelR * 2.0f); i++)
+        for (int i = 0; i < 30 / int(wheelR * 2.0f); i++)
         {
-            CreateWheel(vec2f(-30.0f + 0.25f + float(i) * 0.5f, PLAY_AREA_BOTTOM));
+//            CreateWheel(vec2f(-30.0f + 0.25f + float(i) * 0.5f, PLAY_AREA_BOTTOM), 0.25f, 15.0f;);
+//            CreateWheel(vec2f(-30.0f + float(i) * wheelR * 2.0f, PLAY_AREA_BOTTOM), wheelR, 15.0f;);
+            CreateWheel(vec2f(-30.0f + float(i) * wheelR * 2.0f, PLAY_AREA_BOTTOM), wheelR, 5.0f);
+        }
+        for (int i = 0; i < 30 / int(wheelR * 2.0f); i++)
+        {
+            CreateWheel(vec2f(-30.0f + wheelR + float(i) * wheelR * 2.0f, PLAY_AREA_BOTTOM), wheelR, 5.0f);
         }
         // Floor
         CreateStaticBox(vec2f(-16.0f, PLAY_AREA_BOTTOM - 4.0f), 0.0f, 16.0f, 4.0f);
@@ -180,7 +192,7 @@ namespace duck
         return object;
     }
 
-    GameObject* DuckState::CreateWheel(const vec2f &position)
+    GameObject* DuckState::CreateWheel(const vec2f &position, const float radius, const float speed)
     {
         GameObject *wheel = CreateObject();
 
@@ -192,9 +204,10 @@ namespace duck
 //        wheel->SetColor(Color(0.2f, 0.2f, 0.2f));
         TextureHandle texture = GetCache().GetTexture("wheel.tex");
         wheel->SetTexture(texture);
+        wheel->SetTextureScale(1.3f);
 
         b2CircleShape shape;
-        shape.m_radius = 0.25f;
+        shape.m_radius = radius;
         b2Fixture *fix = body->CreateFixture(&shape, 200.0f);
         b2Filter filter;
         filter.categoryBits = WheelBits;
@@ -206,7 +219,7 @@ namespace duck
         b2RevoluteJointDef revDef;
         revDef.Initialize(body, m_worldBody, body->GetWorldCenter());
         revDef.enableMotor = true;
-        revDef.motorSpeed = 15.0f;
+        revDef.motorSpeed = speed;
         revDef.maxMotorTorque = 1000.0f;
         m_world->CreateJoint(&revDef);
 
@@ -677,7 +690,7 @@ namespace duck
         groupDef.shape = &shape;
         groupDef.color.Set(32, 25, 16, 255);
         groupDef.position.Set(0.0f, 2.0f);
-        groupDef.flags = b2_viscousParticle | b2_fixtureContactListenerParticle;
+        groupDef.flags = b2_viscousParticle; // | b2_powderParticle | b2_fixtureContactListenerParticle;
         groupDef.lifetime = 100.0f;
         m_waste->CreateParticleGroup(groupDef);
 
@@ -831,9 +844,9 @@ namespace duck
         renderer.SetModel(mat4f::Identity);
 
 //        renderer.SetColor(Color(0.18f, 0.14f, 0.14f));
-        renderer.SetColor(Color(60 / 255.0f, 71 / 255.0f, 49 / 255.0f));
-        renderer.BindColorShader();
-        renderer.DrawFilledRectangle(PLAY_AREA_LEFT, PLAY_AREA_BOTTOM, PLAY_AREA_RIGHT, PLAY_AREA_TOP);
+//        renderer.SetColor(Color(60 / 255.0f, 71 / 255.0f, 49 / 255.0f));
+//        renderer.BindColorShader();
+//        renderer.DrawFilledRectangle(PLAY_AREA_LEFT, PLAY_AREA_BOTTOM, PLAY_AREA_RIGHT, PLAY_AREA_TOP);
 
         renderer.SetModel(mat4f::Identity);
         renderer.GetGraphics()->BindTexture(0, GetCache().GetTexture("bg.tex"));

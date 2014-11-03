@@ -17,6 +17,7 @@ namespace duck
         , m_flameTexture(InvalidHandle)
         , m_flameGlowTexture(InvalidHandle)
         , m_bubbleTexture(InvalidHandle)
+        , m_textureScale(1.0f)
         , m_renderLayer(0)
         , m_burnTimer(0.0f)
         , m_oilyness(0.0f)
@@ -101,7 +102,7 @@ namespace duck
 
     void GameObject::Render(Renderer *renderer)
     {
-        const vec2f dim = GetDimensions();
+        vec2f dim = GetDimensions();
 
 //        renderer->SetColor(rob::Color::White);
         renderer->SetColor(m_color);
@@ -131,6 +132,7 @@ namespace duck
         }
         else
         {
+            dim *= m_textureScale;
             renderer->GetGraphics()->SetUniform(renderer->GetGlobals().texture0, 1);
             renderer->GetGraphics()->BindTexture(1, m_texture);
             renderer->BindTextureShader();
