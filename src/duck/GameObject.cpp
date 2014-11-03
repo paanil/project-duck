@@ -15,6 +15,8 @@ namespace duck
         , m_color(Color::White)
         , m_texture(InvalidHandle)
         , m_flameTexture(InvalidHandle)
+        , m_flameGlowTexture(InvalidHandle)
+        , m_bubbleTexture(InvalidHandle)
         , m_renderLayer(0)
         , m_burnTimer(0.0f)
         , m_oilyness(0.0f)
@@ -146,6 +148,11 @@ namespace duck
                 renderer->SetColor(Color(1.0f, 1.0f, 1.0f, k * 2.0f));
                 renderer->GetGraphics()->BindTexture(1, m_flameTexture);
                 renderer->DrawTexturedRectangle(-dim.x*s*f, -dim.y*s, dim.x*s*f, dim.y*1.5f*s);
+
+                renderer->GetGraphics()->SetBlendAdditive();
+                renderer->GetGraphics()->BindTexture(1, m_flameGlowTexture);
+                renderer->DrawTexturedRectangle(-dim.x*s*f, -dim.y*s, dim.x*s*f, dim.y*1.5f*s);
+                renderer->GetGraphics()->SetBlendAlpha();
             }
             else if (m_partsInWater > 0 && m_isWashed)
             {

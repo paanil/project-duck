@@ -48,6 +48,8 @@ namespace duck
 
         void SetFlameTexture(rob::TextureHandle texture)
         { m_flameTexture = texture; }
+        void SetFlameGlowTexture(rob::TextureHandle texture)
+        { m_flameGlowTexture = texture; }
         void SetBubbleTexture(rob::TextureHandle texture)
         { m_bubbleTexture = texture; }
 
@@ -104,6 +106,7 @@ namespace duck
         Color m_color;
         rob::TextureHandle m_texture;
         rob::TextureHandle m_flameTexture;
+        rob::TextureHandle m_flameGlowTexture;
         rob::TextureHandle m_bubbleTexture;
         int m_renderLayer;
 

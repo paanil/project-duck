@@ -41,7 +41,7 @@ namespace duck
 
 
     KillSensor::KillSensor()
-        : Sensor(0xFFFF)
+        : Sensor(0xFFFF, true)
     { }
 
     void KillSensor::BeginContact(void *userData)
@@ -49,6 +49,18 @@ namespace duck
         GameObject *obj = (GameObject*)userData;
 //        if (obj) obj->SetDestroyed(true);
         if (obj) m_duckState->DestroyLinkedObjects(obj);
+    }
+
+    void KillSensor::BeginParticleContact(b2ParticleSystem *ps, const b2ParticleBodyContact *contact)
+    {
+//        ps->DestroyParticle(contact->index);
+        ps->SetParticleFlags(contact->index, b2_zombieParticle);
+        log::Debug("Destroy particle");
+    }
+
+    void KillSensor::EndParticleContact(b2ParticleSystem *ps, int index)
+    {
+        log::Debug("end Destroy particle");
     }
 
     WaterSensor::WaterSensor()

@@ -26,7 +26,9 @@ namespace duck
         void Init(AudioSystem &audio, MasterCache &cache)
         {
             m_audio = &audio;
-            m_burning = cache.GetSound("Explosion32.wav");
+//            m_burning = cache.GetSound("Explosion32.wav");
+//            m_burning = cache.GetSound("flame3.wav");
+            m_burning = cache.GetSound("exp_flame.wav");
             m_water = cache.GetSound("Randomize55.wav");
             m_saved = cache.GetSound("Powerup122.wav");
             m_score = cache.GetSound("Pickup_Coin.wav");

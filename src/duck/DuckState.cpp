@@ -89,6 +89,7 @@ namespace duck
         flags += b2Draw::e_jointBit;
         flags += b2Draw::e_aabbBit;
         flags += b2Draw::e_centerOfMassBit;
+        flags += b2Draw::e_particleBit;
         m_debugDraw->SetFlags(flags);
 
         m_world = GetAllocator().new_object<b2World>(b2Vec2(0.0, -9.81f));
@@ -96,10 +97,16 @@ namespace duck
 
         m_world->SetContactListener(&m_sensorListener);
 
-        b2BodyDef def;
-        def.type = b2_staticBody;
-        def.position.Set(0.0f, PLAY_AREA_BOTTOM - 2.0f);
-        m_worldBody = m_world->CreateBody(&def);
+        b2BodyDef wbodyDef;
+        wbodyDef.type = b2_staticBody;
+        wbodyDef.position.Set(0.0f, PLAY_AREA_BOTTOM - 2.0f);
+        m_worldBody = m_world->CreateBody(&wbodyDef);
+
+        b2ParticleSystemDef wasteDef;
+        wasteDef.radius = 0.2f;
+        wasteDef.density = 1.0f;
+        wasteDef.maxCount = 200;
+        m_waste = m_world->CreateParticleSystem(&wasteDef);
 
         m_ovenSensor.SetDuckState(this);
         m_spawnSensor.SetDuckState(this);
@@ -282,6 +289,7 @@ namespace duck
     GameObject* DuckState::CreateBird(const vec2f &position)
     {
         TextureHandle flameTexture = GetCache().GetTexture("flame.tex");
+        TextureHandle flameGlowTexture = GetCache().GetTexture("flame_glow.tex");
         TextureHandle bubbleTexture = GetCache().GetTexture("bubbles.tex");
 
         b2BodyDef bodyDef;
@@ -306,6 +314,7 @@ namespace duck
         TextureHandle texture = GetCache().GetTexture("bird_body.tex");
         bird->SetTexture(texture);
         bird->SetFlameTexture(flameTexture);
+        bird->SetFlameGlowTexture(flameGlowTexture);
         bird->SetBubbleTexture(bubbleTexture);
         bird->SetOily();
         bird->SetLayer(1);
@@ -326,6 +335,7 @@ namespace duck
         texture = GetCache().GetTexture("bird_head.tex");
         head->SetTexture(texture);
         head->SetFlameTexture(flameTexture);
+        head->SetFlameGlowTexture(flameGlowTexture);
         head->SetBubbleTexture(bubbleTexture);
         head->SetOily();
         head->SetLayer(1);
@@ -346,6 +356,7 @@ namespace duck
         neck0->SetBody(neck0body);
         neck0->SetTexture(neckTex);
         neck0->SetFlameTexture(flameTexture);
+        neck0->SetFlameGlowTexture(flameGlowTexture);
         neck0->SetBubbleTexture(bubbleTexture);
         neck0->SetOily();
 
@@ -365,6 +376,7 @@ namespace duck
         neck1->SetBody(neck1body);
         neck1->SetTexture(neckTex);
         neck1->SetFlameTexture(flameTexture);
+        neck1->SetFlameGlowTexture(flameGlowTexture);
         neck1->SetBubbleTexture(bubbleTexture);
         neck1->SetOily();
 
@@ -381,6 +393,7 @@ namespace duck
         neck2->SetBody(neck2body);
         neck2->SetTexture(neckTex);
         neck2->SetFlameTexture(flameTexture);
+        neck2->SetFlameGlowTexture(flameGlowTexture);
         neck2->SetBubbleTexture(bubbleTexture);
         neck2->SetOily();
 
@@ -412,6 +425,7 @@ namespace duck
             leg->SetBody(legBody);
             leg->SetTexture(legTex);
             leg->SetFlameTexture(flameTexture);
+            leg->SetFlameGlowTexture(flameGlowTexture);
             leg->SetOily();
 //            leg->SetNext(object);
 
@@ -435,6 +449,7 @@ namespace duck
             leg->SetBody(legBody);
             leg->SetTexture(legTex);
             leg->SetFlameTexture(flameTexture);
+            leg->SetFlameGlowTexture(flameGlowTexture);
             leg->SetOily();
             leg->SetNext(bird);
 
@@ -649,6 +664,27 @@ namespace duck
             CreateBird(vec2f(PLAY_AREA_LEFT * 2.0f, PLAY_AREA_BOTTOM + 4.0f));
     }
 
+    void DuckState::CreateWaste()
+    {
+        b2CircleShape shape;
+        shape.m_radius = 2.0f;
+
+        b2ParticleGroupDef groupDef;
+        groupDef.shape = &shape;
+        groupDef.color.Set(32, 25, 16, 255);
+        groupDef.position.Set(0.0f, 2.0f);
+        groupDef.flags = b2_viscousParticle | b2_fixtureContactListenerParticle;
+        groupDef.lifetime = 100.0f;
+        m_waste->CreateParticleGroup(groupDef);
+
+//        b2ParticleDef def;
+//        def.color.Set(25, 20, 12, 255);
+//        def.position.Set(0.0f, 0.0f);
+//        def.flags = b2_waterParticle;
+//        def.group = 0;
+//        m_waste->CreateParticle(def);
+    }
+
     void DuckState::DestroyMouseJoint()
     {
         if (m_mouseJoint)
@@ -700,7 +736,25 @@ namespace duck
             body->ApplyTorque(totalRotation * body->GetMass() * 10.0f, true);
         }
 
-        m_world->Step(deltaTime, 8, 8);
+        m_world->Step(deltaTime, 8, 8, 1);
+
+        {
+            const b2ParticleBodyContact *contacts = m_waste->GetBodyContacts();
+            for (int i = 0; i < m_waste->GetBodyContactCount(); i++)
+            {
+                const b2ParticleBodyContact &contact = contacts[i];
+//                if (m_killSensor.GetBody() == contact.body)
+//                    m_waste->DestroyParticle(contact.index);
+//                if (!contact.fixture || contact.fixture->GetFilterData().categoryBits != SensorBits) continue;
+                if (contact.fixture->GetFilterData().categoryBits != SensorBits) continue;
+                log::Debug("LOOLOLOLOL");
+                Sensor *sensor = (Sensor*)contact.fixture->GetUserData();
+                if (sensor)// && sensor->WithParticles())
+                {
+                    sensor->BeginParticleContact(m_waste, &contact);
+                }
+            }
+        }
 
         size_t deadCount = 0;
         GameObject *dead[MAX_OBJECTS];
@@ -801,12 +855,14 @@ namespace duck
                     maxLayer = l;
             }
         }
+        float ovenLightAlpha = 0.8f + FastSin(m_firedColor) * 0.15f + FastCos(m_firedColor + 0.26f) * 0.05f;
 
         renderer.SetModel(mat4f::Identity);
         renderer.GetGraphics()->SetUniform(renderer.GetGlobals().texture0, 0);
         renderer.BindTextureShader();
         renderer.GetGraphics()->SetBlendAdditive();
-        renderer.SetColor(Color(1.0f, 1.0f, 1.0f, 0.8f));
+//        renderer.SetColor(Color(1.0f, 1.0f, 1.0f, 0.8f));
+        renderer.SetColor(Color(1.0f, 1.0f, 1.0f, ovenLightAlpha));
         renderer.GetGraphics()->BindTexture(0, GetCache().GetTexture("oven_light.tex"));
         renderer.DrawTexturedRectangle(PLAY_AREA_LEFT, PLAY_AREA_BOTTOM, PLAY_AREA_RIGHT, PLAY_AREA_TOP);
         renderer.GetGraphics()->SetBlendAlpha();
@@ -914,6 +970,8 @@ namespace duck
                 m_drawBox2D = !m_drawBox2D;
             if (key == Keyboard::Key::B)
                 NewBird();
+            if (key == Keyboard::Key::W)
+                CreateWaste();
             if (key == Keyboard::Key::Space && !IsGameOver())
                 ChangeState(STATE_Game);
             if (key == Keyboard::Key::Kp_Plus)

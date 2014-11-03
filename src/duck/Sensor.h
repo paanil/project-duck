@@ -24,7 +24,14 @@ namespace duck
     public:
         Sensor(uint16 maskBits)
             : m_maskBits(maskBits)
+            , m_particles(false)
         { }
+        Sensor(uint16 maskBits, bool particles)
+            : m_maskBits(maskBits)
+            , m_particles(particles)
+        { }
+
+        bool WithParticles() const { return m_particles; }
 
         virtual ~Sensor()
         { }
@@ -34,7 +41,7 @@ namespace duck
 
         void SetBody(b2Body *body)
         { m_body = body; }
-        b2Body* GetBody(b2Body *body) const
+        b2Body* GetBody() const
         { return m_body; }
 
         void SetShape(const b2Shape *shape)
@@ -50,12 +57,15 @@ namespace duck
 
         virtual void BeginContact(void *userData) { }
         virtual void EndContact(void *userData) { }
+        virtual void BeginParticleContact(b2ParticleSystem *ps, const b2ParticleBodyContact *particleBodyContact) { }
+        virtual void EndParticleContact(b2ParticleSystem *ps, int index) { }
 
     protected:
         DuckState *m_duckState;
 
     private:
         uint16 m_maskBits;
+        bool m_particles;
         b2Body *m_body;
     };
 
@@ -76,6 +86,18 @@ namespace duck
             void *userData = GetUserDataAndSensor(&sensor, contact);
             if (sensor)
                 sensor->EndContact(userData);
+        }
+
+        void BeginContact(b2ParticleSystem *ps, b2ParticleBodyContact *particleBodyContact) override
+        {
+            Sensor *sensor = GetSensor(particleBodyContact->fixture);
+            if (sensor && sensor->WithParticles()) sensor->BeginParticleContact(ps, particleBodyContact);
+        }
+
+        void EndContact(b2Fixture *fixture, b2ParticleSystem *ps, int32 index) override
+        {
+            Sensor *sensor = GetSensor(fixture);
+            if (sensor && sensor->WithParticles()) sensor->EndParticleContact(ps, index);
         }
 
     private:

@@ -10,6 +10,7 @@ Add FontManager or similar functionality
       graphics resources
     - Also, Renderer::SetFont() should be implemented
 
+Fix audio: deleting buffers when sound playing is not OK.
 
 
 These items have already been done

@@ -60,6 +60,7 @@ namespace duck
         void RealtimeUpdate(const Time_t deltaMicroseconds) override;
 
         void NewBird();
+        void CreateWaste();
 
         void DestroyMouseJoint();
 
@@ -76,6 +77,7 @@ namespace duck
         GameData &m_gameData;
         rob::View m_view;
         b2World *m_world;
+        b2ParticleSystem *m_waste;
         DebugDraw *m_debugDraw;
         bool m_drawBox2D;
 

@@ -55,6 +55,8 @@ namespace duck
     public:
         KillSensor();
         void BeginContact(void *userData) override;
+        void BeginParticleContact(b2ParticleSystem *ps, const b2ParticleBodyContact *particleBodyContact) override;
+        void EndParticleContact(b2ParticleSystem *ps, int index) override;
     };
 
     class WaterSensor : public Sensor
