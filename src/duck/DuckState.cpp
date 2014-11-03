@@ -300,6 +300,7 @@ namespace duck
         def.angle = angle;
         b2Body *body = m_world->CreateBody(&def);
         object->SetBody(body);
+//        object->SetTexture(GetCache().GetTexture("wall.tex"));
         object->SetColor(Color(0.65f, 0.63f, 0.65f));
 
         b2PolygonShape shape;
@@ -328,7 +329,7 @@ namespace duck
         bodyDef.userData = (void*)bird;
         b2Body *body = m_world->CreateBody(&bodyDef);
 
-        shape.m_radius = 1.0f;
+        shape.m_radius = 0.9f;
         b2FixtureDef fixDef;
         fixDef.shape = &shape;
         fixDef.userData = bird;
@@ -341,6 +342,7 @@ namespace duck
         bird->SetTexture(texture);
         bird->SetFlameTexture(flameTexture);
         bird->SetFlameGlowTexture(flameGlowTexture);
+        bird->SetTextureScale(1.2f);
         bird->SetOily();
         bird->SetLayer(1);
 
@@ -349,7 +351,7 @@ namespace duck
         bodyDef.position = ToB2(position + vec2f(0.5f, 0.5f));
         b2Body *headBody = m_world->CreateBody(&bodyDef);
 
-        shape.m_radius = 0.75f;
+        shape.m_radius = 0.65f;
         fixDef.shape = &shape;
         fixDef.userData = head;
         fixDef.density = 5.0f;
@@ -361,6 +363,7 @@ namespace duck
         head->SetTexture(texture);
         head->SetFlameTexture(flameTexture);
         head->SetFlameGlowTexture(flameGlowTexture);
+        head->SetTextureScale(1.2f);
         head->SetOily();
         head->SetLayer(1);
 
@@ -437,7 +440,7 @@ namespace duck
             legDef.type = b2_dynamicBody;
             legDef.position = ToB2(position - vec2f(0.5f, 0.5f));
             b2PolygonShape legShape;
-            legShape.SetAsBox(0.25f, 0.5f);
+            legShape.SetAsBox(0.15f, 0.3f);
 
             b2Body *legBody = m_world->CreateBody(&legDef);
             legBody->CreateFixture(&legShape, 1.0f);
@@ -447,6 +450,7 @@ namespace duck
             leg->SetTexture(legTex);
             leg->SetFlameTexture(flameTexture);
             leg->SetFlameGlowTexture(flameGlowTexture);
+            leg->SetTextureScale(2.0f);
             leg->SetOily();
 //            leg->SetNext(object);
 
@@ -471,6 +475,7 @@ namespace duck
             leg->SetTexture(legTex);
             leg->SetFlameTexture(flameTexture);
             leg->SetFlameGlowTexture(flameGlowTexture);
+            leg->SetTextureScale(2.0f);
             leg->SetOily();
             leg->SetNext(bird);
 
