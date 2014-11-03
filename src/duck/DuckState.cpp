@@ -859,6 +859,20 @@ namespace duck
                     maxLayer = l;
             }
         }
+
+        renderer.SetModel(mat4f::Identity);
+        renderer.BindColorShader();
+
+        const b2Vec2 *positions = m_waste->GetPositionBuffer();
+        const b2ParticleColor *colors = m_waste->GetColorBuffer();
+        const float radius = m_waste->GetRadius();
+        for (int i = 0; i < m_waste->GetParticleCount(); i++)
+        {
+            const b2Color col = colors[i].GetColor();
+            renderer.SetColor(Color(col.r, col.g, col.b, colors[i].a / 255.0f));
+            renderer.DrawFilledCircle(positions[i].x, positions[i].y, radius);
+        }
+
         float ovenLightAlpha = 0.8f + FastSin(m_firedColor) * 0.15f + FastCos(m_firedColor + 0.26f) * 0.05f;
 
         renderer.SetModel(mat4f::Identity);
