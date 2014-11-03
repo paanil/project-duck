@@ -50,8 +50,6 @@ namespace duck
         { m_flameTexture = texture; }
         void SetFlameGlowTexture(rob::TextureHandle texture)
         { m_flameGlowTexture = texture; }
-        void SetBubbleTexture(rob::TextureHandle texture)
-        { m_bubbleTexture = texture; }
 
         void SetTextureScale(float scale)
         { m_textureScale = scale; }
@@ -91,10 +89,10 @@ namespace duck
         { return m_partsInWater != 0; }
 
         void Wash()
-        {
-            m_washTimer = 0.5f;
-            m_isWashed = true;
-        }
+        { m_isWashed = true; }
+
+        bool IsWashed() const
+        { return m_isWashed; }
 
         void Update(const GameTime &gameTime);
         void Render(rob::Renderer *renderer);
@@ -110,7 +108,6 @@ namespace duck
         rob::TextureHandle m_texture;
         rob::TextureHandle m_flameTexture;
         rob::TextureHandle m_flameGlowTexture;
-        rob::TextureHandle m_bubbleTexture;
         float m_textureScale;
         int m_renderLayer;
 
@@ -121,7 +118,6 @@ namespace duck
         bool m_destroyed;
         bool m_saved;
         bool m_burned;
-        float m_washTimer;
         bool m_isWashed;
 
         GameObject *m_next;

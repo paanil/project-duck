@@ -263,6 +263,14 @@ namespace rob
         m_channels[longestPlayIndex]->PlaySound(s, volume, x, y, timeMillis);
     }
 
+    void AudioSystem::StopAllSounds()
+    {
+        for (size_t i = 0; i < MAX_CHANNELS; i++)
+        {
+            m_channels[i]->Stop();
+        }
+    }
+
     void AudioSystem::Update()
     {
         for (size_t i = 0; i < MAX_CHANNELS; i++)

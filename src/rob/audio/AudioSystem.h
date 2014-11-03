@@ -36,6 +36,8 @@ namespace rob
 
         void PlaySound(SoundHandle sound, float volume, float x, float y, Time_t currentTime);
 
+        void StopAllSounds();
+
         void Update();
 
     private:

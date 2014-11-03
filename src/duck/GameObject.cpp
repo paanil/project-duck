@@ -16,7 +16,6 @@ namespace duck
         , m_texture(InvalidHandle)
         , m_flameTexture(InvalidHandle)
         , m_flameGlowTexture(InvalidHandle)
-        , m_bubbleTexture(InvalidHandle)
         , m_textureScale(1.0f)
         , m_renderLayer(0)
         , m_burnTimer(0.0f)
@@ -97,7 +96,7 @@ namespace duck
         float dt = gameTime.GetDeltaSeconds();
         if (m_logic) m_logic->Update(dt);
         if (m_burnTimer > 0.0f) m_burnTimer -= dt;
-        if (m_washTimer > 0.0f) m_washTimer -= dt;
+        m_isWashed = false;
     }
 
     void GameObject::Render(Renderer *renderer)
@@ -155,26 +154,6 @@ namespace duck
                 renderer->GetGraphics()->BindTexture(1, m_flameGlowTexture);
                 renderer->DrawTexturedRectangle(-dim.x*s*f, -dim.y*s, dim.x*s*f, dim.y*1.5f*s);
                 renderer->GetGraphics()->SetBlendAlpha();
-            }
-            else if (m_partsInWater > 0 && m_isWashed)
-            {
-                int i = m_washTimer / 0.1f;
-                float f = (i & 1) ? -1.0f : 1.0f;
-                float k = m_washTimer * 2.0f;
-                float s = 1.0f; // + k*0.5f;
-                vec2f pos = GetPosition();
-                mat4f mat;
-                mat.SetTranslation(pos.x, pos.y, 0.0f);
-                renderer->SetModel(mat);
-                renderer->SetColor(Color(1.0f, 1.0f, 1.0f, k * 2.0f));
-                renderer->GetGraphics()->BindTexture(1, m_bubbleTexture);
-                renderer->DrawTexturedRectangle(-dim.x*s*f, -dim.y*s, dim.x*s*f, dim.y*1.5f*s);
-
-                if (m_washTimer <= 0.0f)
-                {
-                    m_isWashed = false;
-                    m_washTimer = 0.0f;
-                }
             }
         }
     }

@@ -102,7 +102,7 @@ namespace duck
             if (!m_owner->IsBurned())
             {
                 float oilyness = m_owner->GetOilyness();
-                if (oilyness > 0.0f && m_owner->IsInWater())
+                if (oilyness > 0.0f && m_owner->IsInWater() && m_owner->IsWashed())
                 {
                     float speed = 0.1f;
                     oilyness -= speed * deltaTime;

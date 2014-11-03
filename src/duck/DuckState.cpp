@@ -79,6 +79,7 @@ namespace duck
         DestroyAllObjects();
         GetAllocator().del_object(m_world);
         GetAllocator().del_object(m_debugDraw);
+        GetAudio().StopAllSounds();
     }
 
     bool DuckState::Initialize()
@@ -122,7 +123,7 @@ namespace duck
         bubblesDef.destroyByAge = true;
         bubblesDef.dampingStrength = 0.1f;
         bubblesDef.viscousStrength = 1.0f;
-        bubblesDef.ejectionStrength = 0.015f;
+        bubblesDef.ejectionStrength = 0.01f;
         bubblesDef.gravityScale = 0.15f;
         m_bubbles = m_world->CreateParticleSystem(&bubblesDef);
 
@@ -316,7 +317,6 @@ namespace duck
     {
         TextureHandle flameTexture = GetCache().GetTexture("flame.tex");
         TextureHandle flameGlowTexture = GetCache().GetTexture("flame_glow.tex");
-        TextureHandle bubbleTexture = GetCache().GetTexture("bubbles.tex");
 
         b2BodyDef bodyDef;
         b2CircleShape shape;
@@ -341,7 +341,6 @@ namespace duck
         bird->SetTexture(texture);
         bird->SetFlameTexture(flameTexture);
         bird->SetFlameGlowTexture(flameGlowTexture);
-        bird->SetBubbleTexture(bubbleTexture);
         bird->SetOily();
         bird->SetLayer(1);
 
@@ -362,7 +361,6 @@ namespace duck
         head->SetTexture(texture);
         head->SetFlameTexture(flameTexture);
         head->SetFlameGlowTexture(flameGlowTexture);
-        head->SetBubbleTexture(bubbleTexture);
         head->SetOily();
         head->SetLayer(1);
 
@@ -383,7 +381,6 @@ namespace duck
         neck0->SetTexture(neckTex);
         neck0->SetFlameTexture(flameTexture);
         neck0->SetFlameGlowTexture(flameGlowTexture);
-        neck0->SetBubbleTexture(bubbleTexture);
         neck0->SetOily();
 
         neckJoint.bodyA = body;
@@ -403,7 +400,6 @@ namespace duck
         neck1->SetTexture(neckTex);
         neck1->SetFlameTexture(flameTexture);
         neck1->SetFlameGlowTexture(flameGlowTexture);
-        neck1->SetBubbleTexture(bubbleTexture);
         neck1->SetOily();
 
         neckJoint.bodyA = neck0body;
@@ -420,7 +416,6 @@ namespace duck
         neck2->SetTexture(neckTex);
         neck2->SetFlameTexture(flameTexture);
         neck2->SetFlameGlowTexture(flameGlowTexture);
-        neck2->SetBubbleTexture(bubbleTexture);
         neck2->SetOily();
 
         neckJoint.bodyA = neck1body;
@@ -711,7 +706,7 @@ namespace duck
     void DuckState::CreateBubbles(const vec2f &position, float oilyness)
     {
         b2CircleShape shape;
-        shape.m_radius = 0.75f;
+        shape.m_radius = 0.5f;
 
         b2ParticleGroupDef groupDef;
         groupDef.shape = &shape;
@@ -1186,26 +1181,15 @@ namespace duck
 
             if (callback.m_fixture)
             {
-//                bool wash = !(button == MouseButton::Left);
-//                const float force = wash ? 20.0f : 1000.0f;
-
                 b2Body* body = callback.m_fixture->GetBody();
-//                b2MouseJointDef md;
-//                md.bodyA = m_worldBody;
-//                md.bodyB = body;
-//                md.target = p;
-//                md.maxForce = force * body->GetMass();
-//                md.dampingRatio = 0.98f * force / 1000.0f; // TODO: not sure if this does anything good.
-//                m_mouseJoint = (b2MouseJoint*)m_world->CreateJoint(&md);
-//                body->SetAwake(true);
-
-//                m_originalAngle = body->GetAngle();
-
                 if (body->GetUserData())
                 {
                     GameObject *bird = (GameObject*)body->GetUserData();
-                    bird->Wash();
-                    CreateBubbles(m_mouseWorld, bird->GetOilyness());
+                    if (bird->IsInWater())
+                    {
+                        bird->Wash();
+                        CreateBubbles(m_mouseWorld, bird->GetOilyness());
+                    }
                 }
             }
         }
