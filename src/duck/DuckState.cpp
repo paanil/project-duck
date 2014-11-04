@@ -918,8 +918,8 @@ namespace duck
 //        renderer.DrawTexturedRectangle(PLAY_AREA_LEFT, PLAY_AREA_BOTTOM, PLAY_AREA_RIGHT, PLAY_AREA_TOP);
 //        renderer.GetGraphics()->SetBlendAlpha();
 
-        int maxLayer = 0;
-        for (int layer = 0; layer < maxLayer + 1; layer++)
+        int maxLayer = 0, layer;
+        for (layer = 0; layer < maxLayer + 1 && layer < 2; layer++)
         {
             for (size_t i = 0; i < m_objectCount; i++)
             {
@@ -933,6 +933,18 @@ namespace duck
 
         RenderParticleSystem(m_waste);
         RenderParticleSystem(m_bubbles);
+
+        for (; layer < maxLayer + 1; layer++)
+        {
+            for (size_t i = 0; i < m_objectCount; i++)
+            {
+                const int l = m_objects[i]->GetLayer();
+                if (l == layer)
+                    m_objects[i]->Render(&renderer);
+                if (l > maxLayer)
+                    maxLayer = l;
+            }
+        }
 
         float ovenLightAlpha = 0.8f + FastSin(m_firedColor) * 0.15f + FastCos(m_firedColor + 0.26f) * 0.05f;
 
