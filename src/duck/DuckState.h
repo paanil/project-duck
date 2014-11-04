@@ -92,6 +92,7 @@ namespace duck
         float m_originalAngle;
         vec2f m_mouseWorld;
         bool m_washing;
+        float m_washSoundTimer;
 
         rob::Pool<GameObject> m_objectPool;
         GameObject **m_objects;

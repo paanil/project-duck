@@ -58,6 +58,7 @@ namespace duck
         , m_originalAngle(0.0f)
         , m_mouseWorld(0.0f, 0.0f)
         , m_washing(false)
+        , m_washSoundTimer(0.0f)
         , m_objectPool()
         , m_objects(nullptr)
         , m_objectCount(0)
@@ -824,6 +825,7 @@ namespace duck
         }
 
         m_firedColor = gameTime.GetTotalSeconds() * 8.0f;
+        if (m_washSoundTimer > 0.0f) m_washSoundTimer -= deltaTime;
 
         m_inUpdate = false;
     }
@@ -1194,6 +1196,11 @@ namespace duck
                     {
                         bird->Wash();
                         CreateBubbles(m_mouseWorld, bird->GetOilyness());
+                        if (m_washSoundTimer <= 0.0f)
+                        {
+                            m_sounds.PlayWashSound(m_mouseWorld);
+                            m_washSoundTimer = 0.5f;
+                        }
                     }
                 }
             }

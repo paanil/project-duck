@@ -28,10 +28,13 @@ namespace duck
             m_audio = &audio;
 //            m_burning = cache.GetSound("Explosion32.wav");
 //            m_burning = cache.GetSound("flame3.wav");
-            m_burning = cache.GetSound("exp_flame.wav");
-            m_water = cache.GetSound("Randomize55.wav");
+            m_burning = cache.GetSound("exp_flame2.wav");
+//            m_water = cache.GetSound("Randomize55.wav");
+            m_water = cache.GetSound("splash.wav");
+            m_wash = cache.GetSound("wash.wav");
             m_saved = cache.GetSound("Powerup122.wav");
-            m_dying = cache.GetSound("Powerup.wav");
+//            m_dying = cache.GetSound("Powerup.wav");
+            m_dying = cache.GetSound("kraah2.wav");
             m_score = cache.GetSound("Pickup_Coin.wav");
         }
 
@@ -42,12 +45,17 @@ namespace duck
 
         void PlayBurningSound(const vec2f &pos)
         {
-            PlaySound(m_burning, 0.5f, pos);
+            PlaySound(m_burning, 0.65f, pos);
         }
 
         void PlayWaterSound(const vec2f &pos)
         {
-            PlaySound(m_water, 0.5f, pos);
+            PlaySound(m_water, 0.1f, pos);
+        }
+
+        void PlayWashSound(const vec2f &pos)
+        {
+            PlaySound(m_wash, 0.35f, pos);
         }
 
         void PlaySavedSound(const vec2f &pos)
@@ -62,7 +70,7 @@ namespace duck
 
         void PlayScoreSound(const vec2f &pos)
         {
-            PlaySound(m_score, 0.5f, pos);
+            PlaySound(m_score, 0.45f, pos);
         }
 
     private:
@@ -80,6 +88,7 @@ namespace duck
 
         SoundHandle m_burning;
         SoundHandle m_water;
+        SoundHandle m_wash;
         SoundHandle m_saved;
         SoundHandle m_dying;
         SoundHandle m_score;
