@@ -59,6 +59,8 @@ namespace duck
         , m_mouseWorld(0.0f, 0.0f)
         , m_washing(false)
         , m_washSoundTimer(0.0f)
+        , m_birdSoundTimer(0.0f)
+        , m_splashSoundTimer(0.0f)
         , m_objectPool()
         , m_objects(nullptr)
         , m_objectCount(0)
@@ -69,10 +71,12 @@ namespace duck
         , m_waterSensor()
         , m_fadeEffect(Color(0.04f, 0.01f, 0.01f))
         , m_scoreTimer(0.0f)
+        , m_random()
     {
         m_gameData.m_birdsKilled = 0;
         m_gameData.m_birdsSaved = 0;
         m_gameData.m_score = 0;
+        m_random.Seed(GetTicks());
     }
 
     DuckState::~DuckState()
@@ -81,6 +85,7 @@ namespace duck
         GetAllocator().del_object(m_world);
         GetAllocator().del_object(m_debugDraw);
         GetAudio().StopAllSounds();
+        GetAudio().Update();
     }
 
     bool DuckState::Initialize()
@@ -650,12 +655,20 @@ namespace duck
 
     void DuckState::BirdEnteredWater(GameObject *bird)
     {
-        m_sounds.PlayWaterSound(bird->GetPosition());
+        if (m_splashSoundTimer <= 0.0f)
+        {
+            m_sounds.PlayWaterSound(bird->GetPosition());
+            m_splashSoundTimer = 0.5f;
+        }
     }
 
     void DuckState::BirdExitedWater(GameObject *bird)
     {
-        m_sounds.PlayWaterSound(bird->GetPosition());
+        if (m_splashSoundTimer <= 0.0f)
+        {
+            m_sounds.PlayWaterSound(bird->GetPosition());
+            m_splashSoundTimer = 0.5f;
+        }
     }
 
     bool DuckState::IsGameOver() const
@@ -712,7 +725,7 @@ namespace duck
     void DuckState::CreateBubbles(const vec2f &position, float oilyness)
     {
         b2CircleShape shape;
-        shape.m_radius = 0.5f;
+        shape.m_radius = 0.15f;
 
         b2ParticleGroupDef groupDef;
         groupDef.shape = &shape;
@@ -746,7 +759,7 @@ namespace duck
             birdTimer += birdTimerAdd;
             rob::log::Info(birdTimerAdd, " ", gameTime.GetTotalSeconds());
         }
-        birdTimerAdd = 10.0f - rob::Log10(gameTime.GetTotalSeconds());
+        birdTimerAdd = 10.0f - rob::Log10(gameTime.GetTotalSeconds()) * 2.0f;
 
         static float wasteTimer = 0.0f;
         static float wasteTimerAdd = 8.0f;
@@ -826,6 +839,8 @@ namespace duck
 
         m_firedColor = gameTime.GetTotalSeconds() * 8.0f;
         if (m_washSoundTimer > 0.0f) m_washSoundTimer -= deltaTime;
+        if (m_birdSoundTimer > 0.0f) m_birdSoundTimer -= deltaTime;
+        if (m_splashSoundTimer > 0.0f) m_splashSoundTimer -= deltaTime;
 
         m_inUpdate = false;
     }
@@ -1141,11 +1156,17 @@ namespace duck
 
             m_originalAngle = body->GetAngle();
 
-            if (wash && body->GetUserData())
+            GameObject *bird = (GameObject*)body->GetUserData();
+            if (!wash && bird && m_birdSoundTimer <= 0.0f)
             {
-                GameObject *bird = (GameObject*)body->GetUserData();
-                bird->Wash();
+                m_sounds.PlayBirdSound(bird->GetPosition());
+                m_birdSoundTimer = 1.0f + m_random.GetReal(1.0f, 4.0f);
             }
+
+//            if (wash && bird)
+//            {
+//                bird->Wash();
+//            }
         }
     }
 

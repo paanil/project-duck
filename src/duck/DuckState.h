@@ -6,6 +6,7 @@
 #include "rob/application/GameTime.h"
 #include "rob/renderer/Renderer.h"
 #include "rob/memory/Pool.h"
+#include "rob/math/Random.h"
 
 #include "GameData.h"
 #include "GameObject.h"
@@ -93,6 +94,8 @@ namespace duck
         vec2f m_mouseWorld;
         bool m_washing;
         float m_washSoundTimer;
+        float m_birdSoundTimer;
+        float m_splashSoundTimer;
 
         rob::Pool<GameObject> m_objectPool;
         GameObject **m_objects;
@@ -113,6 +116,7 @@ namespace duck
         int m_lastPoints;
 
         SoundPlayer m_sounds;
+        rob::Random m_random;
     };
 
 } // duck

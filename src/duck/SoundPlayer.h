@@ -33,6 +33,7 @@ namespace duck
             m_water = cache.GetSound("splash.wav");
             m_wash = cache.GetSound("wash.wav");
             m_saved = cache.GetSound("Powerup122.wav");
+            m_bird = cache.GetSound("kraah3.wav");
 //            m_dying = cache.GetSound("Powerup.wav");
             m_dying = cache.GetSound("kraah2.wav");
             m_score = cache.GetSound("Pickup_Coin.wav");
@@ -60,7 +61,12 @@ namespace duck
 
         void PlaySavedSound(const vec2f &pos)
         {
-            PlaySound(m_saved, 0.5f, pos);
+            PlaySound(m_saved, 0.15f, pos);
+        }
+
+        void PlayBirdSound(const vec2f &pos)
+        {
+            PlaySound(m_bird, 0.15f, pos);
         }
 
         void PlayDyingSound(const vec2f &pos)
@@ -70,7 +76,7 @@ namespace duck
 
         void PlayScoreSound(const vec2f &pos)
         {
-            PlaySound(m_score, 0.45f, pos);
+            PlaySound(m_score, 0.15f, pos);
         }
 
     private:
@@ -90,6 +96,7 @@ namespace duck
         SoundHandle m_water;
         SoundHandle m_wash;
         SoundHandle m_saved;
+        SoundHandle m_bird;
         SoundHandle m_dying;
         SoundHandle m_score;
     };
