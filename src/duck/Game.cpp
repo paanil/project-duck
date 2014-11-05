@@ -299,12 +299,13 @@ namespace duck
 
     bool Game::Initialize()
     {
-            std::srand(std::time(0));
+        std::srand(std::time(0));
+
         m_window->SetTitle(
         #if defined(ROB_DEBUG)
-            "Duck - Debug"
+            "Save the birds - Debug"
         #else
-            "Duck"
+            "Save the birds"
         #endif // ROB_DEBUG
         );
 

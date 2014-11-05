@@ -142,10 +142,10 @@ namespace duck
         m_sounds.Init(GetAudio(), GetCache());
 
         CreateWorld();
-        CreateBird(vec2f::Zero);
-        CreateBird(vec2f(-2.0f, 0.0f));
-        CreateBird(vec2f(-1.0f, 0.0f));
-        CreateBird(vec2f(1.0f, 0.0f));
+//        CreateBird(vec2f::Zero);
+//        CreateBird(vec2f(-2.0f, 0.0f));
+//        CreateBird(vec2f(-1.0f, 0.0f));
+//        CreateBird(vec2f(1.0f, 0.0f));
 //        CreateBird(vec2f(-2.5f, 2.0f));
 //        CreateBird(vec2f(-4.5f, 4.0f));
 //        CreateBird(vec2f(8.5f, 6.0f));
@@ -608,8 +608,6 @@ namespace duck
 //        {
 //            m_gameData.m_birdsKilled++;
 //        }
-
-        //rob::log::Info("Bird burned");
         m_sounds.PlayBurningSound(bird->GetPosition());
 
         BirdDied(bird);
@@ -623,7 +621,6 @@ namespace duck
 
             if (oil <= 0.5f)
             {
-                //rob::log::Info("Bird saved");
                 m_sounds.PlaySavedSound(bird->GetPosition());
                 m_sounds.PlayScoreSound(vec2f(PLAY_AREA_LEFT, PLAY_AREA_TOP));
 
@@ -648,8 +645,6 @@ namespace duck
         {
             m_gameData.m_birdsKilled++;
         }
-
-        //rob::log::Info("Bird died");
         m_sounds.PlayDyingSound(bird->GetPosition());
     }
 
@@ -717,7 +712,7 @@ namespace duck
         groupDef.shape = &shape;
         groupDef.color.Set(32, 25, 16, 255);
         groupDef.position.Set(PLAY_AREA_LEFT * 2.0f, 2.0f);
-        groupDef.flags = b2_viscousParticle; // | b2_powderParticle | b2_fixtureContactListenerParticle;
+        groupDef.flags = b2_viscousParticle; // | b2_fixtureContactListenerParticle;
         groupDef.lifetime = 30.0f;
         m_waste->CreateParticleGroup(groupDef);
     }
@@ -732,7 +727,7 @@ namespace duck
         const float cleaness = Clamp(0.1f + 1.0f - oilyness, 0.0f, 1.0f);
         groupDef.color.Set(232 * cleaness, 232 * cleaness, 240 * cleaness, 208);
         groupDef.position = ToB2(position);
-        groupDef.flags = b2_viscousParticle; // | b2_powderParticle | b2_fixtureContactListenerParticle;
+        groupDef.flags = b2_viscousParticle; // | b2_fixtureContactListenerParticle;
         groupDef.lifetime = 10.0f;
         m_bubbles->CreateParticleGroup(groupDef);
     }
@@ -1058,26 +1053,26 @@ namespace duck
         }
 
         // TODO: These are for debugging
-        {
-            if (key == Keyboard::Key::Tab)
-                m_drawBox2D = !m_drawBox2D;
-            if (key == Keyboard::Key::B)
-                NewBird();
-            if (key == Keyboard::Key::W)
-                CreateWaste();
-            if (key == Keyboard::Key::Space && !IsGameOver())
-                ChangeState(STATE_Game);
-            if (key == Keyboard::Key::Kp_Plus)
-            {
-                g_zoom = Clamp(g_zoom / 1.5f, 0.4444f, 4.0f);
-                RecalcProj();
-            }
-            else if (key == Keyboard::Key::Kp_Minus)
-            {
-                g_zoom = Clamp(g_zoom * 1.5f, 0.4444f, 4.5f);
-                RecalcProj();
-            }
-        }
+//        {
+//            if (key == Keyboard::Key::Tab)
+//                m_drawBox2D = !m_drawBox2D;
+//            if (key == Keyboard::Key::B)
+//                NewBird();
+//            if (key == Keyboard::Key::W)
+//                CreateWaste();
+//            if (key == Keyboard::Key::Space && !IsGameOver())
+//                ChangeState(STATE_Game);
+//            if (key == Keyboard::Key::Kp_Plus)
+//            {
+//                g_zoom = Clamp(g_zoom / 1.5f, 0.4444f, 4.0f);
+//                RecalcProj();
+//            }
+//            else if (key == Keyboard::Key::Kp_Minus)
+//            {
+//                g_zoom = Clamp(g_zoom * 1.5f, 0.4444f, 4.5f);
+//                RecalcProj();
+//            }
+//        }
 
     }
 
@@ -1169,16 +1164,11 @@ namespace duck
             m_originalAngle = body->GetAngle();
 
             GameObject *bird = (GameObject*)body->GetUserData();
-            if (!wash && bird && m_birdSoundTimer <= 0.0f)
+            if (!wash && bird && !bird->IsBurned() && m_birdSoundTimer <= 0.0f)
             {
                 m_sounds.PlayBirdSound(bird->GetPosition());
                 m_birdSoundTimer = 1.0f + m_random.GetReal(1.0f, 4.0f);
             }
-
-//            if (wash && bird)
-//            {
-//                bird->Wash();
-//            }
         }
     }
 
