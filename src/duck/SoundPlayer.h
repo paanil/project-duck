@@ -46,7 +46,7 @@ namespace duck
 
         void PlayBurningSound(const vec2f &pos)
         {
-            PlaySound(m_burning, 0.65f, pos);
+            PlaySound(m_burning, 1.0f, pos);
         }
 
         void PlayWaterSound(const vec2f &pos)

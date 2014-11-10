@@ -265,11 +265,23 @@ namespace duck
             renderer.BindFontShader();
 
             const Viewport vp = renderer.GetView().m_viewport;
-            TextLayout layout(renderer, vp.w / 2.0f, vp.h / 5.0f * 2.0f);
+            TextLayout layout(renderer, vp.w / 2.0f, vp.h / 8.0f * 2.0f);
 
+            renderer.SetFontScale(2.0f);
+            layout.AddTextAlignC("Brief", 0.0f);
+            layout.AddLine();
             renderer.SetFontScale(1.0f);
             layout.AddTextAlignC("There has been an oil accident. Your task is to save the oily birds by cleaning them.", 0.0f);
+            layout.AddLine();
+            layout.AddTextAlignC("With left mouse button you are able to grab the birds. With the right mouse button", 0.0f);
+            layout.AddLine();
+            layout.AddTextAlignC("you can wash them, when they are in the water container.", 0.0f);
             layout.AddLines(4);
+
+            renderer.SetFontScale(2.0f);
+            layout.AddTextAlignC("Fact", 0.0f);
+            layout.AddLines(1);
+            renderer.SetFontScale(1.0f);
 
             size_t line = 0;
             for (; line + 1 < m_fact.m_lineCount; line++)
